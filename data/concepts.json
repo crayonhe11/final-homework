@@ -1,0 +1,77 @@
+{
+  "boundary": {
+    "topic": "条件判断",
+    "label": "比较运算的等号边界",
+    "hint": "逐一检查 <、<=、>、>= 是否包含相等情况。"
+  },
+  "branches": {
+    "topic": "条件判断",
+    "label": "if / elif 分支互斥",
+    "hint": "在同一条 if / elif / else 链中，最多执行一个分支。"
+  },
+  "and_or": {
+    "topic": "条件判断",
+    "label": "and 与 or 的条件要求",
+    "hint": "布尔表达式中，and 要求两边都真，or 只要求至少一边为真。"
+  },
+  "truthiness": {
+    "topic": "条件判断",
+    "label": "空容器与非空字符串的真假",
+    "hint": "空字符串、空列表为假；非空字符串即使是 \"0\" 也为真。"
+  },
+  "independent_if": {
+    "topic": "条件判断",
+    "label": "独立 if 与分支链的区别",
+    "hint": "多个独立的 if 会分别判断，不具有 elif 的互斥性。"
+  },
+  "range_end": {
+    "topic": "循环",
+    "label": "range 的结束边界",
+    "hint": "range 包含起点，不包含终点。"
+  },
+  "range_step": {
+    "topic": "循环",
+    "label": "range 的步长",
+    "hint": "从起点开始，每次加上步长，在越过边界前停止。"
+  },
+  "accumulate": {
+    "topic": "循环",
+    "label": "循环中的累加",
+    "hint": "跟踪变量每轮的旧值与新值，累加不会自动重置。"
+  },
+  "break_continue": {
+    "topic": "循环",
+    "label": "break 与 continue",
+    "hint": "break 退出当前循环；continue 跳过本轮剩余语句。"
+  },
+  "while_check": {
+    "topic": "循环",
+    "label": "while 在每轮前检查条件",
+    "hint": "先判断条件，再执行循环体；初次条件为假时执行零次。"
+  },
+  "print_return": {
+    "topic": "函数与返回值",
+    "label": "print 不等于 return",
+    "hint": "print 显示内容；没有 return 的函数默认返回 None。"
+  },
+  "return_exit": {
+    "topic": "函数与返回值",
+    "label": "return 立即结束函数",
+    "hint": "执行 return 后，函数中该次调用的后续语句不再执行。"
+  },
+  "arguments": {
+    "topic": "函数与返回值",
+    "label": "位置参数与传参",
+    "hint": "位置参数按调用顺序绑定，注意减法等运算的顺序。"
+  },
+  "local_scope": {
+    "topic": "函数与返回值",
+    "label": "局部变量与外部变量",
+    "hint": "函数内普通赋值创建局部绑定，不会改写同名外部变量。"
+  },
+  "missing_return": {
+    "topic": "函数与返回值",
+    "label": "分支未执行 return 时返回 None",
+    "hint": "只有实际执行到的 return 决定返回值；走完函数仍无 return 则返回 None。"
+  }
+}

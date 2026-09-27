@@ -1,0 +1,812 @@
+[
+  {
+    "id": "boundary_1",
+    "topic": "条件判断",
+    "concept": "boundary",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "x = 5\nprint(x > 5)",
+    "options": {
+      "A": "False",
+      "B": "True",
+      "C": "5"
+    },
+    "answer": "A",
+    "explanation": "5 不大于 5，严格大于不包含相等。",
+    "hint": "逐一检查 <、<=、>、>= 是否包含相等情况。",
+    "misconceptions": {
+      "B": {
+        "concept": "boundary",
+        "evidence": "你选择的输出为「True」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "boundary",
+        "evidence": "你选择的输出为「5」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "boundary_2",
+    "topic": "条件判断",
+    "concept": "boundary",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "score = 60\nprint(score >= 60)",
+    "options": {
+      "A": "False",
+      "B": "True",
+      "C": "60"
+    },
+    "answer": "B",
+    "explanation": "大于等于包含相等，因此结果是 True。",
+    "hint": "逐一检查 <、<=、>、>= 是否包含相等情况。",
+    "misconceptions": {
+      "A": {
+        "concept": "boundary",
+        "evidence": "你选择的输出为「False」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "boundary",
+        "evidence": "你选择的输出为「60」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "branches_1",
+    "topic": "条件判断",
+    "concept": "branches",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "x = 8\nif x > 5:\n    print(\"A\")\nelif x > 3:\n    print(\"B\")",
+    "options": {
+      "A": "A\nB",
+      "B": "B",
+      "C": "A"
+    },
+    "answer": "C",
+    "explanation": "第一个条件成立，后续 elif 不再执行。",
+    "hint": "在同一条 if / elif / else 链中，最多执行一个分支。",
+    "misconceptions": {
+      "A": {
+        "concept": "branches",
+        "evidence": "你选择的输出为「A / B」，与此处的执行规则不一致。"
+      },
+      "B": {
+        "concept": "branches",
+        "evidence": "你选择的输出为「B」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "branches_2",
+    "topic": "条件判断",
+    "concept": "branches",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "n = 12\nif n > 10:\n    print(\"大\")\nelif n > 0:\n    print(\"正\")\nelse:\n    print(\"其他\")",
+    "options": {
+      "A": "大",
+      "B": "大\n正",
+      "C": "正"
+    },
+    "answer": "A",
+    "explanation": "n > 10 已成立，只输出“大”。",
+    "hint": "在同一条 if / elif / else 链中，最多执行一个分支。",
+    "misconceptions": {
+      "B": {
+        "concept": "branches",
+        "evidence": "你选择的输出为「大 / 正」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "branches",
+        "evidence": "你选择的输出为「正」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "and_or_1",
+    "topic": "条件判断",
+    "concept": "and_or",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "age = 15\nprint(age >= 18 and age <= 60)",
+    "options": {
+      "A": "True",
+      "B": "False",
+      "C": "15"
+    },
+    "answer": "B",
+    "explanation": "左侧条件为 False，and 的结果为 False。",
+    "hint": "布尔表达式中，and 要求两边都真，or 只要求至少一边为真。",
+    "misconceptions": {
+      "A": {
+        "concept": "and_or",
+        "evidence": "你选择的输出为「True」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "and_or",
+        "evidence": "你选择的输出为「15」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "and_or_2",
+    "topic": "条件判断",
+    "concept": "and_or",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "rain = False\ncold = True\nprint(rain or cold)",
+    "options": {
+      "A": "False",
+      "B": "True",
+      "C": "None"
+    },
+    "answer": "B",
+    "explanation": "cold 为 True，两个布尔值的 or 结果为 True。",
+    "hint": "布尔表达式中，and 要求两边都真，or 只要求至少一边为真。",
+    "misconceptions": {
+      "A": {
+        "concept": "and_or",
+        "evidence": "你选择的输出为「False」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "and_or",
+        "evidence": "你选择的输出为「None」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "truthiness_1",
+    "topic": "条件判断",
+    "concept": "truthiness",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "items = []\nif items:\n    print(\"有\")\nelse:\n    print(\"无\")",
+    "options": {
+      "A": "有",
+      "B": "[]",
+      "C": "无"
+    },
+    "answer": "C",
+    "explanation": "空列表在条件中为假，因此进入 else。",
+    "hint": "空字符串、空列表为假；非空字符串即使是 \"0\" 也为真。",
+    "misconceptions": {
+      "A": {
+        "concept": "truthiness",
+        "evidence": "你选择的输出为「有」，与此处的执行规则不一致。"
+      },
+      "B": {
+        "concept": "truthiness",
+        "evidence": "你选择的输出为「[]」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "truthiness_2",
+    "topic": "条件判断",
+    "concept": "truthiness",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "text = \"0\"\nif text:\n    print(\"真\")\nelse:\n    print(\"假\")",
+    "options": {
+      "A": "真",
+      "B": "假",
+      "C": "0"
+    },
+    "answer": "A",
+    "explanation": "\"0\" 是非空字符串，在条件中为真。",
+    "hint": "空字符串、空列表为假；非空字符串即使是 \"0\" 也为真。",
+    "misconceptions": {
+      "B": {
+        "concept": "truthiness",
+        "evidence": "你选择的输出为「假」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "truthiness",
+        "evidence": "你选择的输出为「0」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "independent_if_1",
+    "topic": "条件判断",
+    "concept": "independent_if",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "x = 4\nif x > 0:\n    print(\"A\")\nif x < 10:\n    print(\"B\")",
+    "options": {
+      "A": "A",
+      "B": "A\nB",
+      "C": "B"
+    },
+    "answer": "B",
+    "explanation": "两个独立条件都成立，依次输出 A 和 B。",
+    "hint": "多个独立的 if 会分别判断，不具有 elif 的互斥性。",
+    "misconceptions": {
+      "A": {
+        "concept": "independent_if",
+        "evidence": "你选择的输出为「A」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "independent_if",
+        "evidence": "你选择的输出为「B」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "independent_if_2",
+    "topic": "条件判断",
+    "concept": "independent_if",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "n = 6\nif n % 2 == 0:\n    print(\"偶\")\nif n % 3 == 0:\n    print(\"三\")",
+    "options": {
+      "A": "偶",
+      "B": "三",
+      "C": "偶\n三"
+    },
+    "answer": "C",
+    "explanation": "6 同时能被 2 和 3 整除，两个 if 都执行。",
+    "hint": "多个独立的 if 会分别判断，不具有 elif 的互斥性。",
+    "misconceptions": {
+      "A": {
+        "concept": "independent_if",
+        "evidence": "你选择的输出为「偶」，与此处的执行规则不一致。"
+      },
+      "B": {
+        "concept": "independent_if",
+        "evidence": "你选择的输出为「三」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "range_end_1",
+    "topic": "循环",
+    "concept": "range_end",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "for i in range(1, 4):\n    print(i)",
+    "options": {
+      "A": "1\n2\n3",
+      "B": "1\n2\n3\n4",
+      "C": "0\n1\n2\n3"
+    },
+    "answer": "A",
+    "explanation": "range(1, 4) 依次生成 1、2、3，不包含 4。",
+    "hint": "range 包含起点，不包含终点。",
+    "misconceptions": {
+      "B": {
+        "concept": "range_end",
+        "evidence": "你选择的输出为「1 / 2 / 3 / 4」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "range_end",
+        "evidence": "你选择的输出为「0 / 1 / 2 / 3」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "range_end_2",
+    "topic": "循环",
+    "concept": "range_end",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "for n in range(2, 5):\n    print(n)",
+    "options": {
+      "A": "2\n3\n4\n5",
+      "B": "2\n3\n4",
+      "C": "0\n1\n2\n3\n4"
+    },
+    "answer": "B",
+    "explanation": "起点为 2，终点 5 不包含在序列中。",
+    "hint": "range 包含起点，不包含终点。",
+    "misconceptions": {
+      "A": {
+        "concept": "range_end",
+        "evidence": "你选择的输出为「2 / 3 / 4 / 5」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "range_end",
+        "evidence": "你选择的输出为「0 / 1 / 2 / 3 / 4」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "range_step_1",
+    "topic": "循环",
+    "concept": "range_step",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "print(list(range(1, 7, 2)))",
+    "options": {
+      "A": "[1, 2, 3, 4, 5, 6]",
+      "B": "[1, 3, 5, 7]",
+      "C": "[1, 3, 5]"
+    },
+    "answer": "C",
+    "explanation": "从 1 开始每次加 2，7 是不包含的终点。",
+    "hint": "从起点开始，每次加上步长，在越过边界前停止。",
+    "misconceptions": {
+      "A": {
+        "concept": "range_step",
+        "evidence": "你选择的输出为「[1, 2, 3, 4, 5, 6]」，与此处的执行规则不一致。"
+      },
+      "B": {
+        "concept": "range_step",
+        "evidence": "你选择的输出为「[1, 3, 5, 7]」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "range_step_2",
+    "topic": "循环",
+    "concept": "range_step",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "print(list(range(6, 0, -2)))",
+    "options": {
+      "A": "[6, 4, 2]",
+      "B": "[6, 4, 2, 0]",
+      "C": "[]"
+    },
+    "answer": "A",
+    "explanation": "步长为 -2，生成 6、4、2，终点 0 不包含。",
+    "hint": "从起点开始，每次加上步长，在越过边界前停止。",
+    "misconceptions": {
+      "B": {
+        "concept": "range_step",
+        "evidence": "你选择的输出为「[6, 4, 2, 0]」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "range_step",
+        "evidence": "你选择的输出为「[]」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "accumulate_1",
+    "topic": "循环",
+    "concept": "accumulate",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "total = 0\nfor n in range(1, 4):\n    total += n\nprint(total)",
+    "options": {
+      "A": "3",
+      "B": "6",
+      "C": "10"
+    },
+    "answer": "B",
+    "explanation": "total 依次为 1、3、6，循环结束后打印 6。",
+    "hint": "跟踪变量每轮的旧值与新值，累加不会自动重置。",
+    "misconceptions": {
+      "A": {
+        "concept": "accumulate",
+        "evidence": "你选择的输出为「3」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "accumulate",
+        "evidence": "你选择的输出为「10」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "accumulate_2",
+    "topic": "循环",
+    "concept": "accumulate",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "total = 2\nfor n in [2, 4]:\n    total += n\nprint(total)",
+    "options": {
+      "A": "6",
+      "B": "4",
+      "C": "8"
+    },
+    "answer": "C",
+    "explanation": "初值 2，加 2 得 4，再加 4 得 8。",
+    "hint": "跟踪变量每轮的旧值与新值，累加不会自动重置。",
+    "misconceptions": {
+      "A": {
+        "concept": "accumulate",
+        "evidence": "你选择的输出为「6」，与此处的执行规则不一致。"
+      },
+      "B": {
+        "concept": "accumulate",
+        "evidence": "你选择的输出为「4」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "break_continue_1",
+    "topic": "循环",
+    "concept": "break_continue",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "for n in range(1, 4):\n    if n == 2:\n        break\n    print(n)",
+    "options": {
+      "A": "1",
+      "B": "1\n3",
+      "C": "1\n2\n3"
+    },
+    "answer": "A",
+    "explanation": "n 为 2 时 break 终止整个循环，仅打印过 1。",
+    "hint": "break 退出当前循环；continue 跳过本轮剩余语句。",
+    "misconceptions": {
+      "B": {
+        "concept": "break_continue",
+        "evidence": "你选择的输出为「1 / 3」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "break_continue",
+        "evidence": "你选择的输出为「1 / 2 / 3」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "break_continue_2",
+    "topic": "循环",
+    "concept": "break_continue",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "for n in range(1, 4):\n    if n == 2:\n        continue\n    print(n)",
+    "options": {
+      "A": "1",
+      "B": "1\n3",
+      "C": "1\n2\n3"
+    },
+    "answer": "B",
+    "explanation": "n 为 2 时跳过 print，下一轮仍会打印 3。",
+    "hint": "break 退出当前循环；continue 跳过本轮剩余语句。",
+    "misconceptions": {
+      "A": {
+        "concept": "break_continue",
+        "evidence": "你选择的输出为「1」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "break_continue",
+        "evidence": "你选择的输出为「1 / 2 / 3」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "while_check_1",
+    "topic": "循环",
+    "concept": "while_check",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "n = 3\nwhile n < 3:\n    print(n)\n    n += 1\nprint(\"结束\")",
+    "options": {
+      "A": "3\n结束",
+      "B": "无输出",
+      "C": "结束"
+    },
+    "answer": "C",
+    "explanation": "初始 3 < 3 为假，不进入循环，只打印“结束”。",
+    "hint": "先判断条件，再执行循环体；初次条件为假时执行零次。",
+    "misconceptions": {
+      "A": {
+        "concept": "while_check",
+        "evidence": "你选择的输出为「3 / 结束」，与此处的执行规则不一致。"
+      },
+      "B": {
+        "concept": "while_check",
+        "evidence": "你选择的输出为「无输出」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "while_check_2",
+    "topic": "循环",
+    "concept": "while_check",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "n = 1\nwhile n < 3:\n    print(n)\n    n += 1",
+    "options": {
+      "A": "1\n2",
+      "B": "1\n2\n3",
+      "C": "2\n3"
+    },
+    "answer": "A",
+    "explanation": "依次打印 1、2；n 变为 3 后不再进入循环。",
+    "hint": "先判断条件，再执行循环体；初次条件为假时执行零次。",
+    "misconceptions": {
+      "B": {
+        "concept": "while_check",
+        "evidence": "你选择的输出为「1 / 2 / 3」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "while_check",
+        "evidence": "你选择的输出为「2 / 3」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "print_return_1",
+    "topic": "函数与返回值",
+    "concept": "print_return",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "def f():\n    print(3)\nx = f()\nprint(x)",
+    "options": {
+      "A": "3\n3",
+      "B": "3\nNone",
+      "C": "None"
+    },
+    "answer": "B",
+    "explanation": "函数先打印 3，隐式返回 None，再打印 x 得到 None。",
+    "hint": "print 显示内容；没有 return 的函数默认返回 None。",
+    "misconceptions": {
+      "A": {
+        "concept": "print_return",
+        "evidence": "你选择的输出为「3 / 3」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "print_return",
+        "evidence": "你选择的输出为「None」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "print_return_2",
+    "topic": "函数与返回值",
+    "concept": "print_return",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "def greet():\n    print(\"Hi\")\nprint(greet())",
+    "options": {
+      "A": "Hi",
+      "B": "Hi\nHi",
+      "C": "Hi\nNone"
+    },
+    "answer": "C",
+    "explanation": "调用 greet 先打印 Hi，其返回值 None 随后被外层 print 打印。",
+    "hint": "print 显示内容；没有 return 的函数默认返回 None。",
+    "misconceptions": {
+      "A": {
+        "concept": "print_return",
+        "evidence": "你选择的输出为「Hi」，与此处的执行规则不一致。"
+      },
+      "B": {
+        "concept": "print_return",
+        "evidence": "你选择的输出为「Hi / Hi」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "return_exit_1",
+    "topic": "函数与返回值",
+    "concept": "return_exit",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "def f():\n    return 2\n    print(9)\nprint(f())",
+    "options": {
+      "A": "2",
+      "B": "9\n2",
+      "C": "2\n9"
+    },
+    "answer": "A",
+    "explanation": "return 2 立即结束函数，不执行 print(9)。",
+    "hint": "执行 return 后，函数中该次调用的后续语句不再执行。",
+    "misconceptions": {
+      "B": {
+        "concept": "return_exit",
+        "evidence": "你选择的输出为「9 / 2」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "return_exit",
+        "evidence": "你选择的输出为「2 / 9」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "return_exit_2",
+    "topic": "函数与返回值",
+    "concept": "return_exit",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "def f(n):\n    if n > 0:\n        return \"正\"\n    return \"其他\"\nprint(f(1))",
+    "options": {
+      "A": "正\n其他",
+      "B": "正",
+      "C": "其他"
+    },
+    "answer": "B",
+    "explanation": "第一个 return 已结束调用，第二个 return 不执行。",
+    "hint": "执行 return 后，函数中该次调用的后续语句不再执行。",
+    "misconceptions": {
+      "A": {
+        "concept": "return_exit",
+        "evidence": "你选择的输出为「正 / 其他」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "return_exit",
+        "evidence": "你选择的输出为「其他」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "arguments_1",
+    "topic": "函数与返回值",
+    "concept": "arguments",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "def sub(a, b):\n    return a - b\nprint(sub(2, 5))",
+    "options": {
+      "A": "3",
+      "B": "7",
+      "C": "-3"
+    },
+    "answer": "C",
+    "explanation": "a 绑定 2，b 绑定 5，2 - 5 = -3。",
+    "hint": "位置参数按调用顺序绑定，注意减法等运算的顺序。",
+    "misconceptions": {
+      "A": {
+        "concept": "arguments",
+        "evidence": "你选择的输出为「3」，与此处的执行规则不一致。"
+      },
+      "B": {
+        "concept": "arguments",
+        "evidence": "你选择的输出为「7」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "arguments_2",
+    "topic": "函数与返回值",
+    "concept": "arguments",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "def join(a, b):\n    return a + \"-\" + b\nprint(join(\"B\", \"A\"))",
+    "options": {
+      "A": "B-A",
+      "B": "A-B",
+      "C": "AB"
+    },
+    "answer": "A",
+    "explanation": "a 为 B，b 为 A，连接后的字符串是 B-A。",
+    "hint": "位置参数按调用顺序绑定，注意减法等运算的顺序。",
+    "misconceptions": {
+      "B": {
+        "concept": "arguments",
+        "evidence": "你选择的输出为「A-B」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "arguments",
+        "evidence": "你选择的输出为「AB」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "local_scope_1",
+    "topic": "函数与返回值",
+    "concept": "local_scope",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "x = 10\ndef f():\n    x = 2\n    return x\nprint(f())\nprint(x)",
+    "options": {
+      "A": "2\n2",
+      "B": "2\n10",
+      "C": "10\n10"
+    },
+    "answer": "B",
+    "explanation": "函数内部 x 为 2，外部 x 保持 10。",
+    "hint": "函数内普通赋值创建局部绑定，不会改写同名外部变量。",
+    "misconceptions": {
+      "A": {
+        "concept": "local_scope",
+        "evidence": "你选择的输出为「2 / 2」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "local_scope",
+        "evidence": "你选择的输出为「10 / 10」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "local_scope_2",
+    "topic": "函数与返回值",
+    "concept": "local_scope",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "name = \"外\"\ndef f():\n    name = \"内\"\n    return name\nprint(f())\nprint(name)",
+    "options": {
+      "A": "内\n内",
+      "B": "外\n外",
+      "C": "内\n外"
+    },
+    "answer": "C",
+    "explanation": "局部 name 为“内”，外部 name 仍为“外”。",
+    "hint": "函数内普通赋值创建局部绑定，不会改写同名外部变量。",
+    "misconceptions": {
+      "A": {
+        "concept": "local_scope",
+        "evidence": "你选择的输出为「内 / 内」，与此处的执行规则不一致。"
+      },
+      "B": {
+        "concept": "local_scope",
+        "evidence": "你选择的输出为「外 / 外」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "missing_return_1",
+    "topic": "函数与返回值",
+    "concept": "missing_return",
+    "difficulty": 1,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "def f(n):\n    if n > 0:\n        return n\nprint(f(0))",
+    "options": {
+      "A": "None",
+      "B": "0",
+      "C": "False"
+    },
+    "answer": "A",
+    "explanation": "0 > 0 为假，没有执行 return，默认返回 None。",
+    "hint": "只有实际执行到的 return 决定返回值；走完函数仍无 return 则返回 None。",
+    "misconceptions": {
+      "B": {
+        "concept": "missing_return",
+        "evidence": "你选择的输出为「0」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "missing_return",
+        "evidence": "你选择的输出为「False」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  },
+  {
+    "id": "missing_return_2",
+    "topic": "函数与返回值",
+    "concept": "missing_return",
+    "difficulty": 2,
+    "prompt": "下面代码的完整输出是什么？",
+    "code": "def check(n):\n    if n % 2 == 0:\n        return \"偶\"\nprint(check(3))",
+    "options": {
+      "A": "奇",
+      "B": "None",
+      "C": "3"
+    },
+    "answer": "B",
+    "explanation": "3 为奇数，条件不成立，没有显式返回值，因此返回 None。",
+    "hint": "只有实际执行到的 return 决定返回值；走完函数仍无 return 则返回 None。",
+    "misconceptions": {
+      "A": {
+        "concept": "missing_return",
+        "evidence": "你选择的输出为「奇」，与此处的执行规则不一致。"
+      },
+      "C": {
+        "concept": "missing_return",
+        "evidence": "你选择的输出为「3」，与此处的执行规则不一致。"
+      }
+    },
+    "review_status": "答案经自动执行核验；概念标签待团队人工复核"
+  }
+]

@@ -1,0 +1,179 @@
+{
+  "dataset": "12 条模拟学生理由，开发完成后运行；标签未经独立教育专家验证。",
+  "model": null,
+  "count": 12,
+  "rule_agreement": 0.6666666666666666,
+  "combined_agreement": null,
+  "ai_valid_count": 0,
+  "warning": "此结果仅为模拟标签一致率，不代表真实诊断准确率或学习成绩提升。",
+  "cases": [
+    {
+      "id": "E01",
+      "question_id": "range_end_2",
+      "choice": "A",
+      "reason": "最后那个数5也要打印出来。",
+      "expected": "range_end",
+      "rule": "range_end",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "range_end",
+      "rule_match": true,
+      "combined_match": true
+    },
+    {
+      "id": "E02",
+      "question_id": "range_end_2",
+      "choice": "A",
+      "reason": "终点5不包括，应该是2、3、4，我点错按钮了。",
+      "expected": "unknown",
+      "rule": "range_end",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "range_end",
+      "rule_match": false,
+      "combined_match": false
+    },
+    {
+      "id": "E03",
+      "question_id": "branches_2",
+      "choice": "B",
+      "reason": "12大于10也大于0，所以两个分支都会运行。",
+      "expected": "branches",
+      "rule": "branches",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "branches",
+      "rule_match": true,
+      "combined_match": true
+    },
+    {
+      "id": "E04",
+      "question_id": "branches_2",
+      "choice": "B",
+      "reason": "我没有看题，随机选了一个。",
+      "expected": "unknown",
+      "rule": "branches",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "branches",
+      "rule_match": false,
+      "combined_match": false
+    },
+    {
+      "id": "E05",
+      "question_id": "print_return_2",
+      "choice": "B",
+      "reason": "屏幕上显示Hi，所以函数的返回值也是Hi。",
+      "expected": "print_return",
+      "rule": "print_return",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "print_return",
+      "rule_match": true,
+      "combined_match": true
+    },
+    {
+      "id": "E06",
+      "question_id": "print_return_2",
+      "choice": "B",
+      "reason": "应该先显示Hi再显示None，只是误选了。",
+      "expected": "unknown",
+      "rule": "print_return",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "print_return",
+      "rule_match": false,
+      "combined_match": false
+    },
+    {
+      "id": "E07",
+      "question_id": "break_continue_2",
+      "choice": "A",
+      "reason": "continue碰到2之后就会结束整个循环。",
+      "expected": "break_continue",
+      "rule": "break_continue",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "break_continue",
+      "rule_match": true,
+      "combined_match": true
+    },
+    {
+      "id": "E08",
+      "question_id": "local_scope_2",
+      "choice": "A",
+      "reason": "函数里面重新赋值，外面的同名变量也被一起改了。",
+      "expected": "local_scope",
+      "rule": "local_scope",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "local_scope",
+      "rule_match": true,
+      "combined_match": true
+    },
+    {
+      "id": "E09",
+      "question_id": "missing_return_2",
+      "choice": "A",
+      "reason": "既然偶数返回偶，那奇数就会自动返回奇。",
+      "expected": "missing_return",
+      "rule": "missing_return",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "missing_return",
+      "rule_match": true,
+      "combined_match": true
+    },
+    {
+      "id": "E10",
+      "question_id": "arguments_2",
+      "choice": "B",
+      "reason": "我没记清参数顺序，想都没想就按常见字母顺序选了。",
+      "expected": "unknown",
+      "rule": "arguments",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "arguments",
+      "rule_match": false,
+      "combined_match": false
+    },
+    {
+      "id": "E11",
+      "question_id": "truthiness_2",
+      "choice": "B",
+      "reason": "引号中的0也和数字0一样是假。",
+      "expected": "truthiness",
+      "rule": "truthiness",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "truthiness",
+      "rule_match": true,
+      "combined_match": true
+    },
+    {
+      "id": "E12",
+      "question_id": "return_exit_2",
+      "choice": "A",
+      "reason": "return之后会接着向下执行下一条return。",
+      "expected": "return_exit",
+      "rule": "return_exit",
+      "ai": {
+        "status": "not_run"
+      },
+      "combined": "return_exit",
+      "rule_match": true,
+      "combined_match": true
+    }
+  ]
+}

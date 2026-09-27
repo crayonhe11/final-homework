@@ -1,0 +1,2 @@
+# 默认版本仅依赖 Python 3.10+ 标准库，无需 pip 安装。
+# 图形界面需要 Python 的 Tkinter 支持。
