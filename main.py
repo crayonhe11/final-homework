@@ -3,7 +3,7 @@
 import argparse
 from pathlib import Path
 from edu.bank import load_bank, ROOT
-from edu.engine import diagnose, recommend
+from edu.engine import diagnose, recommend, next_practice
 from edu.storage import Store
 
 
@@ -16,10 +16,9 @@ def cli(db_path):
         if text.lower()=='q': return
         if text not in ('1','2','3'): continue
         topic=topics[int(text)-1]
-        history=store.history(); seen={r['question_id'] for r in history}
-        pool=[q for q in questions.values() if q['topic']==topic]
-        pool.sort(key=lambda q:(q['id'] in seen,q['difficulty'],q['id']))
-        question=pool[0]
+        item=next_practice(topic,questions,store.history(),concepts)
+        if item is None: continue
+        print(item['reason']); question=item['question']
         while True:
             print('\n'+question['id']+'\n'+question['code'])
             for key,value in question['options'].items(): print(key,repr(value))

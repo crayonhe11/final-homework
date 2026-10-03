@@ -1,0 +1,167 @@
+{
+  "boundary": {
+    "objective": "用比较表达式回答“是否满足条件”",
+    "explanations": [
+      "比较两个值会得到布尔值 True 或 False。条件判断根据这个结果选择是否执行代码。",
+      "> 和 < 不包含相等的情况，>= 和 <= 包含相等；== 判断值是否相等，= 用于赋值，两者不能混用。"
+    ],
+    "example_code": "temperature = 20\nprint(temperature > 20)\nprint(temperature >= 20)\nprint(temperature == 20)",
+    "example_output": "False\nTrue\nTrue",
+    "walkthrough": "先确认两边的值是否相等，再观察比较符号是否包含等号。",
+    "reflection": "如果门票优惠要求 age < 12，12 岁是否满足？"
+  },
+  "branches": {
+    "objective": "理解 if / elif / else 只选择一个分支",
+    "explanations": [
+      "if 先检查第一个条件。只有它为假，才会继续检查 elif。else 接收前面条件都不满足的情况。",
+      "同一条分支链中，找到第一个成立的条件后只执行它的代码块，后面的 elif 不再检查。代码块用一致缩进表示。"
+    ],
+    "example_code": "score = 85\nif score >= 80:\n    print(\"优秀\")\nelif score >= 60:\n    print(\"合格\")\nelse:\n    print(\"继续努力\")",
+    "example_output": "优秀",
+    "walkthrough": "85 虽然也满足 >= 60，但第一个分支已经被选择。",
+    "reflection": "如果把 >= 60 放到第一个 if，会影响 85 的分类吗？"
+  },
+  "and_or": {
+    "objective": "组合两个布尔条件",
+    "explanations": [
+      "and 在两个条件都为真时才为真；or 在至少一个条件为真时就为真。not 会反转真假。",
+      "先分别算出每个比较条件，再组合结果。Python 会短路求值；一般对象的 and/or 可返回操作数，本关只练布尔条件组合。"
+    ],
+    "example_code": "score = 75\nsubmitted = True\nprint(score >= 60 and submitted)\nprint(score >= 90 or submitted)\nprint(not submitted)",
+    "example_output": "True\nTrue\nFalse",
+    "walkthrough": "分别把左右条件换成 True 或 False，再计算组合结果。",
+    "reflection": "一个条件为真，另一个为假时，and 和 or 各得到什么？"
+  },
+  "truthiness": {
+    "objective": "区分数值、字符串和空容器的真假",
+    "explanations": [
+      "条件位置不仅能写布尔值，也能写其他对象。数值 0、空字符串、空列表和 None 通常按假处理。",
+      "非空字符串按真处理；字符串 \"0\" 和数值 0 是不同的对象。先识别类型，不要只看显示出来的字符。"
+    ],
+    "example_code": "print(bool(0))\nprint(bool(\"0\"))\nprint(bool([]))\nprint(bool([0]))",
+    "example_output": "False\nTrue\nFalse\nTrue",
+    "walkthrough": "[0] 中有一个元素，所以不是空列表。",
+    "reflection": "字符串 \"False\" 是空字符串吗？在条件中它表示真还是假？"
+  },
+  "independent_if": {
+    "objective": "区分独立判断与互斥分支",
+    "explanations": [
+      "多个独立的 if 会依次分别判断。它们可以同时执行，也可以都不执行。",
+      "if/elif 用于互斥分类，多个 if 用于检查可同时成立的条件。不要因为前一个 if 已执行，就认为后一个 if 会跳过。"
+    ],
+    "example_code": "n = 9\nif n > 0:\n    print(\"正数\")\nif n % 3 == 0:\n    print(\"3的倍数\")",
+    "example_output": "正数\n3的倍数",
+    "walkthrough": "% 是取余；9 除以 3 的余数为 0，第二个条件也成立。",
+    "reflection": "把第二个 if 改成 elif 后，输出会怎样改变？"
+  },
+  "range_end": {
+    "objective": "理解 for 遍历与 range 的半开区间",
+    "explanations": [
+      "for 会依次取出序列里的每个值，并执行一次缩进的循环体。循环变量在每轮被赋成当前值。",
+      "range(start, stop) 从 start 开始，每次增加 1，不包含 stop。range(stop) 默认从 0 开始。"
+    ],
+    "example_code": "for number in range(3, 6):\n    print(number)",
+    "example_output": "3\n4\n5",
+    "walkthrough": "依次列出 3、4、5；6 是结束边界，不进入这次遍历。",
+    "reflection": "range(3) 产生哪三个数？"
+  },
+  "range_step": {
+    "objective": "用步长控制递增或递减",
+    "explanations": [
+      "range(start, stop, step) 的第三个参数是每一步的增量。正步长向上走，负步长向下走。",
+      "终点仍然不包含。方向不合适时序列为空，步长为 0 则会报错。先写起点，再按步长逐次计算。"
+    ],
+    "example_code": "print(list(range(2, 9, 3)))\nprint(list(range(9, 2, -3)))",
+    "example_output": "[2, 5, 8]\n[9, 6, 3]",
+    "walkthrough": "正步长在达到或超过终点前停止；负步长在达到或低于终点前停止。",
+    "reflection": "range(2, 8, -1) 为什么没有元素？"
+  },
+  "accumulate": {
+    "objective": "跟踪跨轮次变化的变量",
+    "explanations": [
+      "累加器先在循环外设置初值，每轮读取旧值并更新。total += n 在本关等价于 total = total + n。",
+      "循环结束后的变量保留最后一次更新结果。如果把初始化放到循环体里，就会每轮重置。"
+    ],
+    "example_code": "total = 1\nfor n in [3, 5]:\n    total += n\nprint(total)",
+    "example_output": "9",
+    "walkthrough": "用表格追踪：初值 1 → 加 3 得 4 → 加 5 得 9。",
+    "reflection": "如果每轮开头都执行 total = 1，会发生什么？"
+  },
+  "break_continue": {
+    "objective": "控制当前循环的执行路径",
+    "explanations": [
+      "break 立即退出当前这层循环；continue 只跳过本轮剩余语句，接着开始下一轮。",
+      "判断输出时，注意 print 在跳转语句之前还是之后。遇到跳转后的语句不一定有机会执行。"
+    ],
+    "example_code": "for n in [2, 3, 4, 5]:\n    if n == 3:\n        continue\n    if n == 5:\n        break\n    print(n)",
+    "example_output": "2\n4",
+    "walkthrough": "3 跳过本轮打印；5 结束循环；只有 2 和 4 被打印。",
+    "reflection": "continue 换成 break 后，还会打印 4 吗？"
+  },
+  "while_check": {
+    "objective": "理解先判断、再执行、再更新的循环",
+    "explanations": [
+      "while 在进入循环体之前检查条件，每一轮开始前都会重新检查。初始条件为假时可以执行零次。",
+      "循环体通常需要更新影响条件的变量，否则可能一直无法退出。追踪时先判断，再写本轮输出，再更新变量。"
+    ],
+    "example_code": "n = 2\nwhile n < 5:\n    print(n)\n    n += 1",
+    "example_output": "2\n3\n4",
+    "walkthrough": "更新到 5 后，下一次检查 5 < 5 为假，因此结束。",
+    "reflection": "如果一开始 n 就是 5，循环体执行几次？"
+  },
+  "print_return": {
+    "objective": "区分函数的输出副作用和返回值",
+    "explanations": [
+      "def 定义函数，调用函数名加括号才会执行函数体。print 把内容显示到屏幕，return 把一个值交给调用者。",
+      "函数没有执行 return 时默认返回 None。屏幕上看见的内容不一定就是返回值；外层 print 还能打印函数的返回值。"
+    ],
+    "example_code": "def show():\n    print(\"学习\")\n\nresult = show()\nprint(result)",
+    "example_output": "学习\nNone",
+    "walkthrough": "函数内部打印一次文字；赋给 result 的是隐式返回值 None。",
+    "reflection": "要让 result 等于字符串“学习”，应修改哪条语句？"
+  },
+  "return_exit": {
+    "objective": "沿执行路径寻找真正的返回点",
+    "explanations": [
+      "执行到 return 时，这一次函数调用就结束了，值被交给调用者。函数体中紧接着的语句不会继续运行。",
+      "不同条件可以通往不同 return，但一次调用只会使用实际执行到的那个返回点。定义函数不会立即执行它。"
+    ],
+    "example_code": "def classify(n):\n    if n < 0:\n        return \"负数\"\n    return \"非负数\"\n\nprint(classify(-2))",
+    "example_output": "负数",
+    "walkthrough": "-2 满足第一个条件，第一条 return 结束调用。",
+    "reflection": "调用 classify(0) 会经过哪一个返回点？"
+  },
+  "arguments": {
+    "objective": "按位置把实参绑定到形参",
+    "explanations": [
+      "定义函数时括号中的名字是形参，调用时传入的值是实参。位置参数按照从左到右的顺序绑定。",
+      "绑定完成后，再按函数体中的表达式求值。参数名不会自动按数值大小或字母顺序重新排列。"
+    ],
+    "example_code": "def divide(a, b):\n    return a / b\n\nprint(divide(12, 3))\nprint(divide(3, 12))",
+    "example_output": "4.0\n0.25",
+    "walkthrough": "交换实参会交换 a、b 的值；除法有顺序，结果因此不同。",
+    "reflection": "对于 a - b，交换两个实参通常会怎样改变结果？"
+  },
+  "local_scope": {
+    "objective": "分别追踪函数内部与外部的绑定",
+    "explanations": [
+      "函数内普通赋值通常创建局部变量绑定。它与函数外同名变量不是同一个绑定位置。",
+      "本关只讨论普通赋值与简单值，不涉及 global、nonlocal 或可变对象的原地修改。函数可以把局部结果 return 给调用者。"
+    ],
+    "example_code": "value = 7\ndef make_value():\n    value = 3\n    return value\n\nprint(make_value())\nprint(value)",
+    "example_output": "3\n7",
+    "walkthrough": "内部 value 绑定到 3，外部 value 仍绑定到 7。",
+    "reflection": "如果想用返回值更新外部 value，可以在调用处怎样赋值？"
+  },
+  "missing_return": {
+    "objective": "检查每条执行路径有没有返回值",
+    "explanations": [
+      "有 return 的函数不代表每条路径都执行 return。条件不成立时，可能直接走到函数末尾。",
+      "走到末尾而没有执行 return，就返回 None。Python 不会自动推断一个相反的结果，也不会自动返回参数。"
+    ],
+    "example_code": "def discount(price):\n    if price >= 100:\n        return 10\n\nprint(discount(80))",
+    "example_output": "None",
+    "walkthrough": "80 不满足条件，函数结束但没有执行 return。",
+    "reflection": "如果希望没有优惠时返回 0，应在哪条路径补上 return 0？"
+  }
+}

@@ -14,6 +14,10 @@
     "answer": "A",
     "explanation": "5 不大于 5，严格大于不包含相等。",
     "hint": "逐一检查 <、<=、>、>= 是否包含相等情况。",
+    "hints": [
+      "先判断两个数是否相等，再检查比较符号是否允许相等。",
+      "逐一检查 <、<=、>、>= 是否包含相等情况。"
+    ],
     "misconceptions": {
       "B": {
         "concept": "boundary",
@@ -41,6 +45,10 @@
     "answer": "B",
     "explanation": "大于等于包含相等，因此结果是 True。",
     "hint": "逐一检查 <、<=、>、>= 是否包含相等情况。",
+    "hints": [
+      "先判断两个数是否相等，再检查比较符号是否允许相等。",
+      "逐一检查 <、<=、>、>= 是否包含相等情况。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "boundary",
@@ -68,6 +76,10 @@
     "answer": "C",
     "explanation": "第一个条件成立，后续 elif 不再执行。",
     "hint": "在同一条 if / elif / else 链中，最多执行一个分支。",
+    "hints": [
+      "从上往下找第一个成立的条件，并观察后面用的是 elif 还是独立 if。",
+      "在同一条 if / elif / else 链中，最多执行一个分支。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "branches",
@@ -95,6 +107,10 @@
     "answer": "A",
     "explanation": "n > 10 已成立，只输出“大”。",
     "hint": "在同一条 if / elif / else 链中，最多执行一个分支。",
+    "hints": [
+      "从上往下找第一个成立的条件，并观察后面用的是 elif 还是独立 if。",
+      "在同一条 if / elif / else 链中，最多执行一个分支。"
+    ],
     "misconceptions": {
       "B": {
         "concept": "branches",
@@ -122,6 +138,10 @@
     "answer": "B",
     "explanation": "左侧条件为 False，and 的结果为 False。",
     "hint": "布尔表达式中，and 要求两边都真，or 只要求至少一边为真。",
+    "hints": [
+      "先分别写出左右条件的真假，再考虑它们如何组合。",
+      "布尔表达式中，and 要求两边都真，or 只要求至少一边为真。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "and_or",
@@ -149,6 +169,10 @@
     "answer": "B",
     "explanation": "cold 为 True，两个布尔值的 or 结果为 True。",
     "hint": "布尔表达式中，and 要求两边都真，or 只要求至少一边为真。",
+    "hints": [
+      "先分别写出左右条件的真假，再考虑它们如何组合。",
+      "布尔表达式中，and 要求两边都真，or 只要求至少一边为真。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "and_or",
@@ -176,6 +200,10 @@
     "answer": "C",
     "explanation": "空列表在条件中为假，因此进入 else。",
     "hint": "空字符串、空列表为假；非空字符串即使是 \"0\" 也为真。",
+    "hints": [
+      "先确认变量的类型，再区分空值与非空值。",
+      "空字符串、空列表为假；非空字符串即使是 \"0\" 也为真。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "truthiness",
@@ -203,6 +231,10 @@
     "answer": "A",
     "explanation": "\"0\" 是非空字符串，在条件中为真。",
     "hint": "空字符串、空列表为假；非空字符串即使是 \"0\" 也为真。",
+    "hints": [
+      "先确认变量的类型，再区分空值与非空值。",
+      "空字符串、空列表为假；非空字符串即使是 \"0\" 也为真。"
+    ],
     "misconceptions": {
       "B": {
         "concept": "truthiness",
@@ -230,6 +262,10 @@
     "answer": "B",
     "explanation": "两个独立条件都成立，依次输出 A 和 B。",
     "hint": "多个独立的 if 会分别判断，不具有 elif 的互斥性。",
+    "hints": [
+      "数一数代码里有几个独立的 if，每个是否都需要判断。",
+      "多个独立的 if 会分别判断，不具有 elif 的互斥性。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "independent_if",
@@ -257,6 +293,10 @@
     "answer": "C",
     "explanation": "6 同时能被 2 和 3 整除，两个 if 都执行。",
     "hint": "多个独立的 if 会分别判断，不具有 elif 的互斥性。",
+    "hints": [
+      "数一数代码里有几个独立的 if，每个是否都需要判断。",
+      "多个独立的 if 会分别判断，不具有 elif 的互斥性。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "independent_if",
@@ -284,6 +324,10 @@
     "answer": "A",
     "explanation": "range(1, 4) 依次生成 1、2、3，不包含 4。",
     "hint": "range 包含起点，不包含终点。",
+    "hints": [
+      "列出起点，再逐个增加，检查终点本身是否应当列入。",
+      "range 包含起点，不包含终点。"
+    ],
     "misconceptions": {
       "B": {
         "concept": "range_end",
@@ -311,6 +355,10 @@
     "answer": "B",
     "explanation": "起点为 2，终点 5 不包含在序列中。",
     "hint": "range 包含起点，不包含终点。",
+    "hints": [
+      "列出起点，再逐个增加，检查终点本身是否应当列入。",
+      "range 包含起点，不包含终点。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "range_end",
@@ -338,6 +386,10 @@
     "answer": "C",
     "explanation": "从 1 开始每次加 2，7 是不包含的终点。",
     "hint": "从起点开始，每次加上步长，在越过边界前停止。",
+    "hints": [
+      "三个参数依次是什么？尝试从第一个值加一次步长。",
+      "从起点开始，每次加上步长，在越过边界前停止。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "range_step",
@@ -365,6 +417,10 @@
     "answer": "A",
     "explanation": "步长为 -2，生成 6、4、2，终点 0 不包含。",
     "hint": "从起点开始，每次加上步长，在越过边界前停止。",
+    "hints": [
+      "三个参数依次是什么？尝试从第一个值加一次步长。",
+      "从起点开始，每次加上步长，在越过边界前停止。"
+    ],
     "misconceptions": {
       "B": {
         "concept": "range_step",
@@ -392,6 +448,10 @@
     "answer": "B",
     "explanation": "total 依次为 1、3、6，循环结束后打印 6。",
     "hint": "跟踪变量每轮的旧值与新值，累加不会自动重置。",
+    "hints": [
+      "画一个小表，分别写初值、每轮加上的数和更新后的总值。",
+      "跟踪变量每轮的旧值与新值，累加不会自动重置。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "accumulate",
@@ -419,6 +479,10 @@
     "answer": "C",
     "explanation": "初值 2，加 2 得 4，再加 4 得 8。",
     "hint": "跟踪变量每轮的旧值与新值，累加不会自动重置。",
+    "hints": [
+      "画一个小表，分别写初值、每轮加上的数和更新后的总值。",
+      "跟踪变量每轮的旧值与新值，累加不会自动重置。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "accumulate",
@@ -446,6 +510,10 @@
     "answer": "A",
     "explanation": "n 为 2 时 break 终止整个循环，仅打印过 1。",
     "hint": "break 退出当前循环；continue 跳过本轮剩余语句。",
+    "hints": [
+      "找到触发跳转的那一轮，区分结束循环和跳过本轮。",
+      "break 退出当前循环；continue 跳过本轮剩余语句。"
+    ],
     "misconceptions": {
       "B": {
         "concept": "break_continue",
@@ -473,6 +541,10 @@
     "answer": "B",
     "explanation": "n 为 2 时跳过 print，下一轮仍会打印 3。",
     "hint": "break 退出当前循环；continue 跳过本轮剩余语句。",
+    "hints": [
+      "找到触发跳转的那一轮，区分结束循环和跳过本轮。",
+      "break 退出当前循环；continue 跳过本轮剩余语句。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "break_continue",
@@ -500,6 +572,10 @@
     "answer": "C",
     "explanation": "初始 3 < 3 为假，不进入循环，只打印“结束”。",
     "hint": "先判断条件，再执行循环体；初次条件为假时执行零次。",
+    "hints": [
+      "先代入初始值判断条件，再模拟变量更新后下一次条件判断。",
+      "先判断条件，再执行循环体；初次条件为假时执行零次。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "while_check",
@@ -527,6 +603,10 @@
     "answer": "A",
     "explanation": "依次打印 1、2；n 变为 3 后不再进入循环。",
     "hint": "先判断条件，再执行循环体；初次条件为假时执行零次。",
+    "hints": [
+      "先代入初始值判断条件，再模拟变量更新后下一次条件判断。",
+      "先判断条件，再执行循环体；初次条件为假时执行零次。"
+    ],
     "misconceptions": {
       "B": {
         "concept": "while_check",
@@ -554,6 +634,10 @@
     "answer": "B",
     "explanation": "函数先打印 3，隐式返回 None，再打印 x 得到 None。",
     "hint": "print 显示内容；没有 return 的函数默认返回 None。",
+    "hints": [
+      "分别记录屏幕显示了什么，以及函数交给调用者的值是什么。",
+      "print 显示内容；没有 return 的函数默认返回 None。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "print_return",
@@ -581,6 +665,10 @@
     "answer": "C",
     "explanation": "调用 greet 先打印 Hi，其返回值 None 随后被外层 print 打印。",
     "hint": "print 显示内容；没有 return 的函数默认返回 None。",
+    "hints": [
+      "分别记录屏幕显示了什么，以及函数交给调用者的值是什么。",
+      "print 显示内容；没有 return 的函数默认返回 None。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "print_return",
@@ -608,6 +696,10 @@
     "answer": "A",
     "explanation": "return 2 立即结束函数，不执行 print(9)。",
     "hint": "执行 return 后，函数中该次调用的后续语句不再执行。",
+    "hints": [
+      "沿着本次调用的执行路径，找到第一个实际执行的 return。",
+      "执行 return 后，函数中该次调用的后续语句不再执行。"
+    ],
     "misconceptions": {
       "B": {
         "concept": "return_exit",
@@ -635,6 +727,10 @@
     "answer": "B",
     "explanation": "第一个 return 已结束调用，第二个 return 不执行。",
     "hint": "执行 return 后，函数中该次调用的后续语句不再执行。",
+    "hints": [
+      "沿着本次调用的执行路径，找到第一个实际执行的 return。",
+      "执行 return 后，函数中该次调用的后续语句不再执行。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "return_exit",
@@ -662,6 +758,10 @@
     "answer": "C",
     "explanation": "a 绑定 2，b 绑定 5，2 - 5 = -3。",
     "hint": "位置参数按调用顺序绑定，注意减法等运算的顺序。",
+    "hints": [
+      "按位置将实参代入形参，再计算表达式，注意顺序。",
+      "位置参数按调用顺序绑定，注意减法等运算的顺序。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "arguments",
@@ -689,6 +789,10 @@
     "answer": "A",
     "explanation": "a 为 B，b 为 A，连接后的字符串是 B-A。",
     "hint": "位置参数按调用顺序绑定，注意减法等运算的顺序。",
+    "hints": [
+      "按位置将实参代入形参，再计算表达式，注意顺序。",
+      "位置参数按调用顺序绑定，注意减法等运算的顺序。"
+    ],
     "misconceptions": {
       "B": {
         "concept": "arguments",
@@ -716,6 +820,10 @@
     "answer": "B",
     "explanation": "函数内部 x 为 2，外部 x 保持 10。",
     "hint": "函数内普通赋值创建局部绑定，不会改写同名外部变量。",
+    "hints": [
+      "分两栏记录函数内部和函数外部的同名变量。",
+      "函数内普通赋值创建局部绑定，不会改写同名外部变量。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "local_scope",
@@ -743,6 +851,10 @@
     "answer": "C",
     "explanation": "局部 name 为“内”，外部 name 仍为“外”。",
     "hint": "函数内普通赋值创建局部绑定，不会改写同名外部变量。",
+    "hints": [
+      "分两栏记录函数内部和函数外部的同名变量。",
+      "函数内普通赋值创建局部绑定，不会改写同名外部变量。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "local_scope",
@@ -770,6 +882,10 @@
     "answer": "A",
     "explanation": "0 > 0 为假，没有执行 return，默认返回 None。",
     "hint": "只有实际执行到的 return 决定返回值；走完函数仍无 return 则返回 None。",
+    "hints": [
+      "代入参数后，判断执行路径上是否真的走到了 return。",
+      "只有实际执行到的 return 决定返回值；走完函数仍无 return 则返回 None。"
+    ],
     "misconceptions": {
       "B": {
         "concept": "missing_return",
@@ -797,6 +913,10 @@
     "answer": "B",
     "explanation": "3 为奇数，条件不成立，没有显式返回值，因此返回 None。",
     "hint": "只有实际执行到的 return 决定返回值；走完函数仍无 return 则返回 None。",
+    "hints": [
+      "代入参数后，判断执行路径上是否真的走到了 return。",
+      "只有实际执行到的 return 决定返回值；走完函数仍无 return 则返回 None。"
+    ],
     "misconceptions": {
       "A": {
         "concept": "missing_return",

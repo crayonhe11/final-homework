@@ -36,6 +36,29 @@ with tempfile.TemporaryDirectory() as temp:
         assert len(app.progress_table.get_children())==15
         app.tabs.select(app.practice); app.update()
         assert app.recs.winfo_y()+app.recs.winfo_height()<=app.practice.winfo_height()
+        app.load_question('boundary_1')
+        app.show_hint(); app.show_hint(); app.show_hint()
+        assert app.hints_used == 2
+        assert app.hint_btn.instate(['disabled'])
+        app.choice.set(app.current['answer']); app.submit()
+        until=time.monotonic()+5
+        while app.pending and time.monotonic()<until:
+            app.update(); time.sleep(.02)
+        assert app.store.history()[-1]['hints_used'] == 2
+        assert '需独立作答验证' in app.feedback.get('1.0','end')
+        with app.store.connect() as conn:
+            conn.execute("UPDATE attempts SET created_at='2020-01-01T00:00:00+00:00' WHERE question_id='boundary_1'")
+        app.tabs.select(app.stats); app.refresh(); app.update()
+        assert '到期' in app.summary.get()
+        app.start_due_review(); app.update()
+        assert app.current['id']=='boundary_1'
+        assert app.hints_used==0
+        # 旧题被删除后仍能浏览、导出其记录，不导致进度页异常。
+        app.store.save('archived_question','A','保留旧记录',{'correct':False,'concept':None},{})
+        app.refresh(); app.tabs.select(app.review); app.update()
+        app.records.selection_set(str(app.store.history()[-1]['id'])); app.show_record()
+        assert '题目已不在当前题库' in app.record_detail.get('1.0','end')
+        print('Hints, due review, and archived history passed.')
         print('GUI smoke passed: wrong → recommendation → correct → history → progress; layout fits.')
     finally:
         app.destroy()

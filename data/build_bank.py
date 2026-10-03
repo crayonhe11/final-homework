@@ -50,15 +50,17 @@ GROUPS = [
 ('def check(n):\n    if n % 2 == 0:\n        return "偶"\nprint(check(3))',['奇','None','3'],1,'3 为奇数，条件不成立，没有显式返回值，因此返回 None。')]),
 ]
 
+design = json.loads((Path(__file__).parent / 'learning_design.json').read_text(encoding='utf-8'))
 bank=[]
 concepts={}
 for topic,cid,label,hint,rows in GROUPS:
-    concepts[cid]={'topic':topic,'label':label,'hint':hint}
+    concepts[cid]={'topic':topic,'label':label,'hint':hint, 'order':len(concepts), 'prerequisites':design[cid]['prerequisites']}
     for i,(code,choices,answer,explanation) in enumerate(rows,1):
         options=dict(zip('ABC',choices))
         bank.append({'id':f'{cid}_{i}','topic':topic,'concept':cid,'difficulty':1 if i==1 else 2,
           'prompt':'下面代码的完整输出是什么？','code':code,'options':options,
           'answer':'ABC'[answer],'explanation':explanation,'hint':hint,
+          'hints':[design[cid]['prompt'],hint],
           'misconceptions':{key:{'concept':cid,'evidence':f'你选择的输出为「{value.replace(chr(10), " / ")}」，与此处的执行规则不一致。'} for key,value in options.items() if key!='ABC'[answer]},
           'review_status':'答案经自动执行核验；概念标签待团队人工复核'})
 root=Path(__file__).parent

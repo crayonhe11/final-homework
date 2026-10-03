@@ -1,0 +1,17 @@
+{
+  "boundary": {"prerequisites": [], "prompt": "先判断两个数是否相等，再检查比较符号是否允许相等。"},
+  "branches": {"prerequisites": ["boundary"], "prompt": "从上往下找第一个成立的条件，并观察后面用的是 elif 还是独立 if。"},
+  "and_or": {"prerequisites": ["boundary"], "prompt": "先分别写出左右条件的真假，再考虑它们如何组合。"},
+  "truthiness": {"prerequisites": [], "prompt": "先确认变量的类型，再区分空值与非空值。"},
+  "independent_if": {"prerequisites": ["branches"], "prompt": "数一数代码里有几个独立的 if，每个是否都需要判断。"},
+  "range_end": {"prerequisites": [], "prompt": "列出起点，再逐个增加，检查终点本身是否应当列入。"},
+  "range_step": {"prerequisites": ["range_end"], "prompt": "三个参数依次是什么？尝试从第一个值加一次步长。"},
+  "accumulate": {"prerequisites": ["range_end"], "prompt": "画一个小表，分别写初值、每轮加上的数和更新后的总值。"},
+  "break_continue": {"prerequisites": ["range_end"], "prompt": "找到触发跳转的那一轮，区分结束循环和跳过本轮。"},
+  "while_check": {"prerequisites": ["boundary"], "prompt": "先代入初始值判断条件，再模拟变量更新后下一次条件判断。"},
+  "print_return": {"prerequisites": [], "prompt": "分别记录屏幕显示了什么，以及函数交给调用者的值是什么。"},
+  "return_exit": {"prerequisites": ["print_return"], "prompt": "沿着本次调用的执行路径，找到第一个实际执行的 return。"},
+  "arguments": {"prerequisites": [], "prompt": "按位置将实参代入形参，再计算表达式，注意顺序。"},
+  "local_scope": {"prerequisites": ["arguments"], "prompt": "分两栏记录函数内部和函数外部的同名变量。"},
+  "missing_return": {"prerequisites": ["return_exit", "branches"], "prompt": "代入参数后，判断执行路径上是否真的走到了 return。"}
+}
