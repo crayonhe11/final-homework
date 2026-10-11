@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory() as temp:
         assert len(app.store.history())==1
         assert '可能涉及' in app.feedback.get('1.0','end')
         app.submit(); assert len(app.store.history())==1
-        assert len(app.recs.winfo_children())==2
+        assert len(app.recs.winfo_children())==3
         app.recs.winfo_children()[0].invoke(); app.update()
         assert app.current['id']=='range_end_2'
         app.choice.set('B'); app.submit()

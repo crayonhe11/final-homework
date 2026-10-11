@@ -108,6 +108,9 @@ class CourseView(ttk.Frame):
             rounded(self.map,x+1,base+2,x+col-1,base+410,fill='white',outline=BORDER)
             self.map.create_text(x+16,base+24,anchor='w',text=f'0{chapter+1}  {topic}',font=('Arial',13,'bold'),fill=INK)
             self.map.create_text(x+16,base+47,anchor='w',text=f'{complete} / {len(nodes)} 关已完成',font=('Arial',10),fill=MUTED)
+            tag='coding_'+str(chapter)
+            self.map.create_text(x+col-16,base+47,anchor='e',text='趣味编程 →',font=('Arial',10),fill=ACCENT,tags=tag)
+            self.map.tag_bind(tag,'<Button-1>',lambda e,t=topic:self.app.open_coding(t))
             self.map.create_line(x+16,base+65,x+col-16,base+65,fill='#eeebf7',width=4)
             if complete: self.map.create_line(x+16,base+65,x+16+(col-32)*complete/len(nodes),base+65,fill=ACCENT,width=4)
             for row,cid in enumerate(nodes):

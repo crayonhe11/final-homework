@@ -3,3 +3,7 @@ __pycache__/
 runtime/
 .DS_Store
 .env
+.env.*
+
+# 团队密钥配置：勿提交真实密钥
+api_config.json

@@ -1,0 +1,6 @@
+{
+  "EDU_AI_PROVIDER": "kimi",
+  "MOONSHOT_API_KEY": "sk-O1oUGnvJCNwnx4Qe6OmfYC0Mk4QUJRJk3HM9HDshlX31OdUA",
+  "MOONSHOT_MODEL": "kimi-k2.6",
+  "MOONSHOT_BASE_URL": "https://api.moonshot.cn/v1"
+}

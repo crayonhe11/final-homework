@@ -10,7 +10,7 @@ with tempfile.TemporaryDirectory() as folder:
     app=App(Path(folder)/'platform.sqlite3')
     try:
         app.update()
-        assert len(app.nav_buttons)==4
+        assert len(app.nav_buttons)==5
         assert [v.get() for v in app.course.metric_vars]==['0 / 15','0 / 30','0']
         for index,button in enumerate(app.nav_buttons):
             button.invoke();app.update()

@@ -10,6 +10,8 @@ from .storage import Store
 from .ai import AIHelper
 from .curriculum import load_lessons, course_states, lesson_question
 from .course_ui import CourseView
+from .coding_ui import CodingLab
+from .charts import ProgressCharts
 from .theme import apply_theme, BG, INK, MUTED, ACCENT
 
 
@@ -29,6 +31,7 @@ class App(tk.Tk):
         self.events = queue.Queue()
         self.current = None
         self.submitted = False
+        self.next_recommendation=None
         apply_theme(self)
         self.configure(bg=BG)
         self.sidebar=tk.Frame(self,bg='white',width=172)
@@ -37,7 +40,7 @@ class App(tk.Tk):
         tk.Label(self.sidebar,text='PYTHON LEARNING',bg='white',fg=MUTED,font=('Arial',9)).pack(anchor='w',padx=21,pady=(0,35))
         tk.Label(self.sidebar,text='学习空间',bg='white',fg=MUTED,font=('Arial',10)).pack(anchor='w',padx=22,pady=(0,10))
         self.nav_buttons=[]
-        for index,label in enumerate(('01   课程与地图','02   练习工作区','03   错题记录','04   学习进度')):
+        for index,label in enumerate(('01   课程与地图','02   练习工作区','03   错题记录','04   学习进度','05   趣味编程')):
             button=tk.Button(self.sidebar,text=label,anchor='w',font=('Arial',12),bg='white',fg=INK,
                              activebackground='#eeeafd',activeforeground=ACCENT,relief='flat',bd=0,
                              padx=14,pady=13,cursor='hand2',command=lambda i=index:self.navigate(i))
@@ -58,11 +61,14 @@ class App(tk.Tk):
         self.tabs.add(self.review,text='  错题与记录  ')
         self.tabs.add(self.stats,text='  学习进度  ')
         self.build_practice(); self.build_review(); self.build_stats()
+        self.coding=CodingLab(self.tabs,self)
+        self.tabs.add(self.coding,text="章节编程")
+        self.protocol("WM_DELETE_WINDOW",self.close_app)
         self.tabs.bind('<<NotebookTabChanged>>',lambda e:self.on_page_changed())
         self.status=tk.StringVar(value='本地保存 · 单人使用 · 30 道题 · '+('AI 已配置，需勾选启用' if self.ai.model else '规则模式'))
         ttk.Label(outer,textvariable=self.status,style='Muted.TLabel').pack(anchor='w',pady=(10,0))
-        self.question_title.set('请先从知识地图学习，或选择主题后点击“自由练习下一题”。')
-        self.submit_btn.state(['disabled']); self.hint_btn.state(['disabled'])
+        self.question_title.set('请先从知识地图学习，或选择主题后点击下方“开始练习”。')
+        self.submit_btn.configure(text='开始练习 →'); self.hint_btn.state(['disabled'])
         self.write(self.code, '先学习，再练习。')
         self.write(self.feedback, '课程闯关从知识地图进入；自由练习不计入课程过关。')
         self.tabs.select(self.course)
@@ -84,6 +90,19 @@ class App(tk.Tk):
     def write(box,value):
         box.configure(state='normal'); box.delete('1.0','end'); box.insert('1.0',value); box.configure(state='disabled')
 
+    def open_coding(self,topic):
+        self.coding.open_topic(topic)
+        self.tabs.select(self.coding)
+
+    def close_app(self):
+        if self.coding.running or self.pending:
+            messagebox.showinfo("正在保存", "请等待本次运行或分析结束后关闭。")
+            return
+        if not self.coding.save_draft():
+            messagebox.showerror("草稿尚未保存", "保存失败，请先复制代码或解决存储问题后再关闭。")
+            return
+        self.destroy()
+
     def navigate(self,index):
         self.tabs.select(index)
         if index==0: self.course.show_map()
@@ -91,7 +110,7 @@ class App(tk.Tk):
     def on_page_changed(self):
         if not self.tabs.select(): return
         index=self.tabs.index(self.tabs.select())
-        self.page_title.set(('我的学习路径','练习工作区','错题与学习记录','学习进度')[index])
+        self.page_title.set(('我的学习路径','练习工作区','错题与学习记录','学习进度','章节编程实验室')[index])
         for i,button in enumerate(self.nav_buttons):
             button.configure(bg='#eeeafd' if i==index else 'white',fg=ACCENT if i==index else INK)
         self.refresh()
@@ -103,7 +122,6 @@ class App(tk.Tk):
         self.topics.pack(side='left');self.topics.bind('<<ComboboxSelected>>',lambda e:self.next_question())
         ttk.Button(row,text='知识地图',command=self.return_to_map).pack(side='right',padx=(5,0))
         ttk.Button(row,text='本题讲解',command=self.open_current_lesson).pack(side='right',padx=5)
-        self.next_btn=ttk.Button(row,text='下一题 →',command=self.next_question);self.next_btn.pack(side='right')
         self.question_title=tk.StringVar()
         ttk.Label(self.practice,textvariable=self.question_title,wraplength=730,style='Muted.TLabel').pack(anchor='w',pady=(0,12))
         workspace=ttk.Frame(self.practice);workspace.pack(fill='both',expand=True)
@@ -111,7 +129,7 @@ class App(tk.Tk):
         left=ttk.Frame(workspace,style='Card.TFrame',padding=16);left.grid(row=0,column=0,sticky='nsew',padx=(0,10))
         right=ttk.Frame(workspace,style='Card.TFrame',padding=16);right.grid(row=0,column=1,sticky='nsew')
         ttk.Label(left,text='01  阅读代码',style='CardTitle.TLabel').pack(anchor='w',pady=(0,8))
-        self.code=self.text_box(left,7);self.code.configure(font=('Menlo',13),background='#20263d',foreground='#e6e9ff',insertbackground='white')
+        self.code=self.text_box(left,3);self.code.configure(font=('Menlo',13),background='#20263d',foreground='#e6e9ff',insertbackground='white')
         ttk.Label(left,text='02  选择完整输出',style='CardTitle.TLabel').pack(anchor='w',pady=(14,8))
         self.choice=tk.StringVar()
         self.options_frame=ttk.Frame(left,style='Card.TFrame');self.options_frame.pack(fill='x')
@@ -120,17 +138,17 @@ class App(tk.Tk):
             button=ttk.Radiobutton(self.options_frame,variable=self.choice,value=key)
             button.pack(fill='x',pady=4);self.option_buttons.append(button)
         ttk.Label(left,text='03  说说你的思路（可选）',style='CardTitle.TLabel').pack(anchor='w',pady=(14,4))
-        self.reason=self.text_box(left,3)
+        self.reason=self.text_box(left,2)
         self.reason.configure(background='#f7f8fc')
         actions=ttk.Frame(left,style='Card.TFrame');actions.pack(fill='x',pady=(10,0))
         self.hint_btn=ttk.Button(actions,text='提示 1 / 2',command=self.show_hint);self.hint_btn.pack(side='left')
-        self.submit_btn=ttk.Button(actions,text='提交答案 →',style='Primary.TButton',command=self.submit);self.submit_btn.pack(side='right')
+        self.submit_btn=ttk.Button(actions,text='提交答案 →',style='Primary.TButton',command=self.primary_action,width=20);self.submit_btn.pack(side='right')
         ttk.Label(right,text='反馈与下一步',style='CardTitle.TLabel').pack(anchor='w',pady=(0,8))
         ttk.Label(right,text='提交后查看解析与概念线索',style='CardMuted.TLabel').pack(anchor='w')
-        self.feedback=self.text_box(right,14)
+        self.feedback=self.text_box(right,6)
         self.recs=ttk.Frame(right,style='Card.TFrame');self.recs.pack(fill='x',pady=8)
         self.ai_enabled=tk.BooleanVar(value=False)
-        self.ai_check=ttk.Checkbutton(self.practice,text='使用本地 AI 辅助分析理由',variable=self.ai_enabled)
+        self.ai_check=ttk.Checkbutton(self.practice,text='使用'+self.ai.label+'辅助分析理由',variable=self.ai_enabled)
         self.ai_check.pack(anchor='w',pady=(12,0))
         if not self.ai.model: self.ai_check.state(['disabled'])
 
@@ -150,7 +168,11 @@ class App(tk.Tk):
     def build_stats(self):
         self.summary=tk.StringVar()
         ttk.Label(self.stats,textvariable=self.summary).pack(anchor='w',pady=8)
-        self.progress_table=ttk.Treeview(self.stats,columns=('topic','concept','attempts','rate','state','due'),show='headings',height=16)
+        self.stats_tabs=ttk.Notebook(self.stats);self.stats_tabs.pack(fill='both',expand=True)
+        self.charts=ProgressCharts(self.stats_tabs,self)
+        detail=ttk.Frame(self.stats_tabs)
+        self.stats_tabs.add(self.charts,text='统计曲线');self.stats_tabs.add(detail,text='概念明细')
+        self.progress_table=ttk.Treeview(detail,columns=('topic','concept','attempts','rate','state','due'),show='headings',height=16)
         for key,label,width in [('topic','主题',95),('concept','概念',180),('attempts','次数',45),('rate','正确率',60),('state','近期表现',165),('due','下次复习',125)]:
             self.progress_table.heading(key,text=label); self.progress_table.column(key,width=width)
         self.progress_table.bind('<Double-1>',self.open_progress_lesson)
@@ -241,6 +263,7 @@ class App(tk.Tk):
                     or self.questions[qid]['concept'] != course_concept):
                 return
         self.course_concept=course_concept
+        self.next_recommendation=None
         self.current=self.questions[qid]; q=self.current
         self.topic.set(q['topic']); self.choice.set(''); self.submitted=False
         self.hints_used = 0
@@ -250,10 +273,30 @@ class App(tk.Tk):
         for key,button in zip('ABC',self.option_buttons):
             button.configure(text=f'{key}.  '+q['options'][key].replace('\n','  ↵  ')); button.state(['!disabled'])
         self.reason.configure(state='normal'); self.reason.delete('1.0','end')
+        self.submit_btn.configure(text='提交答案 →')
         self.submit_btn.state(['!disabled']); self.hint_btn.state(['!disabled'])
         self.write(self.feedback,'选择答案后提交。选项中的 ↵ 表示换行。')
         for child in self.recs.winfo_children(): child.destroy()
         self.tabs.select(self.practice)
+
+    def open_ai_practice(self,item):
+        if self.pending: return
+        self.load_question(item['question']['id'])
+        self.write(self.feedback,item['reason']+'。本次为自由练习，不计入课程闯关。')
+
+    def primary_action(self):
+        if self.pending: return
+        if self.current is None:
+            self.next_question()
+        elif self.submitted:
+            if self.course_concept: self.continue_course()
+            elif self.next_recommendation:
+                item=self.next_recommendation
+                self.load_question(item['question']['id'])
+                self.write(self.feedback,item['reason'])
+            else: self.next_question()
+        else:
+            self.submit()
 
     def submit(self):
         if self.pending or self.submitted or self.current is None: return
@@ -264,7 +307,7 @@ class App(tk.Tk):
             messagebox.showinfo('理由过长','请将理由缩短到 1000 字以内。'); return
         q=self.current; result=diagnose(q,choice)
         self.pending=True; self.set_busy(True)
-        self.status.set('正在分析并保存，本地 AI 最多等待约 12 秒…' if self.ai_enabled.get() else '正在保存…')
+        self.status.set('正在分析并保存，AI请求已设置超时…' if self.ai_enabled.get() else '正在保存…')
         use_ai=self.ai_enabled.get()
         def work():
             ai=self.ai.analyze(q,choice,reason,self.concepts) if use_ai else {'status':'disabled','message':'本次使用规则诊断。'}
@@ -272,7 +315,7 @@ class App(tk.Tk):
         threading.Thread(target=work,daemon=True).start()
 
     def set_busy(self,busy):
-        for button in [self.submit_btn,self.next_btn,self.hint_btn,*self.option_buttons]:
+        for button in [self.submit_btn,self.hint_btn,*self.option_buttons]:
             button.state(['disabled' if busy else '!disabled'])
         self.topics.configure(state='disabled' if busy else 'readonly')
         self.reason.configure(state='disabled' if busy else 'normal')
@@ -290,7 +333,8 @@ class App(tk.Tk):
                 messagebox.showerror('保存失败',str(exc))
             else:
                 self.pending=False; self.set_busy(False); self.submitted=True
-                self.submit_btn.state(['disabled']); self.hint_btn.state(['disabled'])
+                self.submit_btn.configure(text='下一题 →')
+                self.submit_btn.state(['!disabled']); self.hint_btn.state(['disabled'])
                 for button in self.option_buttons: button.state(['disabled'])
                 self.reason.configure(state='disabled')
                 lines=['✓ 本次答对' if result['correct'] else '本次答错 · 可以用下一题验证理解']
@@ -302,6 +346,12 @@ class App(tk.Tk):
                 if ai['status']=='ok':
                     label='证据不足，暂不支持概念误区判断' if ai['concept']=='unknown' else '可能涉及「'+self.concepts[ai['concept']]['label']+'」'
                     lines += ['AI 辅助：'+label+'；依据你写的「'+ai['quote']+'」。']
+                feedback=ai.get('feedback',{})
+                if ai['status']=='ok' and feedback.get('status')=='ok':
+                    lines += ['AI个性化讲解：'+feedback['explanation'],'下一步思考：'+feedback['hint'],
+                              '讲解依据：'+feedback['knowledge_quote'],'AI讲解可能有误，请与下方标准解析核对。']
+                elif ai['status']=='ok':
+                    lines.append('个性化讲解未通过检查，以下使用题库解析。')
                 lines += ['正确答案：'+q['answer']+'；'+q['explanation'],ai['message'],'一次错误不能确定误区，请尝试不同题目。']
                 self.write(self.feedback,'\n'.join(lines))
                 if self.course_concept:
@@ -309,13 +359,27 @@ class App(tk.Tk):
                     state=states[self.course_concept]
                     course_line=('本关已通过！回到地图查看新解锁内容。' if state['passed'] else
                                  f'本关独立正确 {state["solved"]}/{state["total"]}；继续完成本关检查。')
-                    self.write(self.feedback,'\n'.join(lines+[course_line]))
+                    self.write(self.feedback,'\n'.join(lines+[course_line,'课程模式按本关要求继续；AI不改变通关条件。']))
+                    self.submit_btn.configure(text='查看下一课 →' if state['passed'] else '继续本关 →')
                     ttk.Button(self.recs,text='查看通关与下一课' if state['passed'] else '继续本关练习',
                                command=self.continue_course).pack(anchor='w',pady=2)
+                    if ai['status']=='ok':
+                        extra=recommend(q,self.questions,self.store.history(),result['concept'],limit=1,ai=ai)
+                        if extra:
+                            item=extra[0]
+                            ttk.Button(self.recs,text='AI建议：课外验证（不计闯关） →',
+                                       command=lambda item=item:self.open_ai_practice(item)).pack(anchor='w',pady=2)
+
                 else:
-                    for item in recommend(q,self.questions,self.store.history(),result['concept'],limit=2):
+                    recommendations=recommend(q,self.questions,self.store.history(),result['concept'],limit=2,ai=ai)
+                    self.next_recommendation=recommendations[0] if recommendations else None
+                    for item in recommendations:
                         target=item['question']
-                        ttk.Button(self.recs,text=item['reason']+' →',command=lambda qid=target['id']:self.load_question(qid)).pack(anchor='w',pady=2)
+                        label=('AI建议：同章基础验证' if item['strategy']=='neutral_verification' else 'AI建议：针对性练习' if item['strategy']=='ai_targeted' else item['reason'])
+                        ttk.Button(self.recs,text=label+' →',command=lambda item=item:self.open_ai_practice(item)).pack(anchor='w',pady=2)
+                    if recommendations and ai['status']=='ok':
+                        self.write(self.feedback,'\n'.join(lines+['推荐策略：'+recommendations[0]['reason']]))
+                ttk.Button(self.recs,text='本章趣味编程 →',command=lambda topic=q['topic']:self.open_coding(topic)).pack(anchor='w',pady=2)
                 self.status.set('作答已保存 · '+('AI 辅助结果已记录' if ai['status']=='ok' else ai['message']))
                 self.refresh()
         self.after(100,self.poll)
@@ -340,6 +404,7 @@ class App(tk.Tk):
             due = min(due_dates) if due_dates else None
             due_label = '待开始' if due is None else '已到期' if due <= now else due.astimezone().strftime('%m-%d %H:%M')
             self.progress_table.insert('','end',iid=row['concept'],values=(row['topic'],row['label'],row['attempts'],rate,row['state'],due_label))
+        self.charts.refresh()
         metrics = learning_summary(self.questions, history)
         first_rate = f'{metrics["first_correct"] / metrics["unique"]:.0%}' if metrics['unique'] else '—'
         self.summary.set(f'作答 {metrics["attempts"]} 次 · 已练 {metrics["unique"]}/{len(self.questions)} 题 · '

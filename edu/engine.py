@@ -12,9 +12,13 @@ def diagnose(question, choice):
             'explanation': question['explanation'], 'hint': question['hint']}
 
 
-def recommend(question, questions, history, concept=None, limit=3, now=None):
+def recommend(question, questions, history, concept=None, limit=3, now=None, ai=None):
     """未做同概念变式 → 到期题 → 同主题新题 → 提前复习；排除当前题。"""
     concept = concept or question['concept']
+    ai_valid=isinstance(ai,dict) and ai.get('status')=='ok' and ai.get('concept') in (concept,'unknown')
+    uncertain=ai_valid and ai['concept']=='unknown'
+    strategy='neutral_verification' if uncertain else 'ai_targeted' if ai_valid else 'rule'
+
     attempted = {row['question_id'] for row in history}
     due = due_reviews(questions, history, now, question['topic'])
     due_order = {qid: i for i, qid in enumerate(due)}
@@ -22,13 +26,17 @@ def recommend(question, questions, history, concept=None, limit=3, now=None):
     last_seen = {row['question_id']: i for i, row in enumerate(history)}
 
     def priority(q):
+        if uncertain:
+            if q['id'] in due_order: return 0
+            if q['id'] not in attempted: return 1
+            return 2
         if q['id'] not in attempted and q['concept'] == concept: return 0
         if q['id'] in due_order: return 1
         if q['id'] not in attempted: return 2
         return 3
 
     candidates.sort(key=lambda q: (priority(q), due_order.get(q['id'], len(due)),
-        q['concept'] != concept, abs(q['difficulty'] - question['difficulty']),
+        False if uncertain else q['concept'] != concept, q['difficulty'] if uncertain else abs(q['difficulty'] - question['difficulty']),
         last_seen.get(q['id'], -1), q['id']))
     output = []
     for q in candidates[:max(0, limit)]:
@@ -36,7 +44,10 @@ def recommend(question, questions, history, concept=None, limit=3, now=None):
         elif q['id'] in attempted: reason = '复习题 · 提前巩固，尚无其他未做或到期题'
         elif q['concept'] == concept: reason = '未做题 · 验证相同概念'
         else: reason = '未做题 · 同主题拓展（同概念未做题不足）'
-        output.append({'question': q, 'reason': reason})
+        if uncertain:
+            reason='AI证据不足 · '+('到期复习' if q['id'] in due_order else '同章基础验证' if q['id'] not in attempted else '复习验证')+'，暂不按确定误区补练'
+        elif ai_valid: reason='AI理由支持候选误区 · '+reason
+        output.append({'question': q, 'reason': reason, 'strategy':strategy})
     return output
 
 

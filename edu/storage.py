@@ -21,6 +21,9 @@ class Store:
                 conn.execute('ALTER TABLE attempts ADD COLUMN course_concept TEXT')
             conn.execute('CREATE TABLE IF NOT EXISTS lesson_reads (concept_id TEXT PRIMARY KEY, read_at TEXT NOT NULL)')
             conn.execute('CREATE INDEX IF NOT EXISTS attempts_question_id ON attempts(question_id, id)')
+            conn.execute('CREATE TABLE IF NOT EXISTS code_drafts (task_id TEXT PRIMARY KEY, source TEXT NOT NULL, updated_at TEXT NOT NULL)')
+            conn.execute('CREATE TABLE IF NOT EXISTS code_attempts (id INTEGER PRIMARY KEY, task_id TEXT NOT NULL, source TEXT NOT NULL, mode TEXT NOT NULL, passed INTEGER NOT NULL, result_json TEXT NOT NULL, created_at TEXT NOT NULL)')
+
 
     @contextmanager
     def connect(self):
@@ -53,3 +56,22 @@ class Store:
     def lesson_reads(self):
         with self.connect() as conn:
             return {row['concept_id']:row['read_at'] for row in conn.execute('SELECT * FROM lesson_reads')}
+
+    def save_draft(self, task_id, source):
+        with self.connect() as conn:
+            conn.execute('INSERT INTO code_drafts VALUES (?,?,?) ON CONFLICT(task_id) DO UPDATE SET source=excluded.source,updated_at=excluded.updated_at',
+                         (task_id,source,datetime.now(timezone.utc).isoformat(timespec='seconds')))
+
+    def get_draft(self, task_id):
+        with self.connect() as conn:
+            row=conn.execute('SELECT source FROM code_drafts WHERE task_id=?',(task_id,)).fetchone()
+            return None if row is None else row['source']
+
+    def save_code_attempt(self, task_id, source, mode, result):
+        with self.connect() as conn:
+            conn.execute('INSERT INTO code_attempts (task_id,source,mode,passed,result_json,created_at) VALUES (?,?,?,?,?,?)',
+                         (task_id,source,mode,int(bool(result.get('passed'))),json.dumps(result,ensure_ascii=False),datetime.now(timezone.utc).isoformat(timespec='seconds')))
+
+    def code_history(self):
+        with self.connect() as conn:
+            return [dict(row) for row in conn.execute('SELECT * FROM code_attempts ORDER BY id')]
