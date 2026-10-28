@@ -1,321 +1,240 @@
-# 中文版：PySteps 使用说明
+# PySteps
 
-PySteps 面向 Python 初学者，提供概念导学、选择题、错题理由分析与章节编程。系统是由 Python 后端支持的网页应用，统一从 `main.py` 启动。
+Python 入门学习、错题反馈与练习推荐 / Python learning, mistake feedback and practice recommendation
 
-## 1. 运行程序
+[中文](#中文使用说明) · [English](#english-guide) · [软件规格 / SRS](SPEC.md)
 
-环境要求：Python 3.10+、现代浏览器以及完整解压的项目。普通运行不需要 Node.js、pip 依赖或 Docker。运行服务的电脑须安装 Python；访问已部署网站的人只需浏览器。
+## 中文使用说明
 
-在含 `main.py` 的目录打开终端：
+### 1. 项目用途
 
-|环境 |命令 |
+PySteps 帮助 Python 初学者完成“阅读概念 → 答题 → 解释思路 → 查看反馈 → 继续练习”的流程。当前内容包括条件判断、循环、函数与返回值，共 3 章、15 个概念、30 道选择题及 6 个编程任务（39 个参考测试案例）。
+
+Python 后端负责判分、课程规则、推荐、复习计划和 SQLite 存储；浏览器提供 React 界面与 Pyodide 编程环境。可选 Kimi 分析只辅助解释错题理由，不决定标准答案。PiPo 小精灵通过预设回复和关键词提供导航，不是大模型聊天或自主代理。
+
+### 2. 快速开始
+
+需要 Python 3.10+、现代浏览器和完整解压的项目。使用随包网页成品时，无需安装 Python 第三方依赖、Node.js 或 Docker。
+
+在包含 `main.py` 的文件夹打开终端：
+
+```bash
+python main.py --open
+```
+
+macOS 的 Python 命令若为 `python3`，使用 `python3 main.py --open`；Windows 也可以使用 `py main.py --open`。
+
+默认地址为 **http://127.0.0.1:8010/**，以终端实际输出为准。保持终端运行，按 Ctrl+C 停止。不要直接双击静态网页替代启动服务。
+
+```bash
+# 端口冲突时使用另一端口
+python main.py --port 8011 --open
+# 指定数据库位置
+python main.py --db runtime/learning.sqlite3
+```
+
+默认只监听本机。更换端口不会停止旧服务。`web/static/index.html` 缺失时应完整解压项目，或由开发成员重新构建前端。
+
+### 3. 使用流程
+
+1. 首次访问默认英语；右上角可切换中英文。
+2. 阅读学习地图中的入门导学，再进入概念课程。课程按前置关系解锁；当前题库中，每个概念需完成阅读并无提示答对两道不同题。自由练习不计入课程解锁。
+3. 提交选择题，可填写理由。错答后可修改理由并重新分析，更新原记录，不新增一次作答。
+4. 进入推荐练习。推荐限定当前章节、排除当前题，优先考虑目标概念未做题和到期复习。它是规则排序，不是模型生成新题或能力自适应算法。
+5. 编程任务可直接进入；运行示例检查前两例，检查答案执行全部任务案例。代码在浏览器 Worker 内运行。
+6. 查看进度、错题及最近 14 个有作答日期的统计，定期导出 JSON 备份。
+
+一次答错只提供可能的概念线索；课程过关不代表全面掌握知识。题库内容和反馈仍需要人工复核。
+
+### 4. 可选 AI 配置
+
+不配置 AI 仍可判题、查看固定反馈、推荐练习及进行编程。若启用，在项目根目录复制 `config.example.json` 为 `config.local.json`，填写后重启服务。也可以设置同名环境变量；环境变量优先，程序不自动加载 `.env`。
+
+| 配置项 | 用途 |
 |---|---|
-|通用 | `python main.py --open` |
-| macOS（python3） | `python3 main.py --open` |
-|Windows 启动器 | `py main.py --open` |
+| `MOONSHOT_API_KEY` | 服务端密钥，不加 `Bearer ` 前缀 |
+| `MOONSHOT_MODEL` | 账户可用模型；代码默认 `kimi-k2.6`，默认名称不保证账户可用 |
+| `MOONSHOT_BASE_URL` | `https://api.moonshot.cn/v1` 或 `https://api.moonshot.ai/v1`，与密钥对应 |
+| `TEAM_ACCESS_CODE` | 至少 12 字符；在网页中输入此口令，而非 API 密钥 |
+| `PUBLIC_ORIGIN` | 本机运行留空；外部访问时设置准确来源地址 |
 
-打开终端显示的网址，通常为 `http://127.0.0.1:8000/`。保持终端运行，Ctrl+C 停止。端口被占用时，停止旧实例，或使用 `python main.py --port 8001 --open`；新端口不会更新旧进程。双击 `打开网页版.html` 只显示入口说明。
+只有错答且理由非空时才需要模型分析。请求会将题目代码、答案、标准解析、所选选项、理由和候选概念发送给配置的 Kimi 服务。密钥保留在服务端，不放入前端、截图或提交包。
 
-可选数据库位置：`python main.py --db runtime/learning.sqlite3`。
+后端请求超时参数为 30 秒，前端取消等待阈值为 40 秒；网络整体耗时不以此获得严格保证。每进程每小时最多受理 60 次模型请求，重启重置计数；这不是费用上限。没有自动重试或显式提示缓存，手动重试可能再次收费。无配置、服务故障或输出不合格时保留规则反馈；错误团队口令返回授权错误。
 
-## 2. 语言与学习流程
+AI 输出需满足候选标签、理由原文引用和格式限制。若标签/理由引用无效，返回规则反馈；若标签和引文有效但答案或知识依据无效，保留通过校验的诊断字段，讲解与提示改用题库内容。校验不等于证明生成内容正确。
 
-首次访问默认英语，右上角按钮可切换中英文并记住选择。切换保留作答、个人文字与代码草稿。代码和精确输出字符串不翻译；新的 AI 请求使用当前语言，历史 AI 讲解保留原文。
+### 5. 保存与限制
 
-1. 从学习地图阅读入门导学并选择概念。
-2. 进入课程闯关，或在自由练习选择主题。
-3. 提交答案，可选填写理由。
-4. 答错后可补充或修改思路，并选择调用 AI 分析。
-5. 继续针对性练习，或进入本章编程任务。
-6. 查看学习进度并导出备份。
+默认数据库是 `runtime/learning.sqlite3`。随机浏览器 Cookie 对应独立学习空间，没有账号登录和自动跨设备同步。清除 Cookie、更换浏览器或访问主机名可能进入新空间。
 
-## 3. 已实现功能
+通过 JSON 导出/导入迁移记录。导入经确认后替换当前空间，不合并；后端重新判分，并恢复规则反馈。保存发生版本冲突时，先备份当前内容再刷新处理。
 
-|功能 |当前行为 |
-|---|---|
-|知识架构 |3 章、15 个概念和前置关系 |
-|概念导学 |学习目标、解释、代码、输出与思考题 |
-|课程闯关 |阅读后无提示独立答对同概念两道不同题 |
-|自由练习 |30 道选择题；自由练习不解锁课程 |
-|判分 |标准答案、经自动执行核验的输出和规则概念线索 |
-|补充思路 |在原作答记录补充理由并重新分析，不重复计数 |
-|推荐 |当前章按概念、未做记录、到期复习排序，排除当前题 |
-|AI 诊断 |可选 Kimi 理由分析、原文引用、受限标签和反馈校验 |
-|章节编程 |6 个故事任务、39 个测试案例，不必先完成选择题 |
-|编辑器 |草稿、示例运行、全例检查、错误反馈、停止与历史 |
-|学习进度 |错题、统计、概念状态、最近 14 个有作答日期的正确率曲线与表格 |
-|保存 |SQLite、JSON 备份和保存冲突检测 |
-|导航助手 |中英文快捷入口与关键词导航，不调用大模型 |
+每空间最多 10,000 条选择题记录、2,000 条代码记录；理由限 1,000 字符、代码限 20,000 字符；请求体限 10,000,000 字节。没有自动归档。
 
-下一题操作位于原提交区。一次答错只是线索，不能证明存在误区；通过当前小题库也不等于全面掌握。题库的教育内容与概念标签仍待团队复核。
+编程环境限制可用语法，禁用导入、文件操作等；Worker 加载和执行阈值分别为 60 秒与 4 秒，没有硬性内存配额。学习记录不是防篡改考试成绩。应用适合课程演示和小团队，未验证生产级负载。
 
-## 4. 推荐与复习算法
+### 6. 测试与贡献
 
-在当前章节排除原题后，依次推荐：①同疑似误区的未做题；②到期复习题，较早到期优先；③其他未做题；④尚未到期的已做题。余下排序结合适用时的目标概念、难度和题号；页面取首项。诊断为 `unknown` 时，优先到期题，再选未做题，不强行归因。
+在项目根目录运行：
 
-答错后 10 分钟复习；使用提示答对在一天内安排复习且不提升阶段；到期后独立答对，间隔依次为 1、3、7、14、30 天；提前重复不提升阶段。这是确定性排序与固定复习间隔，题库较小仍会重复，目前不估计个人能力来动态调整难度。
-
-## 5. 可选 Kimi 配置
-
-在根目录将 `config.example.json` 复制为 `config.local.json` 后编辑。真实密钥不要写入示例、前端或提交 ZIP。同名环境变量优先于文件，程序不自动读取 `.env`。修改后必须重启服务。
-
-|字段 |含义 |
-|---|---|
-| `MOONSHOT_API_KEY` |API 密钥本身，不加 `Bearer ` 前缀 |
-| `MOONSHOT_MODEL` |账号有权限的模型；代码默认 `kimi-k2.6`，不保证账号可用 |
-| `MOONSHOT_BASE_URL` |`https://api.moonshot.cn/v1` 或 `https://api.moonshot.ai/v1`，与密钥所属服务匹配 |
-| `TEAM_ACCESS_CODE` |至少 12 字符的团队口令，网页填写此项 |
-| `PUBLIC_ORIGIN` |本机留空，网络访问填写准确来源地址 |
-
-答错且理由非空时，已选择 AI 的用户可触发分析；也可提交后主动分析。答对或空理由不调用模型。修改理由会清除旧 AI 反馈，再次分析更新原记录；每次主动重试都可能收费。
-
-模型只能选择候选误区或 `unknown`，须引用理由原文；个性化讲解还检查答案与标准解析引文。校验不等于整段讲解正确。目前 60 个错误选项都映射到各自题目的概念，诊断粒度较粗，需人工复核；Kimi 不能另选其他误区或生成新题。
-
-后端等待最多 30 秒、界面最多 40 秒；认证、网络、输出或依据失败时回退规则。每进程每小时限 60 次，重启会重置，并非账单上限。未采用的响应也可能已产生费用。2026 年 10 月 27 日审核未进行付费调用，未验证当前密钥或真实模型质量。
-
-## 6. 数据与代码运行边界
-
-默认数据库为 `runtime/learning.sqlite3`，随机浏览器 Cookie 对应学习空间。保留 Cookie 与数据库才能继续原记录；没有账号自动跨设备同步。通过导出/导入转移；导入会替换当前空间、重判答案并恢复标准反馈。更换浏览器、主机名或清 Cookie 可能进入新空间；冲突时先备份再刷新。
-
-每空间最多 10,000 次答题、2,000 次代码提交；理由最多 1,000 字符、代码 20,000 字符、请求 10 MB；没有自动归档。
-
-代码在浏览器 Worker 内由随包 Pyodide 运行，不在服务器执行。语法白名单不允许导入、网络和文件操作；加载限 60 秒、执行限 4 秒。运行示例检查两例，检查答案运行全部案例并保存结果。没有硬性内存配额，浏览器成绩不是防篡改考试凭证。
-
-## 7. 常见问题
-
-|现象 |处理 |
-|---|---|
-|端口占用 |停止旧服务或更换端口 |
-|AI 未配置 |检查密钥、至少 12 字符口令并重启 |
-|Kimi 认证失败 |核对密钥、接口与环境变量，不是答案无效 |
-|团队口令错误 |网页填写团队口令而非密钥 |
-|界面未更新 |构建后刷新，后端或配置修改后重启 |
-|证书错误 |修复系统或 Python 证书，不关闭校验 |
-|编程环境失败 |保持服务运行并完整保留运行时目录 |
-|保存冲突 |先导出备份，再刷新恢复 |
-
-## 8. 测试与开发
-
-测试目标、21 个测试方法的逐项说明、选择原因和缺口见 [SPEC.md](SPEC.md) 的中文版第 6、7 节。
-
-```text
+```bash
 python -m unittest discover -s tests -t . -v
 ```
 
-macOS 可用 `python3`，Windows 可用 `py`。2026 年 10 月 27 日在 macOS/Python 3.13.11 上 21 项测试通过，TypeScript 检查通过。AI 使用模拟响应，不收费。覆盖 30 道题输出、通关、推荐、复习、输入、数据库、HTTP、AI 校验与降级、双语内容及英文提示。Python 参考解核验 39 例，不等于本次重新做了浏览器运行时验收；范围见测试记录。
+2026-10-28 在 macOS/Python 3.12 环境重新执行，**21 个测试方法全部通过**。模型响应为模拟数据，HTTP 测试使用本地临时服务和数据库，不调用付费 API。方法数量不是测试场景数，也不是覆盖率；30 道选择题和 39 个编程参考案例包含在部分方法中。
 
-历史记录包含离线运行、超时、语言切换等浏览器检查，本次不把它们算作重新执行的证据。CI 配置了三系统及 Python 3.10/3.13，但未据此宣称远端执行成功。真实可用性、Windows/Linux、人工题库复核及真实诊断效果仍待验证。
+本次未重新执行浏览器验收、真实模型评估或 Windows/Linux 测试。CI 已配置多系统矩阵，配置存在不等于远端运行通过。完整映射与待验收项见 [SPEC.md](SPEC.md)。
 
-### VS Code 测试发现
+贡献步骤：先确定受影响的需求 ID 和预期结果，再修改代码与相关测试；运行回归检查；请另一位成员审查并复核问题；同步更新文档。新缺陷优先补能复现问题的测试，不追溯声称整个项目采用了测试先行。
 
-在 VS Code 中直接打开包含 `main.py` 的项目文件夹，通过 **Python: Select Interpreter** 选择 Python 3.10+，再刷新测试面板。`tests/__init__.py` 使测试目录可导入；从项目根目录使用 `-s tests -t . -p test_*.py` 发现测试。旧错误仍显示时执行 **Developer: Reload Window** 后刷新。不要把整个个人主目录当作本项目工作区，以免读取错误配置。
+只有修改前端源码时需要 Node.js 22（与 CI 配置一致）及 npm：
 
-模拟理由评估：
-
-```text
-python scripts/evaluate_ai.py
-python scripts/evaluate_ai.py --live
-```
-
-第一条仅生成规则基线；`--live` 可发出 12 次付费请求。模拟理由标签是初稿，并非独立金标准。须补人工标注、保留集及质量评分后才能讨论效果；当前脚本默认中文分析，不验证英文模型效果。
-
-仅前端开发者需要 Node.js 22+ 与 npm：
-
-```text
+```bash
 cd web
 npm ci
 npm run check
 npm run build
 ```
 
-修改前端源码、公共资源或导入的数据后需构建；普通运行使用随包的 `web/static`。后端/配置修改需重启。部分工作副本使用 pnpm；提交的 npm 锁文件须与依赖声明一致。
+普通启动使用 `web/static`；修改 `web/src`、`web/public` 或前端导入的数据后需要重新构建。后端和配置修改需要重启服务。
 
-## 9. 结构、部署与提交
+### 7. 文件导航与常见问题
 
-|路径 |用途 |
+| 路径 | 作用 |
 |---|---|
-| `main.py` |启动入口 |
-| `backend/domain.py` |判分、课程、推荐、复习 |
-| `backend/storage.py` |数据库与版本冲突 |
-| `backend/ai.py` |模型请求、校验与回退 |
-| `backend/server.py` |接口、会话与访问限制 |
-| `data/` |题库、概念、导学与任务 |
-| `web/src`, `web/public`, `web/static` |源码、运行资源与网页成品 |
-| `tests`, `scripts` |自动测试、评估与打包 |
-| `SPEC.md`, `submission/` |规格、双语提交材料与证据 |
-| `licenses/` |依赖原始许可证 |
+| `main.py` | 统一启动入口与命令行参数 |
+| `backend/domain.py` | 判分、课程状态、推荐、复习、输入校验 |
+| `backend/ai.py` | 可选模型请求、输出校验与规则回退 |
+| `backend/storage.py`, `backend/server.py` | SQLite 存储、HTTP 接口及访问检查 |
+| `data/` | 题目、概念、导学与编程任务 |
+| `web/src/`, `web/public/`, `web/static/` | 前端源代码、公开资源与构建产物 |
+| `tests/`, `.github/workflows/` | 自动测试与持续集成配置 |
+| `SPEC.md` | 需求、接口、约束、验收和测试对应关系 |
+| `submission/`, `licenses/` | 提交辅助材料及依赖许可证 |
 
-本机运行不需 VPN，AI 需联网。局域网配置准确 `PUBLIC_ORIGIN`，再以 `--host 0.0.0.0` 启动并放行端口。公网需另备服务器、HTTPS 代理与持久存储；Docker 可选。标准库服务适用于演示/小团队，未验证高并发生产使用。
-
-
-
-
-## 10. 引用与 AI 披露
-
-Python 标准库、React/ReactDOM（MIT）、Lucide（ISC）、Pyodide（MPL-2.0）及 CPython 的相关许可见 `licenses/`；TypeScript/esbuild 用于开发。Exercism 是概念学习方向参考，不宣称复制课程或代码；如有实际复制，须逐项注明。Kimi 是可选服务，未随包分发模型。
-
-来源：[Python](https://docs.python.org/3/library/), [React](https://github.com/facebook/react), [Lucide](https://github.com/lucide-icons/lucide), [Pyodide](https://github.com/pyodide/pyodide), [TypeScript](https://github.com/microsoft/TypeScript), [esbuild](https://github.com/evanw/esbuild), [Exercism Python](https://github.com/exercism/python), [Kimi](https://platform.moonshot.cn/).
-
-Codex 协助实现、测试、文档、展示初稿及代码检查；团队须理解、复核并如实披露。AI 自查不能证明已完成成员独立审查；每位成员须填写真实个人贡献。
-
----
-
-
-# English Version: PySteps User Guide
-
-PySteps helps Python beginners learn a concept, answer questions, explain mistakes and practise coding within each chapter. It is a browser interface backed by a Python application, launched through `main.py`.
-
-## 1. Run the application
-
-Requirements: Python 3.10+, a modern browser and the fully extracted project. Normal use needs no Node.js, pip packages or Docker. Python must be installed on the host; visitors to an already hosted instance only need a browser.
-
-Open a terminal in the folder containing `main.py`
-
-| Environment| Command|
+| 问题 | 处理 |
 |---|---|
-| Python available as `python`| `python main.py --open` |
-| macOS with `python3` | `python3 main.py --open` |
-| Windows Python launcher| `py main.py --open` |
+| 端口占用 | 停止旧进程或指定其他端口 |
+| AI 不可用 | 检查服务端配置、团队口令和网络，修改后重启；固定反馈仍可使用 |
+| HTTPS 证书错误 | 修复系统/Python 证书，不关闭证书校验 |
+| 页面仍是旧版 | 检查构建产物后刷新；不要只改前端源码 |
+| 编程环境加载失败 | 保持后端运行并保留完整的 `web/static/pyodide/` 资源 |
+| 保存冲突 | 导出当前备份，再刷新协调版本 |
 
-Use the URL printed in the terminal, normally `http://127.0.0.1:8000/`. Keep the terminal open; use Ctrl+C to stop. If the port is occupied, stop the old instance or use `python main.py --port 8001 --open`. Starting another port does not reload the old process. Double-clicking `打开网页版.html` only shows instructions.
+### 8. 提交与资源说明
 
-Optional database location: `python main.py --db runtime/learning.sqlite3`.
+用实际组号替换下列示例中的 `N`：
 
-## 2. Language and learning flow
+```bash
+python scripts/package_submission.py --group N
+```
 
-The first visit defaults to English. The top-right Chinese/English button changes the language and remembers the selection in this browser. Switching preserves answers, learner text and code drafts. Code and exact expected output strings remain unchanged; new AI requests use the selected language, while historical generated feedback is retained verbatim.
+输出 `dist/groupN_project.zip`。打包脚本排除本地密钥、学习数据库、Git 历史及 `node_modules`。提交前仍应解压检查入口、运行资源、测试和文档；PPT、视频和个人报告按 Moodle 的要求提交。
 
-1. Read the introduction and select a concept on the Learning Map.
-2. Enter a course lesson or choose a topic in Free Practice.
-3. Submit an answer; a written reason is optional.
-4. After a wrong answer, add or revise the reason and optionally request AI analysis.
-5. Try targeted practice or a chapter coding challenge.
-6. Review progress and export a backup.
+运行依赖与开发工具包括 [Python 标准库](https://docs.python.org/3/library/)、[React](https://github.com/facebook/react)、[Lucide](https://github.com/lucide-icons/lucide)、[Pyodide](https://github.com/pyodide/pyodide)、[TypeScript](https://github.com/microsoft/TypeScript) 和 [esbuild](https://github.com/evanw/esbuild)。原始许可见 `licenses/`。现有项目记录将 [Exercism](https://github.com/exercism/python) 列为学习结构参考；这不代表复制代码。若实际使用了外部代码或素材，应补充具体来源和许可。
 
-## 3. Implemented features
+项目使用了生成式 AI 辅助开发及文档整理；团队负责核对实现、测试结果与贡献归属。小精灵是设计成果，运行时采用规则导航。AI 自查不能替代组员独立代码审查。
 
-| Feature| Current behaviour|
+## English guide
+
+### 1. Purpose
+
+PySteps supports the cycle of reading a concept, answering a question, explaining a mistake and practising again. The current bank contains 3 chapters, 15 concepts, 30 multiple-choice questions and 6 coding tasks with 39 reference cases. The topics are conditionals, loops, and functions and return values.
+
+Python implements grading, progression, recommendation, review scheduling and SQLite persistence. React supplies the browser interface and Pyodide runs coding exercises. Optional Kimi analysis supplements feedback; fixed answer keys determine correctness. PiPo uses predefined replies and keywords for navigation, not live model chat or an autonomous agent loop.
+
+### 2. Quick start
+
+Use Python 3.10+, a modern browser and the fully extracted distribution. Running bundled assets requires no third-party Python packages, Node.js or Docker.
+
+```bash
+python main.py --open
+```
+
+Run from the directory containing `main.py`. Use `python3` on macOS or `py` on Windows where appropriate. The default URL is **http://127.0.0.1:8010/**; follow the actual terminal output. Keep the terminal running and stop with Ctrl+C. Do not open the static HTML directly.
+
+```bash
+python main.py --port 8011 --open
+python main.py --db runtime/learning.sqlite3
+```
+
+The default listener is local-only. Another port does not stop an old process. Missing `web/static/index.html` requires a complete distribution or a frontend rebuild.
+
+### 3. Learning workflow
+
+1. Select English or Chinese; first visits default to English.
+2. Read the introduction and concept lesson. Prerequisites control course access. In the current bank, passing requires both distinct concept questions to be answered correctly without hints after reading. Free practice does not unlock courses.
+3. Submit a choice and optionally a reason. After a mistake, edit the reason and reanalyse the same attempt without increasing the attempt count.
+4. Follow a same-chapter recommendation excluding the current question. Targeted unseen items and due reviews take priority. This is deterministic ranking, not generated questions or estimated ability.
+5. Open a coding task directly. Run Example checks the first two cases; Check Answer runs all task cases in a browser Worker.
+6. Review history and statistics for the latest 14 dates containing attempts, and export a JSON backup.
+
+An incorrect choice is a clue rather than a confirmed misconception. Passing this bank is not proof of general mastery. Educational content requires independent review.
+
+### 4. Optional AI
+
+Copy `config.example.json` to `config.local.json` at the project root, fill it and restart. Environment variables override matching file values; `.env` is not automatically loaded.
+
+| Setting | Meaning |
 |---|---|
-| Curriculum| 3 chapters, 15 concepts and prerequisites|
-| Guided lessons| Objectives, explanations, code, outputs and reflection prompts|
-| Course progression| Read the lesson and independently solve its two distinct questions without hints|
-| Free practice| 30 multiple-choice questions; does not unlock course lessons|
-| Grading| Fixed answer keys, reviewed-by-execution outputs and rule-based concept clues|
-| Follow-up reasoning| Edit a wrong-answer reason and reanalyse the same attempt without increasing the attempt count|
-| Recommendation| Same-chapter ranking by target concept, unseen status and due reviews; excludes current question|
-| AI diagnosis| Optional Kimi analysis with quoted reasoning, constrained labels and validated feedback|
-| Coding| 6 story tasks with 39 test cases, available without completing quizzes|
-| Editor| Drafts, example runs, full checks, error feedback, stop and history|
-| Progress| Mistake review, statistics, concept states, accuracy curve and table for the latest 14 dates with attempts|
-| Persistence| SQLite, JSON backups and conflict detection|
-| PiPo| Chinese/English shortcuts and keyword navigation; it does not call a language model|
+| `MOONSHOT_API_KEY` | Server-side API key without a `Bearer ` prefix |
+| `MOONSHOT_MODEL` | A model available to the account; the code default `kimi-k2.6` is not an availability guarantee |
+| `MOONSHOT_BASE_URL` | Either `https://api.moonshot.cn/v1` or `https://api.moonshot.ai/v1`, matching the key |
+| `TEAM_ACCESS_CODE` | At least 12 characters; enter this in the UI, not the API key |
+| `PUBLIC_ORIGIN` | Empty for local use; exact external origin when configured |
 
-The next-question action stays in the original submit area. An incorrect answer is a clue, not proof of a misconception. Passing the small course question bank is not proof of complete mastery. Educational content and concept labels still require team review.
+Only incorrect answers with non-empty reasons require analysis. The configured provider receives the question code, correct and selected answers, standard explanation, learner reason and candidate concept. Keep credentials out of frontend assets and submissions.
 
-## 4. Recommendation and review algorithm
+The server request uses a 30-second timeout parameter; the UI cancels its wait at 40 seconds. These are not a strict end-to-end latency guarantee. The per-process allowance is 60 requests per hour and resets on restart, not a monetary budget. There is no automatic retry or explicit prompt cache. Manual retries may incur charges.
 
-Within the current chapter, excluding the current question, priority is: (1) unseen questions matching the suspected concept; (2) due reviews, earliest due first; (3) other unseen questions; (4) previously seen questions not yet due. Remaining ties use target match where applicable, difficulty and question ID. The interface takes the first result. When the diagnosis is `unknown`, due reviews come before unseen questions without forcing a target misconception.
+Missing configuration, service failure or invalid output leaves rule feedback available. An incorrect team code produces an authorisation error. Invalid labels or reason quotations cause rule fallback. If those fields pass but the answer or knowledge evidence fails, accepted diagnostic fields are retained while explanations and hints revert to bank content. Structural checks do not establish factual accuracy.
 
-Wrong answers schedule a review in 10 minutes. Correct answers with hints schedule one within a day without advancing a stage. Independent correct answers at/after the due time advance through 1, 3, 7, 14 and 30 days. Early repetition does not advance a stage. This is deterministic ranking with a fixed review schedule, not a trained recommendation model. A small bank still leads to repetitions; difficulty is not estimated from an individual learner model.
+### 5. Data and boundaries
 
-## 5. Optional Kimi configuration
+The default database is `runtime/learning.sqlite3`. A random browser cookie identifies a learning space; there are no accounts or automatic device synchronisation. Clearing cookies or changing browsers/hostnames may create a new space.
 
-Copy `config.example.json` to `config.local.json` in the root, then edit the local file. Never put a real key into the example, frontend or submitted ZIP. Same-named environment variables override file values. `.env` is not loaded automatically. Restart the server after changing settings.
+Confirmed imports replace rather than merge the current space. The server regrades answers and restores rule feedback. Export before resolving a save conflict. Limits are 10,000 quiz attempts, 2,000 coding attempts, 1,000-character reasons, 20,000-character source and 10,000,000-byte request bodies. There is no automatic archiving.
 
-| Field| Meaning|
-|---|---|
-| `MOONSHOT_API_KEY` | Actual API key, without the `Bearer ` prefix|
-| `MOONSHOT_MODEL` | A model available to your account; the code fallback is `kimi-k2.6`, not a guarantee of availability|
-| `MOONSHOT_BASE_URL` | `https://api.moonshot.cn/v1` or `https://api.moonshot.ai/v1`, matching the key|
-| `TEAM_ACCESS_CODE` | Team access password of at least 12 characters; this is what learners enter|
-| `PUBLIC_ORIGIN` | Empty locally; the exact browser origin for network access|
+Learner code runs in a restricted browser Worker, not on the Python server. The runtime-loading and execution thresholds are 60 and 4 seconds. There is no hard memory quota; learning records are not tamper-proof exam credentials. Production load has not been validated.
 
-A wrong answer plus a non-empty reason can trigger AI if opted in, or learners can request it after submitting. Correct answers and blank reasons do not trigger a model call. Editing a reason clears old AI feedback, then reanalysis updates the original attempt. Each deliberate reanalysis may incur fees.
+### 6. Tests and contributions
 
-The model can choose only the candidate misconception or `unknown`. It must quote the reason; personalised feedback also checks the answer key and a verbatim excerpt of the standard explanation. These checks do not prove the whole explanation is correct. All 60 current wrong-option mappings point to their question's own concept, so the diagnostic taxonomy is coarse and needs human review. Kimi cannot choose an unrelated alternative concept or generate new practice questions.
-
-The backend waits up to 30 seconds and the interface up to 40 seconds. Authentication, connection, output or evidence failures use rule feedback. Each process limits requests to 60 per hour; restart resets the count, so it is not a billing cap. A failed/unused response may still have incurred provider charges. No live paid call was made in the 27 October 2026 audit; current credentials and model quality were not verified by that audit.
-
-## 6. Storage and coding limits
-
-The default database is `runtime/learning.sqlite3`. A random browser cookie identifies a learning space. Keep both cookie and database to resume it. There is no account-based automatic cross-device sync. Transfer records using export/import; import replaces the current space, regrades answers and restores standard feedback. Changing browser/host or clearing cookies may create a new space. A save conflict requires a backup and refresh, not repeated overwriting.
-
-Each space allows up to 10,000 quiz attempts and 2,000 code attempts. Reasons are limited to 1,000 characters, code to 20,000 and requests to 10 MB. No automatic archive exists.
-
-Python practice runs in a browser Worker using a bundled Pyodide runtime. It does not execute learner code on the server. The syntax allowlist excludes imports, network and filesystem operations. Loading times out after 60 seconds; execution stops after 4 seconds. Example runs use two cases; full checks use all cases and save a result. There is no hard memory quota, and browser results are learning records rather than tamper-proof exam credentials.
-
-## 7. Troubleshooting
-
-| Symptom| Action|
-|---|---|
-| Address already in use| Stop the old process or use `--port 8001`|
-| AI not configured| Check server key and 12+ character team code, then restart|
-| 401 from Kimi| Check key, endpoint and environment overrides; the learner answer is not invalid|
-| Team code rejected| Enter the team code, not the API key|
-| Old interface| Refresh after rebuilding; restart after backend/config changes|
-| Certificate error| Repair system/Python trust certificates; do not disable verification|
-| Coding runtime unavailable| Keep the server running and retain `web/static/pyodide`|
-| Save conflict| Export a backup, refresh and recover carefully|
-
-## 8. Tests and development
-
-See sections 6 and 7 of the English version in [SPEC.md](SPEC.md) for all 21 test methods, their targets, rationale and remaining gaps.
-
-```text
+```bash
 python -m unittest discover -s tests -t . -v
 ```
 
-Use `python3` on macOS or `py` on Windows if needed. The audit on 27 October 2026 passed 21 tests on macOS/Python 3.13.11 and passed TypeScript checking. Tests use simulated AI responses and do not incur API charges. They cover all 30 question outputs, course progression, ranking, review scheduling, input validation, SQLite, HTTP, AI validation/fallback, bilingual content and English prompting. Python reference solutions validate 39 coding cases; this is distinct from a fresh browser-runtime test. See `submission/test_results_2026-10-27.txt` for the recorded scope.
+On 2026-10-28, all **21 test methods** passed on macOS/Python 3.12. AI responses were mocked; HTTP tests used a temporary local server and database. No paid model call was made. Method count is neither input-case count nor coverage: some methods loop through 30 questions or 39 reference coding cases.
 
-Earlier project records describe browser checks, including offline operation, timeout handling and language switching. Those are historical records, not freshly rerun evidence in this audit. The CI matrix configures Windows/macOS/Linux and Python 3.10/3.13, but no successful remote CI run is claimed. Human usability, Windows/Linux execution, independent content review and live diagnostic quality remain pending.
+Browser acceptance, live model quality and Windows/Linux execution were not rerun. A configured CI matrix does not establish successful remote runs. See [SPEC.md](SPEC.md) for traceability and outstanding acceptance checks.
 
-### VS Code test discovery
+Before a change, identify its requirement ID and expected behaviour. Update the implementation and tests, run regressions, obtain another member's review and update documentation. Prefer a reproducing test for a new defect; do not retroactively claim that all existing code was developed test-first.
 
-Open the project folder containing `main.py` directly in VS Code, select Python 3.10+ using **Python: Select Interpreter**, then refresh the Testing panel. The test package contains `tests/__init__.py`; discovery uses `-s tests -t . -p test_*.py` from the project root. If the old discovery error persists, use **Developer: Reload Window** and refresh tests. Opening your entire home folder instead of this project can cause the wrong workspace configuration to be used.
+Frontend contributors use Node.js 22, matching CI, and npm:
 
-For the synthetic AI evaluation
-
-```text
-python scripts/evaluate_ai.py
-python scripts/evaluate_ai.py --live
-```
-
-The first command writes a rule baseline without a model call. `--live` can issue 12 paid requests. Labels are draft labels for simulated reasons, not independently validated ground truth. Human labelling, a held-out set and quality scoring are required before making effectiveness claims. The current script defaults to Chinese analysis; it does not establish English-model performance.
-
-Only frontend developers need Node.js 22+ and npm
-
-```text
+```bash
 cd web
 npm ci
 npm run check
 npm run build
 ```
 
-Rebuild after editing `web/src`, `web/public` or imported data. Runtime use relies on committed/bundled `web/static`; backend/config changes require a restart. Some project copies use pnpm, but the distributed npm lockfile must stay consistent with `package.json`.
+Rebuild after editing frontend source, public assets or imported data. Normal execution uses `web/static`. Restart after backend/configuration changes.
 
-## 9. Structure, hosting and submission
+### 7. Structure and troubleshooting
 
-| Path| Purpose|
-|---|---|
-| `main.py` | Python entry point|
-| `backend/domain.py` | Grading, course rules, ranking and review|
-| `backend/storage.py` | SQLite and revision conflicts|
-| `backend/ai.py` | Kimi request, evidence validation and fallback|
-| `backend/server.py` | HTTP, sessions and access controls|
-| `data/` | Questions, concepts, lessons and tasks|
-| `web/src`, `web/public`, `web/static` | Source, runtime assets and built application|
-| `tests`, `scripts` | Automated tests, evaluation and packaging|
-| `SPEC.md`, `submission/` | Requirements, bilingual submission material and evidence|
-| `licenses/` | Original dependency licence texts|
+`main.py` starts the service. `backend/domain.py` contains learning rules; `ai.py` handles the model boundary; `storage.py` and `server.py` handle persistence and HTTP. `data/` holds content. `web/src`, `web/public` and `web/static` contain source, resources and built assets. `tests/` and `.github/workflows/` contain checks. `SPEC.md` defines requirements and verification; `submission/` and `licenses/` contain delivery materials and licences.
 
-Local operation needs no VPN; optional AI needs network access. For LAN use configure the exact `PUBLIC_ORIGIN`, then run `python main.py --host 0.0.0.0` and allow the port through the firewall. Public hosting needs a reachable server, HTTPS reverse proxy and persistent storage. A Dockerfile is optional. This standard-library server is for demonstrations/small teams, not validated high-concurrency production.
+For an occupied port, stop the old process or select another port. For unavailable AI, check server settings, team code and connectivity, then restart. Repair certificate configuration instead of disabling TLS checks. Rebuild stale frontend assets. Keep the bundled Pyodide directory intact. On a save conflict, export before refreshing.
 
+### 8. Packaging and attribution
 
+```bash
+python scripts/package_submission.py --group N
+```
 
-## 10. Attribution and AI disclosure
+Replace `N` with the actual group number. The output is `dist/groupN_project.zip`. The packager excludes private settings, learning databases, Git history and `node_modules`. Extract and check the final archive; submit slides, video and individual reports through the required Moodle entries.
 
-Python standard library, React/ReactDOM (MIT), Lucide (ISC), bundled Pyodide (MPL-2.0) and CPython licences are retained in `licenses/`. TypeScript and esbuild support development. Exercism inspired the concept-led learning direction; no copying of its curriculum/code is asserted. Record any actual copied material precisely. Kimi is an optional service, not a distributed model.
+Dependencies and tools include Python, React, Lucide, Pyodide, TypeScript and esbuild; upstream links are listed in the Chinese section and licence texts are in `licenses/`. Existing project records identify Exercism as a learning-structure reference, not evidence of copied code. Attribute any actually reused code or assets specifically.
 
-Source links: [Python](https://docs.python.org/3/library/), [React](https://github.com/facebook/react), [Lucide](https://github.com/lucide-icons/lucide), [Pyodide](https://github.com/pyodide/pyodide), [TypeScript](https://github.com/microsoft/TypeScript), [esbuild](https://github.com/evanw/esbuild), [Exercism Python](https://github.com/exercism/python), [Kimi](https://platform.moonshot.cn/).
-
-Codex assisted implementation, tests, documentation, presentation drafting and code inspection. The team must understand, verify and disclose this assistance. AI self-review is not evidence of completed human peer review. Actual individual authorship and contributions must be recorded by each member.
+Generative AI assisted implementation and documentation; the team remains responsible for verification and accurate contribution statements. PiPo is a design contribution with rule-based runtime navigation. AI inspection is not independent teammate review.
