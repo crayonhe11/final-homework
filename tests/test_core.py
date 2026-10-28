@@ -17,10 +17,14 @@ def attempt(q, choice=None, at='2026-10-01T00:00:00Z', hints=0, course=True, ide
 class LearningTests(unittest.TestCase):
     def test_all_question_answers(self):
         # Only repository-owned reviewed snippets are executed, never learner code.
-        import subprocess, sys, os
+        import subprocess, sys
         for q in E.questions:
             with self.subTest(question=q['id']):
-                output=subprocess.run([sys.executable,'-I','-c',q['code']],capture_output=True,text=True,encoding='utf-8',env={**os.environ,'PYTHONIOENCODING':'utf-8'},timeout=2,check=True).stdout.strip()
+                # -I ignores PYTHON* environment variables; enable child UTF-8 explicitly.
+                result=subprocess.run([sys.executable,'-I','-X','utf8','-c',q['code']],
+                    capture_output=True,text=True,encoding='utf-8',timeout=2)
+                self.assertEqual(result.returncode,0,f"{q['id']}: {result.stderr}")
+                output=result.stdout.strip()
                 self.assertEqual(output,q['options'][q['answer']].strip())
                 for choice in q['options']:
                     self.assertEqual(E.grade(q['id'],choice)['correct'],choice==q['answer'])
