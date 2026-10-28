@@ -1,0 +1,74 @@
+PySteps 当前代码验证记录 / Current-code verification record
+日期 / Date: 2026-10-27 (Asia/Hong_Kong)
+项目 / Project: /Users/crayon11/Downloads/EDU/Python/final-homework-3
+环境 / Environment: Python 3.13.11; Darwin 25.6.0 arm64 (macOS)
+
+范围 / Scope
+本次实际重新运行21项Python自动测试，使用临时数据库及仅本机HTTP测试服务器。
+21 Python tests were rerun using temporary databases and a local-only HTTP test server.
+全部AI响应均为模拟，未请求真实Kimi服务，未产生API调用费用。
+AI responses were mocked. No live Kimi request or paid API call was made.
+39个编程测试案例在Python参考解中核对；本次没有重新执行浏览器中的39例验证。
+The 39 coding-task cases were checked against Python reference solutions; this audit did not rerun the 39 cases in a browser.
+测试通过不等于AI诊断质量已验证，也不等于人工独立代码审查或Windows/Linux实测完成。
+Passing tests does not establish AI diagnostic quality, independent human review, or Windows/Linux validation.
+
+执行命令 / Command
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
+
+实际输出 / Observed output
+test_bad_quote_and_label_rejected (test_core.AITests.test_bad_quote_and_label_rejected) ... ok
+test_mock_success_and_timeout_fallback (test_core.AITests.test_mock_success_and_timeout_fallback) ... ok
+test_no_key_does_not_call_network (test_core.AITests.test_no_key_does_not_call_network) ... ok
+test_valid_and_unknown_diagnoses (test_core.AITests.test_valid_and_unknown_diagnoses) ... ok
+test_wrong_answer_or_anchor_uses_reviewed_explanation (test_core.AITests.test_wrong_answer_or_anchor_uses_reviewed_explanation) ... ok
+test_restricted_syntax (test_core.CodeSyntaxTests.test_restricted_syntax) ... ok
+test_all_question_answers (test_core.LearningTests.test_all_question_answers) ... ok
+test_entire_course_unlocks_in_order (test_core.LearningTests.test_entire_course_unlocks_in_order) ... ok
+test_hint_and_free_practice_do_not_pass_course (test_core.LearningTests.test_hint_and_free_practice_do_not_pass_course) ... ok
+test_import_regrades_and_removes_untrusted_feedback (test_core.LearningTests.test_import_regrades_and_removes_untrusted_feedback) ... ok
+test_import_rejects_invalid_and_oversize (test_core.LearningTests.test_import_rejects_invalid_and_oversize) ... ok
+test_recommendation_target_and_unknown (test_core.LearningTests.test_recommendation_target_and_unknown) ... ok
+test_schedule_early_repeat_not_advance (test_core.LearningTests.test_schedule_early_repeat_not_advance) ... ok
+test_sqlite_persistence_isolation_and_conflict (test_core.LearningTests.test_sqlite_persistence_isolation_and_conflict) ... ok
+test_bad_origin_and_input (test_http.HTTPTests.test_bad_origin_and_input) ... ok
+test_grading_and_ai_rule_fallback (test_http.HTTPTests.test_grading_and_ai_rule_fallback) ... ok
+test_state_roundtrip_cookie_and_conflict (test_http.HTTPTests.test_state_roundtrip_cookie_and_conflict) ... ok
+test_static_and_private_files (test_http.HTTPTests.test_static_and_private_files) ... ok
+test_team_authorization_and_rate_limit (test_http.HTTPTests.test_team_authorization_and_rate_limit) ... ok
+test_all_learning_prose_has_english_translation (test_language.LanguageTests.test_all_learning_prose_has_english_translation) ... ok
+test_english_prompt_preserves_original_evidence (test_language.LanguageTests.test_english_prompt_preserves_original_evidence) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.895s
+
+OK
+
+网页类型检查 / Frontend type check
+工作目录 / Working directory: final-homework-3/web
+命令 / Command: /Users/crayon11/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node node_modules/typescript/bin/tsc --noEmit
+结果 / Result: Exit code 0; no diagnostics. 类型检查通过，无诊断信息。
+本次未重新构建网页，也未重新运行浏览器交互验收。
+The frontend was not rebuilt, and browser interaction acceptance tests were not rerun in this audit.
+
+现有压缩包只读核对 / Existing archive read-only check
+文件 / Archive: dist/groupN_project.zip
+条目数 / Entries: 71
+逐条比较压缩包内容与当前同路径文件的SHA-256，已存在文件的差异数为0。
+SHA-256 comparisons found zero differences between archived entries and their currently existing counterparts.
+未发现config.local.json、runtime目录或node_modules。
+No config.local.json, runtime directory, or node_modules entries were found.
+config.example.json在项目根目录及现有压缩包中均缺失，README却要求复制该文件；需补齐后重新打包。
+config.example.json is missing from both the project root and archive, although README instructs users to copy it; add the non-secret example and repackage.
+本记录是自动工具辅助检查，不替代团队成员独立人工审查。
+This is an automated tool-assisted check, not independent human team review.
+
+后续材料整理说明 / Subsequent documentation update
+上述压缩包核对是修改材料前的快照。配置示例已在本次整理中补回，文档改为双语，21项计数已更正；最终ZIP会重新打包并核对。
+The archive audit above is a pre-update snapshot. This task restored the configuration example, made documentation bilingual, and corrected the test count to21. The final ZIP is repackaged and checked separately.
+
+最终材料核对 / Final material check
+双语文档和PPT更新后重新打包，75个条目与当前文件逐字节一致。无私有配置、runtime或node_modules；配置示例密钥和口令为空。完整解压到临时目录后，main.py --help退出码0。此启动参数检查不等于完整浏览器验收。
+After the bilingual document/deck update, all75 archive entries match current files byte-for-byte. No private configuration, runtime or node_modules was included; example key and team code are empty. After clean extraction to a temporary directory, main.py --help exited0. This argument check is not a complete browser acceptance test.
+PPTX为5页，每页包含英文、中文与可编辑文字；已渲染检查。
+The PPTX has five slides, each with English, Chinese and editable text, and was rendered for inspection.

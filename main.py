@@ -1,53 +1,36 @@
-#!/usr/bin/env python3
-"""启动入口：python3 main.py；命令行降级模式：python3 main.py --cli。"""
+"""INT6181 entry point: python main.py. Python 3.10+, standard library only."""
 import argparse
 from pathlib import Path
-from edu.bank import load_bank, ROOT
-from edu.engine import diagnose, recommend, next_practice
-from edu.storage import Store
+import webbrowser
+from backend.domain import ROOT
+from backend.server import create_server
 
-
-def cli(db_path):
-    questions, concepts=load_bank(); store=Store(db_path)
-    print('知错 · Python 入门概念练习（输入 q 退出）')
-    topics=['条件判断','循环','函数与返回值']
-    while True:
-        text=input('选择主题 1 条件判断 / 2 循环 / 3 函数与返回值：').strip()
-        if text.lower()=='q': return
-        if text not in ('1','2','3'): continue
-        topic=topics[int(text)-1]
-        item=next_practice(topic,questions,store.history(),concepts)
-        if item is None: continue
-        print(item['reason']); question=item['question']
-        while True:
-            print('\n'+question['id']+'\n'+question['code'])
-            for key,value in question['options'].items(): print(key,repr(value))
-            choice=input('答案 A/B/C（q 退出）：').strip().upper()
-            if choice=='Q': return
-            if choice not in question['options']: continue
-            reason=input('简短理由（可留空）：')[:1000]
-            result=diagnose(question,choice)
-            store.save(question['id'],choice,reason,result,{'status':'disabled','message':'命令行规则模式'})
-            print('答对了。' if result['correct'] else '可能涉及：'+concepts[result['concept']]['label'])
-            print(question['explanation'])
-            rec=recommend(question,questions,store.history(),result['concept'],1)[0]
-            if input('输入 y 继续针对性练习，其他键返回主题：').strip().lower()!='y': break
-            print(rec['reason']); question=rec['question']
-
-
-def main():
-    parser=argparse.ArgumentParser(description='Python 错题概念诊断与练习推荐')
-    parser.add_argument('--cli',action='store_true',help='使用命令行界面')
-    parser.add_argument('--db',type=Path,default=ROOT/'runtime/learning.sqlite3',help='数据库路径')
-    args=parser.parse_args()
-    if args.cli:
-        cli(args.db); return
+def main(argv=None):
+    parser = argparse.ArgumentParser(description='PySteps Python 学习系统：启动本机网页，无需Node.js')
+    parser.add_argument('--host', default='127.0.0.1', help='默认仅本机；部署可设为0.0.0.0')
+    parser.add_argument('--port', type=int, default=8010)
+    parser.add_argument('--db', type=Path, default=ROOT / 'runtime/learning.sqlite3')
+    parser.add_argument('--open', action='store_true', help='启动后打开浏览器')
+    args = parser.parse_args(argv)
+    if not 0 <= args.port <= 65535:
+        parser.error('端口应在0至65535之间')
+    if not (ROOT / 'web/static/index.html').is_file():
+        parser.error('缺少随作业提交的网页文件，请完整解压项目。开发者可运行网页构建脚本。')
     try:
-        from edu.ui import App
-        app=App(args.db)
-    except ImportError:
-        print('当前 Python 没有 Tkinter。请使用 python3 main.py --cli，或安装包含 Tk 的 Python。')
-        return
-    app.mainloop()
+        server = create_server(args.host, args.port, args.db)
+    except OSError as error:
+        parser.error(f'启动失败，请检查端口占用和数据库目录权限：{error}')
+    url = f'http://127.0.0.1:{server.server_port}/'
+    print(f'PySteps 已启动：{url}\n使用Python标准库运行；按Ctrl+C停止。', flush=True)
+    if args.open:
+        webbrowser.open(url)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print('\n已停止。学习记录已保存在SQLite。')
+    finally:
+        server.server_close()
+    return 0
 
-if __name__=='__main__': main()
+if __name__ == '__main__':
+    raise SystemExit(main())

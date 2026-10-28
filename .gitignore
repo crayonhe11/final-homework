@@ -1,9 +1,14 @@
-__pycache__/
-*.pyc
-runtime/
-.DS_Store
+config.local.json
 .env
 .env.*
-
-# 团队密钥配置：勿提交真实密钥
+!.env.example
 api_config.json
+.dev.vars*
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+runtime/
+dist/
+evaluation-results/
+*.tsbuildinfo

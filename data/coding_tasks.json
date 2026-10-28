@@ -71,7 +71,6 @@
         "expected": "放行"
       }
     ],
-    "solution": "def gate_status(energy, has_badge):\n    if energy < 20:\n        return \"充能\"\n    if has_badge:\n        return \"放行\"\n    return \"等待\"\n",
     "review_status": "原创初稿；程序参考解已核验，教育内容待团队复核"
   },
   {
@@ -152,7 +151,6 @@
         "expected": 12
       }
     ],
-    "solution": "def ticket_price(age, member):\n    if age < 6:\n        return 0\n    if age < 18:\n        price = 8\n    else:\n        price = 15\n    if member:\n        price -= 3\n    return price\n",
     "review_status": "原创初稿；程序参考解已核验，教育内容待团队复核"
   },
   {
@@ -231,7 +229,6 @@
         "expected": 9
       }
     ],
-    "solution": "def collect_coins(coins):\n    total = 0\n    for coin in coins:\n        if coin > 0:\n            total += coin\n    return total\n",
     "review_status": "原创初稿；程序参考解已核验，教育内容待团队复核"
   },
   {
@@ -316,7 +313,6 @@
         ]
       }
     ],
-    "solution": "def countdown(start):\n    numbers = []\n    for n in range(start, 0, -1):\n        numbers.append(n)\n    return numbers\n",
     "review_status": "原创初稿；程序参考解已核验，教育内容待团队复核"
   },
   {
@@ -391,7 +387,6 @@
         "expected": 0
       }
     ],
-    "solution": "def checkout(quantity, unit_price, coupon):\n    amount = quantity * unit_price - coupon\n    if amount < 0:\n        return 0\n    return amount\n",
     "review_status": "原创初稿；程序参考解已核验，教育内容待团队复核"
   },
   {
@@ -459,7 +454,6 @@
         "expected": "货运"
       }
     ],
-    "solution": "def route_parcel(weight, fragile):\n    if fragile:\n        return \"轻放\"\n    if weight > 5:\n        return \"货运\"\n    return \"普通\"\n",
     "review_status": "原创初稿；程序参考解已核验，教育内容待团队复核"
   }
 ]
