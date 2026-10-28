@@ -2,10 +2,15 @@
 import argparse
 from pathlib import Path
 import re
+import sys
 import zipfile
 ROOT=Path(__file__).resolve().parents[1]
 
 def main():
+    # Windows CI redirects output using a legacy encoding; preserve Unicode logs.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     parser=argparse.ArgumentParser();parser.add_argument('--group',default='N');args=parser.parse_args()
     if not re.fullmatch(r'(N|[0-9]{1,3})',args.group):parser.error('组号须为1至3位数字；暂未确定可用N')
     allowed_files=['main.py','打开网页版.html','README.md','SPEC.md','config.example.json','Dockerfile','.dockerignore','.gitignore']
