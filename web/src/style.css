@@ -2519,3 +2519,11 @@ html[lang="en"] .button {
 html[lang="en"] .page-heading h1 {
   font-size: clamp(25px, 3vw, 36px);
 }
+
+.agent-auth { display: grid; gap: 4px; padding: 8px 16px; font-size: 12px; color: #5b4778; }
+.agent-auth input { width: 100%; box-sizing: border-box; border: 1px solid #d8ccea; border-radius: 8px; padding: 8px; }
+.agent-trace { font-size: 12px; color: #654b8c; margin-bottom: 8px; }
+.agent-trace ol { padding-left: 20px; }
+.agent-error { color: #a12542; font-size: 13px; padding: 8px; }
+.assistant-panel { max-height: calc(100dvh - 110px); }
+.assistant-messages { min-height: 80px; }

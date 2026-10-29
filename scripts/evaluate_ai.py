@@ -12,7 +12,7 @@ def main():
     parser=argparse.ArgumentParser(description='模拟理由评估集，标签仍需独立人工复核；--live会产生API费用')
     parser.add_argument('--live',action='store_true');args=parser.parse_args()
     engine=LearningEngine();cases=json.loads((ROOT/'submission/ai_cases.json').read_text(encoding='utf-8'));settings=config()
-    if args.live and not settings.get('MOONSHOT_API_KEY'):parser.error('请先配置MOONSHOT_API_KEY')
+    if args.live and not settings.get('OPENAI_API_KEY'):parser.error('请先配置OPENAI_API_KEY')
     rows=[]
     for case in cases:
         baseline=engine.grade(case['question_id'],case['choice'])['feedback']['concept']

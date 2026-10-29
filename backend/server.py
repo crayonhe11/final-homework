@@ -15,6 +15,7 @@ from urllib.parse import urlsplit, unquote
 from .domain import LearningEngine, ROOT, text
 from .storage import Store, ConflictError
 from .ai import config, analyze
+from .agent import run_agent
 
 mimetypes.add_type('application/wasm', '.wasm')
 mimetypes.add_type('application/javascript', '.mjs')
@@ -28,7 +29,7 @@ class Application:
         self.window, self.calls = time.monotonic(), 0
 
     def ai_enabled(self):
-        return bool(self.settings.get('MOONSHOT_API_KEY') and len(self.settings.get('TEAM_ACCESS_CODE', '')) >= 12)
+        return bool(self.settings.get('OPENAI_API_KEY') and len(self.settings.get('TEAM_ACCESS_CODE', '')) >= 12)
 
     def authorize_ai(self, supplied):
         wanted = self.settings.get('TEAM_ACCESS_CODE', '')
@@ -160,6 +161,26 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(dict(questions=engine.recommend(body.get('question_id'), body.get('diagnosis'), state)))
             if path == '/api/grade':
                 return self.send_json(engine.grade(body.get('question_id'), body.get('choice')))
+            if path == '/api/agent':
+                if not self.app.ai_enabled():
+                    return self.send_json({'error': 'PiPo 需要服务端配置 GLM-4.7 和团队口令。 / Configure GLM-4.7 and team access code first.'}, 503)
+                if not self.app.authorize_ai(self.headers.get('X-Team-Code', '')[:1000]):
+                    return self.send_json({'error': '团队AI口令不正确。 / Incorrect team access code.'}, 401)
+                goal = text(body.get('goal'), 1000, '目标').strip()
+                language = body.get('language', 'zh')
+                history = body.get('history', [])
+                if not goal or language not in ['zh', 'en'] or not isinstance(history, list) or len(history) > 8:
+                    raise ValueError('Invalid agent input')
+                for row in history:
+                    if not isinstance(row, dict) or row.get('role') not in ['user', 'assistant']:
+                        raise ValueError('Invalid history')
+                    text(row.get('text'), 10000, '对话')
+                state = engine.validate_state(body.get('state'))
+                try:
+                    result = run_agent(engine, state, goal, history, language, self.app.settings, self.app.allow_call)
+                except Exception:
+                    return self.send_json({'error': 'PiPo 本轮未完成，未执行页面操作。请检查模型、网络或额度后重试。 / PiPo could not finish; no page action was applied. Check model, network or quota and retry.'}, 502)
+                return self.send_json(result)
             if path == '/api/diagnose':
                 qid, choice = body.get('question_id'), body.get('choice')
                 graded = engine.grade(qid, choice)
@@ -167,7 +188,7 @@ class Handler(SimpleHTTPRequestHandler):
                 if graded['correct'] or not reason.strip():
                     return self.send_json(graded['feedback'])
                 if not self.app.ai_enabled():
-                    return self.send_json(dict(graded['feedback'], message='尚未配置Kimi及团队口令，使用规则反馈。'))
+                    return self.send_json(dict(graded['feedback'], message='尚未配置GLM-4.7及团队口令，使用规则反馈。'))
                 if not self.app.authorize_ai(self.headers.get('X-Team-Code', '')[:1000]):
                     return self.send_json({'error': '团队AI口令不正确。'}, 401)
                 if not self.app.allow_call():

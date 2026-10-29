@@ -11,7 +11,7 @@ def main():
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
-    parser=argparse.ArgumentParser();parser.add_argument('--group',default='N');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--group',default='8');args=parser.parse_args()
     if not re.fullmatch(r'(N|[0-9]{1,3})',args.group):parser.error('组号须为1至3位数字；暂未确定可用N')
     allowed_files=['main.py','打开网页版.html','README.md','SPEC.md','config.example.json','Dockerfile','.dockerignore','.gitignore']
     allowed_dirs=['backend','data','tests','scripts','submission','licenses','.github']
@@ -25,7 +25,7 @@ def main():
             rel=path.relative_to(ROOT)
             if not path.is_file() or path.is_symlink() or '__pycache__' in rel.parts or path.suffix in ['.pyc','.sqlite3','.db'] or path.name.startswith('.env') or path.name in ['config.local.json','api_config.json','.DS_Store']:continue
             arc=str(Path(f'group{args.group}_project')/rel)
-            if rel.as_posix()=='submission/groupN_presentation.pptx':arc=arc.replace('groupN_presentation',f'group{args.group}_presentation')
+            if rel.as_posix()=='submission/group8_presentation.pptx':arc=arc.replace('group8_presentation',f'group{args.group}_presentation')
             archive.write(path,arc)
     print(destination)
     if args.group=='N':print('N为占位组号，提交前请用真实组号重新打包。')

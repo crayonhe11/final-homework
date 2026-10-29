@@ -1,7 +1,8 @@
 {
-  "MOONSHOT_API_KEY": "",
-  "MOONSHOT_MODEL": "",
-  "MOONSHOT_BASE_URL": "https://api.moonshot.cn/v1",
+  "OPENAI_API_KEY": "",
+  "OPENAI_MODEL": "glm-4.7",
+  "OPENAI_BASE_URL": "https://maas.eduhk.hk/api/v1",
   "TEAM_ACCESS_CODE": "",
-  "PUBLIC_ORIGIN": ""
+  "PUBLIC_ORIGIN": "",
+  "AI_AGENT_MODE": "json"
 }

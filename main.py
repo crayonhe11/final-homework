@@ -8,7 +8,7 @@ from backend.server import create_server
 def main(argv=None):
     parser = argparse.ArgumentParser(description='PySteps Python 学习系统：启动本机网页，无需Node.js')
     parser.add_argument('--host', default='127.0.0.1', help='默认仅本机；部署可设为0.0.0.0')
-    parser.add_argument('--port', type=int, default=8010)
+    parser.add_argument('--port', type=int, default=8011)
     parser.add_argument('--db', type=Path, default=ROOT / 'runtime/learning.sqlite3')
     parser.add_argument('--open', action='store_true', help='启动后打开浏览器')
     args = parser.parse_args(argv)

@@ -1,3 +1,5 @@
+> PiPo 功能更新：下文关于“预设关键词导航 / 非 Agent”的描述是旧版状态，已被受限模型工具循环替代。当前实现、演示路径与验证边界以 [PiPo Agent](PiPo_Agent.md) 为准。 / PiPo's old navigation-only descriptions below are superseded by the bounded tool-loop implementation documented in PiPo_Agent.md.
+
 # 中文版：PySteps 答辩 Q&A
 
 依据当前final-homework-3与已核对的课程要求整理，更新日期2026-10-28。以下是可能问题，不是老师的确定题目。建议回答为可练习草稿；将“我们/我”替换为真实贡献，未完成事项不得改成已完成。优先练习第4、6、9、11、13、14、19题。
@@ -30,7 +32,7 @@
 
 分类：Python与架构
 
-建议回答：main.py解析启动参数并启动Python服务。实际业务在Python后端：判分、课程解锁、推荐、复习、状态校验、SQLite和Kimi结果处理。React负责网页交互；浏览器里的Pyodide运行受限制的练习代码。Python并非仅用来打开一个网页。
+建议回答：main.py解析启动参数并启动Python服务。实际业务在Python后端：判分、课程解锁、推荐、复习、状态校验、SQLite和GLM-4.7结果处理。React负责网页交互；浏览器里的Pyodide运行受限制的练习代码。Python并非仅用来打开一个网页。
 
 追问准备与边界：现场打开main.py及backend/domain.py说明调用关系；课程是否接受该GUI形式以老师确认的口径为准。
 
@@ -54,7 +56,7 @@
 
 分类：推荐与诊断
 
-建议回答：不能。错误可能来自手误、猜测或不同的理解问题，因此我们只显示可能的概念线索。当前映射较粗：错误选项都指向各自题目的概念。Kimi根据理由支持这个候选或返回unknown，不能从整个知识体系任意另选误区。后续题目能提供更多表现证据，但系统尚未形成统计意义上的诊断证明。
+建议回答：不能。错误可能来自手误、猜测或不同的理解问题，因此我们只显示可能的概念线索。当前映射较粗：错误选项都指向各自题目的概念。GLM-4.7根据理由支持这个候选或返回unknown，不能从整个知识体系任意另选误区。后续题目能提供更多表现证据，但系统尚未形成统计意义上的诊断证明。
 
 追问准备与边界：可以举“选输出5，可能是不懂比较返回布尔值，不一定是不懂边界”的反例。
 
@@ -70,7 +72,7 @@
 
 分类：AI作用
 
-建议回答：可以不用AI。标准判分、固定解析、推荐、保存和编程都可运行。Kimi的额外作用是分析学生文字理由，引用原话，判断是否支持候选误区，并组织个性化解释。信息不足可以返回unknown。这种能力是否比规则更好，需要同一批独立标注案例的实际比较，目前不能直接宣布更准确。
+建议回答：可以不用AI。标准判分、固定解析、推荐、保存和编程都可运行。GLM-4.7的额外作用是分析学生文字理由，引用原话，判断是否支持候选误区，并组织个性化解释。信息不足可以返回unknown。这种能力是否比规则更好，需要同一批独立标注案例的实际比较，目前不能直接宣布更准确。
 
 追问准备与边界：展示“AI辅助诊断”和“规则反馈”的区别，避免把固定文案当成模型输出。
 
@@ -94,7 +96,7 @@
 
 分类：AI作用
 
-建议回答：PiPo目前是预设文案和关键词导航，没有自主规划或工具调用循环。Kimi是受限的单次诊断服务。开发过程中Codex协助实现、测试、文档和检查，这与应用运行时使用Kimi是两件事。我们应展示真实采用、修改或拒绝AI建议的记录，并由成员解释最终代码。
+建议回答：PiPo目前是预设文案和关键词导航，没有自主规划或工具调用循环。GLM-4.7是受限的单次诊断服务。开发过程中Codex协助实现、测试、文档和检查，这与应用运行时使用GLM-4.7是两件事。我们应展示真实采用、修改或拒绝AI建议的记录，并由成员解释最终代码。
 
 追问准备与边界：不要把同一AI的自查说成已经完成团队成员独立审查。
 
@@ -206,7 +208,7 @@ Follow-up preparation and boundaries: Acknowledge the trade-off; not every repet
 
 Category: Python and architecture
 
-Suggested answer: main.py parses launch arguments and starts the Python server. Python implements grading, progression, recommendations, scheduling, state validation, SQLite persistence and Kimi result handling. React provides interaction, while browser Pyodide executes restricted practice code. Python does more than open a webpage.
+Suggested answer: main.py parses launch arguments and starts the Python server. Python implements grading, progression, recommendations, scheduling, state validation, SQLite persistence and GLM-4.7 result handling. React provides interaction, while browser Pyodide executes restricted practice code. Python does more than open a webpage.
 
 Follow-up preparation and boundaries: Show main.py and backend/domain.py; acceptance of the browser GUI is ultimately the instructor’s decision.
 
@@ -230,7 +232,7 @@ Follow-up preparation and boundaries: See LearningEngine.recommend(). Ordinary c
 
 Category: Recommendation and diagnosis
 
-Suggested answer: No. A mistake may be a slip, guess or a different misunderstanding. We present possible concept clues. Current mappings are coarse: wrong options point to the question’s concept. Kimi can support that candidate or return unknown, not freely choose another concept. Follow-up performance provides more evidence, but not a statistically validated diagnosis.
+Suggested answer: No. A mistake may be a slip, guess or a different misunderstanding. We present possible concept clues. Current mappings are coarse: wrong options point to the question’s concept. GLM-4.7 can support that candidate or return unknown, not freely choose another concept. Follow-up performance provides more evidence, but not a statistically validated diagnosis.
 
 Follow-up preparation and boundaries: For example, selecting output 5 may reflect confusion about Boolean results rather than comparison boundaries.
 
@@ -246,7 +248,7 @@ Follow-up preparation and boundaries: Do not label it a full implementation of S
 
 Category: AI contribution
 
-Suggested answer: The application works without AI: grading, standard explanations, ranking, persistence and coding remain available. Kimi adds analysis of written reasoning, verbatim evidence, support for or abstention from a candidate diagnosis, and personalised explanation. Whether it improves on rules requires a comparison on independently labelled cases; we do not yet claim higher accuracy.
+Suggested answer: The application works without AI: grading, standard explanations, ranking, persistence and coding remain available. GLM-4.7 adds analysis of written reasoning, verbatim evidence, support for or abstention from a candidate diagnosis, and personalised explanation. Whether it improves on rules requires a comparison on independently labelled cases; we do not yet claim higher accuracy.
 
 Follow-up preparation and boundaries: Distinguish AI-assisted feedback from fixed rule feedback in the demonstration.
 
@@ -270,7 +272,7 @@ Follow-up preparation and boundaries: If it has not been run, say so. Do not inv
 
 Category: AI contribution
 
-Suggested answer: PiPo currently uses preset responses and keyword navigation, without autonomous planning or a tool loop. Kimi provides bounded diagnostic requests. Codex assistance during implementation, testing, documentation and inspection is separate from runtime Kimi use. We should show actual examples of accepted, modified or rejected suggestions and explain the final code ourselves.
+Suggested answer: PiPo currently uses preset responses and keyword navigation, without autonomous planning or a tool loop. GLM-4.7 provides bounded diagnostic requests. Codex assistance during implementation, testing, documentation and inspection is separate from runtime GLM-4.7 use. We should show actual examples of accepted, modified or rejected suggestions and explain the final code ourselves.
 
 Follow-up preparation and boundaries: Do not describe AI self-inspection as completed independent human team review.
 

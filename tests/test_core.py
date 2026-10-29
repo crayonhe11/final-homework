@@ -76,7 +76,7 @@ class LearningTests(unittest.TestCase):
             self.assertEqual(Store(path).get('alice'),(1,state));self.assertEqual(a.get('bob'),(0,empty_state()))
             with self.assertRaises(ConflictError):a.save('alice',0,empty_state())
 
-class AITests(unittest.TestCase):
+class GLMDiagnosisTests(unittest.TestCase):
     def setUp(self):
         self.q=E.questions[0];self.choice=next(c for c in self.q['options'] if c!=self.q['answer']);self.reason='我以为边界不包含相等'
         self.valid=dict(concept=self.q['misconceptions'][self.choice]['concept'],quote=self.reason,answer_key=self.q['answer'],knowledge_quote=self.q['explanation'],explanation='请检查等于边界的情况。',hint='关注比较符号。')
@@ -94,14 +94,43 @@ class AITests(unittest.TestCase):
         import io
         response=json.dumps({'choices':[{'finish_reason':'stop','message':{'content':json.dumps(self.valid)}}]}).encode()
         def success(req,timeout):
-            self.assertEqual(timeout,30);self.assertIn('reason',req.data.decode());return io.BytesIO(response)
-        settings={'MOONSHOT_API_KEY':'test-only'}
+            self.assertEqual(timeout,60);self.assertIn('reason',req.data.decode());return io.BytesIO(response)
+        settings={'OPENAI_API_KEY':'test-only'}
         self.assertEqual(analyze(E,self.q['id'],self.choice,self.reason,settings,success)['source'],'ai')
         def fail(*args,**kwargs):raise TimeoutError()
         self.assertEqual(analyze(E,self.q['id'],self.choice,self.reason,settings,fail)['source'],'rule')
+    def test_glm_gateway_account_key_error_is_actionable_and_redacted(self):
+        import io
+        from urllib.error import HTTPError
+        def rejected(request, timeout):
+            body = b'{"message":"Key is error. You need to use the app key rather than the account key. test-secret"}'
+            raise HTTPError(request.full_url, 500, 'error', {}, io.BytesIO(body))
+        result = analyze(E, self.q['id'], self.choice, self.reason,
+                         {'OPENAI_API_KEY': 'test-secret'}, rejected)
+        self.assertEqual(result['source'], 'rule')
+        self.assertIn('App Key', result['message'])
+        self.assertNotIn('test-secret', result['message'])
+
+    def test_glm_gateway_markdown_json_preserves_validation(self):
+        import io
+        def response(content):
+            def fake(request, timeout):
+                return io.BytesIO(json.dumps({'choices': [{'finish_reason': 'stop',
+                    'message': {'content': content}}]}).encode())
+            return analyze(E, self.q['id'], self.choice, self.reason,
+                           {'OPENAI_API_KEY': 'test-only'}, fake)
+        valid = json.dumps(self.valid)
+        self.assertEqual(response('```json\n' + valid + '\n```')['source'], 'ai')
+        self.assertEqual(response('```\n' + valid + '\n```')['source'], 'ai')
+        self.assertEqual(response('Explanation first\n```json\n' + valid + '\n```')['source'], 'rule')
+        bad = json.dumps(dict(self.valid, quote='invented evidence'))
+        self.assertEqual(response('```json\n' + bad + '\n```')['source'], 'rule')
+
     def test_no_key_does_not_call_network(self):
         def forbidden(*args,**kwargs):raise AssertionError('Unexpected network')
-        self.assertEqual(analyze(E,self.q['id'],self.choice,self.reason,{},forbidden)['source'],'rule')
+        result = analyze(E,self.q['id'],self.choice,self.reason,{},forbidden)
+        self.assertEqual(result['source'], 'rule')
+        self.assertIn('GLM-4.7', result['message'])
 
 class CodeSyntaxTests(unittest.TestCase):
     def test_restricted_syntax(self):

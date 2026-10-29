@@ -1159,7 +1159,12 @@ export default function App() {
           </footer>
         </main>
       </div>
-      <AssistantWidget onNavigate={go} />
+      <AssistantWidget state={state} ready={aiReady && loaded} teamCode={teamCode} onTeamCode={setTeamCode} onAction={(action) => {
+        if (action.kind === "lesson" && (action.id === "__intro__" || (concepts[action.id] && !states[action.id].locked))) { openLesson(action.id); return true; }
+        if (action.kind === "question") { const q = questions.find(q => q.id === action.id); if (q) { openQuiz(q); return true; } }
+        if (action.kind === "coding" && tasks.some(t => t.id === action.id)) { openTask(action.id); return true; }
+        return false;
+      }} />
       {tr(restoreOpen && (
         <div className="modal-backdrop">
           <div
@@ -1299,7 +1304,7 @@ function Quiz({
     setBusy(true);
     const controller = new AbortController();
     abort.current = controller;
-    const timer = setTimeout(() => controller.abort(), 40000);
+    const timer = setTimeout(() => controller.abort(), 75000);
     try {
       const r = await fetch("/api/diagnose", {
         method: "POST",
@@ -1427,7 +1432,7 @@ function Quiz({
               disabled={!aiReady || busy || (Boolean(feedback) && correct)}
               onChange={(e) => setAI(e.target.checked)}
             />
-            <Sparkles size={15} />{tr("用 Kimi 分析我的理由")}{tr(" ")}
+            <Sparkles size={15} />{tr("用 GLM-4.7 分析我的理由")}{tr(" ")}
             <small>
               {tr(aiReady ? "答错且填写思路时才调用 AI" : "等待服务端配置")}
             </small>
@@ -1447,10 +1452,10 @@ function Quiz({
             <div className="reason-followup" aria-live="polite">
               <p>
                 {tr(!reason.trim()
-                  ? "本次先显示规则反馈。你可以补充刚才的想法，再让 Kimi 分析。"
+                  ? "本次先显示规则反馈。你可以补充刚才的想法，再让 GLM-4.7 分析。"
                   : feedback.source === "ai"
                     ? "已根据这段思路完成 AI 分析。修改想法后可以重新分析。"
-                    : "思路已记录。点击下方按钮，让 Kimi 根据你的想法补充分析。")}
+                    : "思路已记录。点击下方按钮，让 GLM-4.7 根据你的想法补充分析。")}
               </p>
               <button
                 className="button secondary"
@@ -1545,7 +1550,7 @@ function Quiz({
               </div>
               {tr(busy && (
                 <p className="ai-working">
-                  <Sparkles size={16} />{tr("Kimi 正在阅读你的思路…")}</p>
+                  <Sparkles size={16} />{tr("GLM-4.7 正在阅读你的思路…")}</p>
               ))}
               <Pill>
                 {tr(feedback.source === "ai" ? "AI 辅助诊断" : "规则反馈")}

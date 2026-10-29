@@ -1,353 +1,495 @@
-# PySteps — Software Requirements Specification / 软件需求规格说明书
+# PySteps — Software Requirements Specification
 
-版本 / Version: 1.1 · 日期 / Date: 2026-10-28 · 适用代码 / Baseline: `final-homework-3`
+## English
 
-本文以现有实现为基线整理需求，不追溯声称在编码前完成。需求中的“应”表示验收标准；“已实现”“自动验证”“待人工验收”分别记录，不互相替代。文档采用课程所讲的 SRS、功能/非功能分类与需求—测试对应原则，不声称获得 ISO/IEC/IEEE 29148 认证，也不把课件示例全部当作项目必需功能。
+**Group 8**
 
-This specification documents the existing implementation; it is not evidence of a pre-implementation SRS. “Shall” denotes an acceptance condition, not a completed test. Implementation, automated verification and pending manual acceptance are distinct. The document applies the course's SRS and traceability principles without claiming certification or treating every lecture example as mandatory functionality.
+Baseline: implemented application, 29 October 2026. Entry point: `main.py`. Related document: [README.md](README.md).
 
-## 1. 目的、用户与范围 / Purpose, users and scope
+### 1. Purpose and product scope
 
-目标是帮助 Python 初学者根据概念导学和作答反馈继续练习。主要用户为学习者；维护者负责内容、配置和版本；组员负责测试及审查。程序不是正式考试评分系统，不根据一次答错确定学生能力，也不宣称已证实提升学习成绩。
+PySteps gives Python beginners an actionable learning path after an incorrect answer. It links concept reading, fixed-answer assessment, explanatory feedback, targeted practice and chapter coding. PiPo interprets natural-language learning goals and uses tools to inspect progress and prepare the next learning activity.
 
-The system supports Python beginners with lessons, feedback and follow-up practice. Learners use the application; maintainers manage content and configuration; team members verify it. It is not a formal assessment system or evidence of improved learning outcomes.
+The implemented content comprises 3 chapters, 15 concepts, 30 multiple-choice questions and 6 coding tasks with 39 cases. The target setting is individual learning or a small teaching group using a local Python service and browser. Two language interfaces support English and Chinese. This specification describes current behaviour and the criteria used to evaluate it.
 
-当前范围：3 章（条件判断、循环、函数与返回值）、15 个概念、30 道选择题、6 个编程任务。包含双语界面、可选 Kimi、SQLite 和备份。排除教师后台、任意学科、图片识题、账号同步、自主代理及服务器执行任意学生代码。
+**User roles.** Learners read, answer, explain, practise, code and manage backups. A local operator configures the service, model and team access code. Contributors maintain content, implementation, tests and documentation.
 
-Scope: 3 chapters, 15 concepts, 30 questions, 6 coding tasks, bilingual UI, optional Kimi, SQLite and backups. Teacher dashboards, arbitrary subjects, image recognition, account sync, autonomous agents and arbitrary learner-code execution on the server are excluded.
+**System boundary.** Python owns grading, progression, ranking, review schedules, model integration, HTTP and SQLite. The browser owns interaction and restricted code execution. GLM-4.7 supplies optional diagnosis and Agent decisions. Learning spaces are identified by cookies; record transfer uses explicit JSON backup/import. Teacher administration, account-based synchronisation and arbitrary server-side learner-code execution are outside this version.
 
-术语 / Terms: FR = 功能需求 / functional requirement; NFR = 非功能需求 / non-functional requirement; AC = 验收案例 / acceptance case; `unknown` = 证据不足 / insufficient evidence; revision = 保存版本 / optimistic save version. “规则反馈”来自题库和确定性逻辑；“AI 反馈”是通过有限校验的补充输出。
+### 2. Architecture and principal use cases
 
-## 2. 运行环境与系统边界 / Operating context and boundaries
+```text
+Browser: React interface + PiPo panel + Pyodide Worker
+                         |
+                    HTTP JSON API
+                         |
+Python server: origin/host checks, session identity, AI authorisation
+       |                    |                    |
+ LearningEngine        Diagnosis adapter      PiPo agent loop
+       |                    |                    |
+ JSON content         GLM-4.7 + validation    Model -> tool -> observation
+       |                                         |
+ SQLite learning state                Allowlisted learning tools
+```
 
-Python 3.10+ 标准库后端，通过 `main.py` 启动，默认 `127.0.0.1:8010`；React 构建产物随包提供。Node.js 22 与 npm 仅用于前端开发。浏览器加载本地 Pyodide 后运行受限代码；模型分析需网络和有效配置。
-
-The Python 3.10+ standard-library server starts via `main.py`, defaulting to `127.0.0.1:8010`. React assets and Pyodide are bundled. Node.js 22/npm are frontend development tools. Model analysis requires connectivity and valid credentials.
-
-| 边界 / Boundary | 责任 / Responsibility |
+| Use case | Trigger and outcome |
 |---|---|
-| 浏览器 → Python HTTP | JSON 输入、原始来源检查、服务端判题与存储 / JSON input, origin checks, grading and persistence |
-| Python → Kimi | 可选单次请求、受限证据与输出校验 / Optional single request, bounded evidence and output validation |
-| 浏览器 → Worker | 学生代码及案例；禁止服务器执行 / Learner source and cases; no server execution |
-| 浏览器 Cookie → SQLite | 匿名学习空间与 revision；非账号认证 / Opaque learning space and revision, not an account |
+| UC-01 Continue a course | Read the introduction and an available concept, complete its questions independently, and open the next available step. |
+| UC-02 Learn from a mistake | Submit an answer, inspect fixed feedback, revise the reason, optionally request diagnosis and practise a related item. |
+| UC-03 Ask PiPo for a next step | State a goal; PiPo inspects tools, selects content and returns an explanation plus at most one validated opening. |
+| UC-04 Apply Python | Open a chapter task, edit a draft, run samples, check all cases and inspect stored submissions. |
+| UC-05 Resume or transfer records | Reload a learning space, resolve a stale revision, or confirm replacement from an exported backup. |
 
-PiPo 的预设对话与关键词导航不使用模型。AI 诊断不运行工具，不形成代理循环。学习理由、代码与备份属于输入数据，不能被当作程序指令或可信成绩。
+### 3. Functional requirements
 
-PiPo is rule-based navigation. Diagnosis has no tool execution or agent loop. Reasons, source and backups are untrusted data, not instructions or trusted grades.
+All requirements below refer to implemented behaviour. Automated evidence and interface acceptance are identified separately in §8.
 
-## 3. 功能需求 / Functional requirements
+#### FR-01 Language and presentation
 
-优先级 / Priority: P1 = 基础交付 / core delivery; P2 = 可选 AI / optional AI. 各项均描述代码中的现有行为，验证范围见第 8 节。
+The application shall default to English on first access and remember an explicit English/Chinese selection in browser storage. Navigation, lesson prose, feedback translations and task instructions shall follow that selection. Learner input, source code and precise expected outputs shall retain their original values.
 
+#### FR-02 Deterministic assessment
 
-### FR-01 · 学习内容与语言 / Content and language · P1
+The service shall accept a known `question_id` and an option belonging to that question. `grade()` shall compare it with the stored answer and return `correct` plus rule feedback. A correct answer produces concept `none`; a wrong option uses its mapped concept or `unknown`. Unknown questions/options shall be rejected. Fixed answers remain authoritative when AI is enabled.
 
-**要求：** 首次访问应默认英语，允许中英切换；显示现有三章内容。代码、精确输出与学生原文应保留，新的模型请求携带当前语言。
+#### FR-03 Course progression
 
-**Requirement:** First visits shall default to English and allow EN/ZH switching. Code, exact outputs and learner text shall remain unchanged; new model requests shall carry the selected language.
+`courses()` shall calculate access from introduction reading, explicit prerequisites and completion of concepts in preceding chapters. A qualifying course attempt requires the matching `course_concept`, concept reading, satisfied prerequisites, a correct answer and zero hints. For this bank, both distinct questions of the concept must have qualifying results. Free-practice and hinted successes shall not establish course completion. The implementation processes attempts in their stored order and retains concepts added to the passed set during that calculation.
 
-**实现与验证索引 / Implementation and verification:** `AC-01; LanguageTests; web/src/i18n.ts`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
+#### FR-04 Reason revision
 
+After a wrong submission, the learner shall be able to edit a reason and request further analysis of the same attempt. Updating that attempt shall preserve its identity rather than add an attempt. The interface shall reject an empty analysis reason and preserve usable rule feedback if diagnosis cannot be obtained.
 
-### FR-02 · 选择题判分 / Quiz grading · P1
+#### FR-05 Targeted recommendation
 
-**要求：** 输入必须是已知题号与有效选项。应按题库固定答案返回 correct 和规则反馈；非法题号/选项应报错，不能由模型改分。
+`recommend()` shall exclude the current question and keep candidates in its chapter. With a specific diagnosis, ranking shall prioritise (1) unseen target-concept items, (2) due items, (3) other unseen items, then (4) remaining seen items. Due timestamps, target match, difficulty and ID provide deterministic tie-breaking in the implemented key. For `unknown`, due items lead, then unseen items, then other seen items, without forcing a concept diagnosis. The service returns existing bank questions; it does not generate questions.
 
-**Requirement:** A known question and valid choice shall be graded against the fixed key and return correctness and rule feedback. Unknown IDs/options shall be rejected; the model shall not change grades.
+#### FR-06 Review schedule
 
-**实现与验证索引 / Implementation and verification:** `AC-02; test_all_question_answers; test_grading_and_ai_rule_fallback`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
+Attempts shall be sorted by their timezone-aware timestamps before scheduling. A wrong answer shall reset stage to 0 and set the due time to 10 minutes later. A hinted correct answer shall reset stage to 0 and use one day later, preserving an earlier future due time where present. A correct answer without hints shall advance a stage when there is no previous schedule or the previous due time has arrived. Intervals shall be 1, 3, 7, 14 and 30 days, capped at stage 5. Early independent repeats shall preserve the schedule.
 
+#### FR-07 GLM-4.7 misconception diagnosis
 
-### FR-03 · 课程过关 / Progression · P1
+Diagnosis shall operate on a wrong answer with a non-empty reason after configuration and team-code authorisation. The prompt shall contain instructions, question context, selected answer/reason and a JSON output contract.
 
-**要求：** 完成入门阅读和前置概念后开放课程。当前概念已读，且课程模式下两道不同题均最新无提示答对时通过；自由练习和提示答对不能代替独立通关。处理按状态中记录顺序进行。
-
-**Requirement:** A course shall open after introduction/prerequisites. In the current bank, the read concept passes when both distinct questions have correct, hint-free course attempts. Free practice and hinted answers shall not pass it. Stored attempt order is used.
-
-**实现与验证索引 / Implementation and verification:** `AC-03; test_entire_course_unlocks_in_order; test_hint_and_free_practice_do_not_pass_course`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
-
-
-### FR-04 · 补充理由 / Revised reasoning · P1
-
-**要求：** 错答后应允许修改理由；清除旧 AI 反馈，重新分析更新同一记录，不增加作答次数；理由最多1000字符。
-
-**Requirement:** After a mistake, editing the reason shall invalidate old AI feedback and update the same attempt without increasing the count; reasons are limited to 1,000 characters.
-
-**实现与验证索引 / Implementation and verification:** `AC-04; App.tsx; validate_state`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
-
-
-### FR-05 · 练习推荐 / Recommendation · P1
-
-**要求：** 应限定同章并排除当前题。非 unknown 时排序为：目标概念未做题、到期题、其他未做题、其他已做题；到期更早优先。unknown 时不强行指定概念，先到期、再未做、再已做；用难度和题号等规则稳定排序。
-
-**Requirement:** Recommendations shall remain in the chapter and exclude the current question. With a known target: unseen target items, due items, other unseen items, then remaining seen items. Due items use earlier due time. Unknown avoids a target, ranking due/unseen/seen, with deterministic difficulty/ID tie-breaking.
-
-**实现与验证索引 / Implementation and verification:** `AC-05; test_recommendation_target_and_unknown; LearningEngine.recommend`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
-
-
-### FR-06 · 复习计划 / Review scheduling · P1
-
-**要求：** 按时间排序处理作答；错误重置到阶段0、10分钟后复习。提示答对回到阶段0、至多一天后复习；到期独立答对按1/3/7/14/30天推进且封顶，提前重复独立答对不推进。
-
-**Requirement:** Chronological attempts shall schedule an error at stage 0 after ten minutes. Hinted success resets to stage 0 with a review within one day. Due independent success advances through 1/3/7/14/30 days, capped at stage 5; early independent repeats do not advance.
-
-**实现与验证索引 / Implementation and verification:** `AC-06; test_schedule_early_repeat_not_advance`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
-
-
-### FR-07 · AI 理由分析 / AI analysis · P2
-
-**要求：** 仅错答、非空理由、配置可用且口令正确时请求模型。候选为当前错项映射概念或 unknown；要求逐字引用理由。标签/引文失败整体退回规则；答案或解析依据失败则仅讲解/提示恢复题库内容。固定答案不变。
-
-**Requirement:** Only wrong answers with non-empty reasons, valid configuration and team authorisation shall request the model. Labels are the wrong-choice candidate or unknown with a verbatim reason quote. Invalid label/quote causes full rule fallback; invalid answer/knowledge evidence replaces prose with bank content. Keys remain fixed.
-
-**实现与验证索引 / Implementation and verification:** `AC-07; AITests; test_team_authorization_and_rate_limit`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
-
-
-### FR-08 · 学习记录与保存 / Persistence · P1
-
-**要求：** 以随机 Cookie 对应学习空间，保存读取、答题、草稿与编程记录。写入应携带 revision；旧版本返回409，不能静默覆盖；读取应返回本空间数据。
-
-**Requirement:** A random cookie shall identify the space holding reads, attempts, drafts and coding records. Saves require a revision; stale writes shall return 409 without silent overwrite. Reads return only that space.
-
-**实现与验证索引 / Implementation and verification:** `AC-08; test_sqlite_persistence_isolation_and_conflict; test_state_roundtrip_cookie_and_conflict`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
-
-
-### FR-09 · 备份迁移 / Backup · P1
-
-**要求：** 应支持版本1 JSON导出及确认后替换导入。导入时校验结构、ID、长度和时间，重新判分并移除不可信AI反馈；不合并账号或设备。
-
-**Requirement:** Version-1 JSON export and confirmed replacement import shall be available. Imports validate shape, IDs, lengths and timestamps, recompute grades and discard untrusted AI feedback. There is no account/device merge.
-
-**实现与验证索引 / Implementation and verification:** `AC-09; test_import_regrades_and_removes_untrusted_feedback; test_import_rejects_invalid_and_oversize`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
-
-
-### FR-10 · 编程练习 / Coding · P1
-
-**要求：** 应支持草稿、前两例运行、全例检查、停止与历史。仅在浏览器Worker运行受限Python；结果按类型和值比较。运行时加载/执行超时应终止Worker，不生成通过记录。
-
-**Requirement:** Coding shall support drafts, first-two-case runs, full checks, stop and history. Restricted Python runs only in a browser Worker with type/value comparisons. Loading/execution timeout shall terminate it without a passing record.
-
-**实现与验证索引 / Implementation and verification:** `AC-10; test_restricted_syntax; App.tsx; python-worker.mjs`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
-
-
-### FR-11 · 学习汇总 / Progress · P1
-
-**要求：** 应显示课程状态、作答统计与错题；图表按设备时区汇总最近14个有作答日期。重复和提示作答仍计入历史，不能解释为独立掌握率。
-
-**Requirement:** The UI shall show course state, attempt statistics and mistakes, aggregating the latest 14 dates with attempts in device timezone. Repeated/hinted attempts remain in history and are not independent mastery measures.
-
-**实现与验证索引 / Implementation and verification:** `AC-11; App.tsx; summary`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
-
-
-### FR-12 · 小精灵导航 / PiPo · P1
-
-**要求：** 快捷入口或关键词应引导至地图、练习或编程。空输入不提交，输入最多160字符；输入AI问题时说明到练习页使用分析。此功能不发送模型请求。
-
-**Requirement:** Shortcuts/keywords shall navigate to map, practice or coding. Empty input is not submitted; input is capped at 160 characters. AI questions point to exercise analysis. No model request is sent.
-
-**实现与验证索引 / Implementation and verification:** `AC-12; AssistantWidget.tsx`。测试名称表示相关证据，不代表整条需求已全部覆盖。 / A named test is relevant evidence, not full coverage.
-
-
-## 4. 非功能需求 / Non-functional requirements
-
-下列可量化阈值有两类：实现内已有的限制，以及待团队实测的验收目标。二者分别标明。没有用“快速、安全、易用”等形容词代替验收条件。
-
-Implemented limits and proposed measurement targets are distinguished below. Proposed targets are project acceptance choices, not instructor-prescribed numbers or established results.
-
-| ID | 要求 / Requirement | 验证方法与状态 / Verification and status |
-|---|---|---|
-| NFR-01 可靠性 / Reliability | 无模型配置时，核心判题、规则反馈、推荐、保存仍可用；模型失败不更改固定分数。 / Core learning remains usable without AI; failure does not alter keys. | AITests、HTTP fallback 已自动验证部分路径；完整界面 AC-07 待验收。 / Partly automated; UI acceptance pending. |
-| NFR-02 响应 / Responsiveness | 本机固定题库下，连续20次规则判题接口调用每次应在1秒内返回。 / On the reference local setup, each of 20 rule-grading calls should finish within 1 s. | **新增验收目标、未测量**；记录设备、版本、负载、每次耗时，不含AI。 / Proposed, unmeasured; record setup and timings, excluding AI. |
-| NFR-03 等待界限 / Bounded waits | 模型timeout参数30s、UI等待40s；Worker加载60s、执行4s；数据库连接timeout参数10s。 / API parameter 30 s, UI 40 s, Worker loading 60 s/execution 4 s, DB timeout parameter 10 s. | 配置及部分模拟验证；浏览器终止行为待 AC-10。参数不是整体时延保证。 / Inspected/partly mocked, browser pending; not overall latency guarantees. |
-| NFR-04 数据访问 / Data access | 仅公开静态目录可访问；非法Host/Origin应拒绝；不同Cookie空间隔离，旧revision不能覆盖。 / Restrict public files, reject invalid host/origin, isolate spaces and prevent stale overwrite. | HTTPTests验证部分；非法Host、HEAD及更多路径仍需补例。 / Partial HTTP coverage; more cases pending. |
-| NFR-05 资源与费用 / Resources | 输入按第5节限额；模型每进程60次/小时、max_tokens=1200、响应最多65536字节；没有硬内存或费用上限。 / Enforce §5; 60 calls/hour/process, 1,200 token allowance, 65,536 response bytes; no hard memory/spend cap. | 61次拒绝和部分长度已测；窗口重置及其余边界待补。 / Rate limit and some lengths tested; reset/remaining boundaries pending. |
-| NFR-06 易用性 / Usability | 一名未参与核心开发的组员应能仅按README启动，完成答题→反馈→推荐→备份，无开发者代操作。 / A non-core-developer should complete startup and the learning/backup flow using README without takeover. | 项目验收目标；记录求助点、错误和修改，尚未执行。 / Proposed acceptance; record difficulties; pending. |
-| NFR-07 可移植性 / Portability | 目标为Windows/macOS/Linux、Python3.10/3.13及现代浏览器。 / Target Windows/macOS/Linux, Python 3.10/3.13 and modern browsers. | CI配置不是运行证据；本次仅macOS/Python3.12自动测试通过，目标组合待确认。 / Only macOS/Python3.12 rerun; target matrix unconfirmed. |
-| NFR-08 可维护性 / Maintainability | 领域规则、存储、HTTP、AI分层；修改映射需求与测试；提交前另一成员审查并记录问题闭环。 / Separate domain/storage/HTTP/AI; trace changes to tests and obtain independent review. | 代码结构已检查，成员审查完成情况未据此确认。 / Structure inspected; human review not established. |
-| NFR-09 离线资源 / Offline assets | 后端运行且禁止外部网络时，本地导学、规则练习和编程资源应可用，AI明确不可用。 / With server running and external traffic blocked, bundled learning/coding resources remain usable; AI is unavailable. | 资源随包提供；本次未重新进行离线浏览器验收。 / Bundled assets inspected; browser acceptance not rerun. |
-
-## 5. 数据与接口约束 / Data and interface constraints
-
-状态格式 / State: `version=1`, `reads`, `attempts`, `drafts`, `codeAttempts`。服务端重算选择题正确性。SQLite 使用 `learners(id, revision, state)`，ID 是随机 Cookie 的 SHA-256 摘要；这不是实名认证，也不是数据库加密。
-
-Quiz correctness is recomputed server-side. SQLite stores `learners(id, revision, state)` with the digest of an opaque cookie. Hashing the identifier is neither account authentication nor database encryption.
-
-| 字段或对象 / Field | 约束 / Constraint |
+| Model field | Validation contract |
 |---|---|
-| reads | 列表最多16项，ID为入门或已知概念；去重 / At most 16 entries, known concept/introduction IDs; deduplicated |
-| attempts / codeAttempts | 最多10,000 / 2,000条；各自ID唯一、非空、最多80字符 / Separate unique nonempty IDs, at most 80 characters |
-| reason / source / details | 最多1,000 / 20,000 / 4,000字符 / Character limits |
-| created_at | 可解析、带时区的ISO时间 / Parseable timezone-aware ISO timestamp |
-| hints_used | 整数，0至该题提示数量 / Integer within the question hint range |
-| revision | 非负整数，保存时匹配当前版本 / Nonnegative integer matching stored version |
-| HTTP body | JSON对象，1至10,000,000字节；禁止NaN等非有限值 / JSON object with finite values |
+| `concept` | The wrong option's candidate concept or `unknown`. |
+| `quote` | Non-blank, at most 200 characters and a verbatim substring of the reason. |
+| `answer_key` | Equal to the stored answer letter. |
+| `knowledge_quote` | Verbatim substring of the standard explanation, with at least 4 non-edge-whitespace characters. |
+| `explanation` | Non-blank; trimmed length 1–600 characters. |
+| `hint` | Non-blank; trimmed length 1–240 characters. |
 
-### 5.1 HTTP 接口 / API contract
+An invalid concept or learner quotation shall cause rule fallback. If these pass but answer/evidence/teaching-text checks fail, the adapter shall retain `source: "ai"` and the accepted diagnostic fields, set `personalized: false`, and use the bank explanation/hint. Valid output shall set `personalized: true`. Provider errors, timeout, oversized/incomplete output and malformed responses shall yield rule feedback. The diagnosis request reads at most 65,537 bytes and rejects responses over 65,536 bytes. Correct answers and blank reasons shall bypass model analysis.
 
-POST需同源、正确Content-Type和合法Host。`/api/import`只验证并返回清洗后状态，客户端随后保存；不能把该接口单独当作已写数据库。
+#### FR-08 Persistence and session isolation
 
-POST requests require matching origin, JSON content type and a valid host. `/api/import` validates and returns sanitised state; the client then saves it. Import validation alone does not persist data.
+The service shall hash an opaque random session cookie to identify a learning space. SQLite shall store one versioned JSON state per space. `Store.save()` shall use `BEGIN IMMEDIATE`, compare the submitted revision and atomically increment it on success. A stale revision shall produce HTTP 409. Different cookies shall resolve to separate spaces.
 
-| Method/path | 输入 / Input | 输出或错误 / Output or error |
-|---|---|---|
-| GET `/api/state` | Cookie | revision, state, summary；必要时新Cookie / new cookie when needed |
-| POST `/api/state` | revision, state | new revision, summary；旧版本409 / stale version 409 |
-| POST `/api/import` | state | validated state；非法400 / invalid 400 |
-| POST `/api/grade` | question_id, choice | correct, feedback |
-| POST `/api/recommend` | question_id, diagnosis, state | ordered questions |
-| GET `/api/diagnose` | 无 / none | configured flag，不证明服务可达 / not provider availability |
-| POST `/api/diagnose` | question_id, choice, reason, language；X-Team-Code | feedback；错误口令401；失败/限流可返回规则 / invalid code 401; fallback where applicable |
+#### FR-09 Backup and import
 
-其他错误 / Other errors: 不匹配Host/Origin 403；未知接口404；Content-Type错误415；空/超大请求413；字段错误400；POST处理中未预期异常500。后者不代表所有GET或启动错误都已统一处理。
+The interface shall export version-1 learning JSON and ask for confirmation before replacing a space. The server shall validate structure, IDs, timestamps, lengths and duplicate attempt identities, regrade quiz choices and restore rule feedback for imports. Unknown extra fields are omitted from the normalised state. Code submission pass flags are retained as submitted local learning records; the import service does not rerun code. Import validation returns normalised state, and the browser then persists the confirmed replacement through the state endpoint.
 
-Other statuses: 403 host/origin, 404 route, 415 content type, 413 size, 400 fields, 500 unexpected POST processing error. This does not claim universal GET/startup exception handling.
+#### FR-10 Browser coding
 
-### 5.2 AI 提示与输出 / Prompt and output contract
+The interface shall offer 6 chapter tasks independently of quiz completion. Run Example shall execute the first two cases; Check Answer shall execute all cases for the task. Source shall pass an AST allowlist before execution in a disposable Pyodide Worker. Forbidden constructs include imports, class definitions, arbitrary attributes, indirect calls and file access. Results shall include per-case values, output and error locations where available. Booleans shall not substitute for numbers; numeric `int`/`float` equality is allowed. Drafts and completed checks shall be stored in learning history. The UI shall stop execution by terminating the Worker.
 
-按Lecture04的四个提示要素记录：指令是谨慎诊断且不执行学生指令；上下文是题目、标准解析和候选概念；输入是所选答案和理由；输出是JSON。Lecture05的角色消息和token限制用于单次请求，没有工具循环。
+#### FR-11 Learning analytics
 
-The prompt has an instruction, bounded context, input data and a JSON output indicator. It uses role messages and a token allowance, not an autonomous tool loop.
+The application shall show quiz counts, accuracy, concept status, coding completion and wrong-attempt details. The quiz accuracy chart and associated table shall group attempts by device-local date and select the latest 14 dates containing attempts. Hinted and repeat quiz attempts remain included. Coding completion is reported separately from quiz accuracy.
 
-输出字段 / Output fields: `concept`, `quote` (1–200字符、理由逐字子串 / verbatim reason substring), `answer_key`, `knowledge_quote` (标准解析子串、去空白至少4字符 / explanation substring, >=4 trimmed characters), `explanation` (1–600), `hint` (1–240)。实现检查是结构和依据约束，不能证明语义正确、消除所有提示注入或代替人工审查。
+#### FR-12 PiPo learning Agent
 
-当前每个错项的候选都指向题目自身概念，模型只能选择该候选或unknown；不能宣称进行了开放式、多误区诊断。Lecture05建议的指数退避和缓存未实现；本项目选择单次调用与规则回退，避免自动重试费用。它是已说明的取舍，不是声称满足所有课件建议。
+PiPo shall accept a non-empty goal of at most 1,000 characters and up to 8 prior user/assistant messages, each at most 10,000 characters. Python shall validate the submitted learning state before running the loop. The model shall choose from the following tools, and each execution result shall be returned as a tool observation for subsequent decisions.
 
-Each current wrong-option candidate is the question's own concept. The model chooses it or unknown, not unrestricted alternative misconceptions. Exponential backoff and explicit caching suggested in Lecture05 are not implemented; single-call fallback avoids automatic retry charges. This is a disclosed trade-off.
-
-## 6. 模块设计与函数契约 / Modules and function contracts
-
-本节是支持规格的实现说明，不将内部类名当作用户需求。Lecture03的函数、容器、排序、类和文件处理在以下职责中使用。
-
-This section explains implementation, not additional user requirements. Functions, containers, sorting, classes and file operations support the following boundaries.
-
-| 模块/接口 / Module or function | 前置条件与结果 / Preconditions and result |
+| Tool | Observation or permitted action |
 |---|---|
-| `LearningEngine.grade(qid, choice)` | 已知ID与有效选项；返回固定判分，否则ValueError / known ID/choice → grade; invalid → ValueError |
-| `LearningEngine.courses(state)` | 已校验状态；按前置集合与记录计算passed/locked/read/solved / validated state → course flags |
-| `LearningEngine.recommend(qid, diagnosis, state, now)` | 合法诊断ID/unknown/none；排序返回当前章其他题 / valid label → same-chapter ranked alternatives |
-| `LearningEngine.schedule(attempts)` | 有效带时区时间及判分；返回due毫秒与stage / valid attempts → due milliseconds and stage |
-| `LearningEngine.validate_state(raw, importing)` | 不信任输入；返回规范状态或ValueError / untrusted data → sanitised state or ValueError |
-| `Store.get/save` | 参数化SQL；revision控制原子写入，冲突抛ConflictError / parameterised SQL, versioned transaction |
-| `analyze/validate_output` | 模型适配与字段校验；保留规则回退 / model boundary with fallback |
-| `Handler` | 传输、来源、会话与错误映射；业务规则交给engine / transport/session checks delegate domain rules |
-| `App.tsx` / Worker | UI状态和受限浏览器运行；非服务端执行 / UI state and browser-only execution |
+| `progress` | Quiz totals, computed course states, due items, up to 5 recent mistakes with reasons truncated to 500 characters, and passed coding IDs. |
+| `lesson` | Introduction or a valid concept's definition, lesson content and current course state. |
+| `recommend` | Up to 3 ranked same-chapter alternatives. Defaults to the most recent wrong attempt in stored order, or the first question when none exists. Model-facing results omit answer keys and misconception maps. |
+| `coding` | Task IDs, titles, topics and whether an associated passed submission exists; optional exact-topic filter. |
+| `open_content` | Prepare a lesson, question or coding opening for an ID already inspected by another tool this turn. Locked lessons and a second opening are rejected. |
 
-## 7. 人工验收案例 / Manual acceptance cases
+Tool names and argument keys shall be allowlisted; argument values shall be strings of at most 100 characters. The loop shall allow up to 5 model requests and 8 tool executions. In school JSON mode, the fifth request shall allow only a final reply; further tool plans shall be rejected. Native mode disables tools on its final request. Every model request shall consume the shared hourly allowance. JSON-mode requests shall use `max_tokens: 650` (native mode: 1400); model responses over 131,072 bytes shall be rejected. A final non-blank reply shall be at most 4,000 characters in JSON mode (10,000 in native mode) and have `finish_reason: "stop"`.
 
-以下均为**待执行步骤，不是通过记录**。执行者记录日期、版本、操作系统/浏览器、实际结果、问题编号及复核人。自动测试只覆盖部分条件，不能代替这些界面检查。
+Successful responses shall contain `reply`, `trace`, `actions` and `source: "agent"`. The browser shall validate the action against available content and apply it after a completed turn. Failed turns shall return an error rather than partial actions. Tool traces shall show accepted/rejected calls. Stop shall abort browser waiting and prevent subsequent action application; it does not guarantee cancellation of an in-flight server request. Tools shall not modify grades, course reads, saved learning records or files. PiPo conversation is kept in page memory.
 
-These are pending procedures, not pass records. Record date, version, platform/browser, actual result, issue ID and reviewer.
+### 4. Non-functional requirements and operating limits
 
-| AC | 操作与预期 / Action and expected outcome |
+| ID | Implemented quality constraint | Verification |
+|---|---|---|
+| NFR-01 Local operation | The Python backend uses the standard library; built UI, icons and Pyodide are bundled. Core learning works without model access. | Start a clean distribution; block external requests and complete the core flow. |
+| NFR-02 Input bounds | Body ≤10,000,000 bytes; reads ≤16; quiz attempts ≤10,000; code records ≤2,000; reasons/goals ≤1,000 characters; source ≤20,000 characters. | Boundary inputs and state validation; inspect declared limits. |
+| NFR-03 Request access | Host checks; same-origin JSON POST; private paths outside static scope; HttpOnly/SameSite session cookies; response security headers. | HTTP tests plus direct Host/path checks. |
+| NFR-04 Model access | Team code ≥12 characters with constant-time digest comparison; server-held provider key; shared 60 requests/hour/process. | Authorisation/rate tests; inspect outgoing model payloads. |
+| NFR-05 Controlled waiting | Diagnosis: request 60 s / browser 75 s. PiPo JSON mode: up to 60 s per request, approximately 100 s turn budget / browser 115 s. Worker loading: 60 s / execution: 4 s. | Mocked timeout tests; browser stop/timeout exercise. These thresholds are not aggregate latency guarantees. |
+| NFR-06 Persistence | Atomic revision checks and cookie isolation; conflicts do not silently replace newer records. | SQLite and HTTP roundtrip/conflict tests. |
+| NFR-07 Maintainability | Domain, storage, HTTP, diagnosis and Agent modules have separate responsibilities; data is JSON; tests run through standard `unittest`. | Module inspection, regression suite and recorded code review. |
+| NFR-08 Portability | Python 3.10+ target; CI matrix declares Ubuntu/Windows/macOS with Python 3.10/3.13 and a Node.js 22 frontend build. | Current local test result and separate remote CI records. |
+
+The browser runtime applies syntax, output and execution controls without a hard memory quota. The application is intended for local teaching and small-group demonstrations. Numerical response-speed targets require a named machine, workload and measurement; no performance benchmark is inferred from a timeout setting.
+
+### 5. Data contracts
+
+Content files are `concepts.json` (15 entries), `lessons.json` (15), `questions.json` (30) and `coding_tasks.json` (6 tasks / 39 cases).
+
+```json
+{
+  "version": 1,
+  "reads": [],
+  "attempts": [],
+  "drafts": {},
+  "codeAttempts": []
+}
+```
+
+Quiz records contain `id`, `question_id`, `choice`, `reason`, `correct`, `diagnosis`, `created_at`, `hints_used`, `course_concept` and `feedback`. Code records contain `id`, `task_id`, `source`, `passed`, `created_at` and `details`. Timestamps shall carry a timezone. Stored `correct` values for quizzes are recomputed by state validation.
+
+```sql
+CREATE TABLE learners (
+  id TEXT PRIMARY KEY,
+  revision INTEGER NOT NULL,
+  state TEXT NOT NULL
+);
+```
+
+The state is a local learning record. It is not an account identity or an invigilated examination credential.
+
+### 6. HTTP interface
+
+All POST endpoints require a permitted Host/Origin, `Content-Type: application/json` and a body within the size limit. Model endpoints additionally require `X-Team-Code` when configured and applicable.
+
+| Method and path | Input | Successful output |
+|---|---|---|
+| GET `/api/state` | Session cookie | `revision`, `state`, `summary` (courses and schedule). |
+| POST `/api/state` | `revision`, `state` | New `revision`, computed `summary`. |
+| POST `/api/import` | `state` | Validated, regraded `state`. |
+| POST `/api/grade` | `question_id`, `choice` | `correct`, `feedback`. |
+| POST `/api/recommend` | `question_id`, `diagnosis`, `state` | Ordered `questions`. |
+| GET `/api/diagnose` | None | `configured` flag for local settings. |
+| POST `/api/diagnose` | Question, choice, reason, `language` | Diagnosis or rule `feedback`. |
+| POST `/api/agent` | `goal`, `history`, `language`, `state` | `reply`, tool `trace`, `actions`, `source`. |
+
+Error statuses: 400 invalid fields; 401 team-code failure; 403 Host/Origin mismatch; 404 unknown/private path; 409 revision conflict; 413 body size; 415 content type; 503 unconfigured Agent; 502 unfinished Agent turn; 500 unexpected POST-processing failure. The configuration flag describes local settings, not provider reachability.
+
+Example Agent request (include the team code in the header):
+
+```json
+{
+  "goal": "Check my progress and open the next lesson",
+  "history": [],
+  "language": "en",
+  "state": {"version": 1, "reads": [], "attempts": [], "drafts": {}, "codeAttempts": []}
+}
+```
+
+### 7. Model and tool trust boundary
+
+Diagnosis uses a restricted field/evidence contract. PiPo uses an allowlisted executable tool boundary. Both treat learner reasons and model text as data. The Agent system message instructs progress inspection before personalised planning, teaching through lesson content and appropriate hints; executable restrictions are enforced by Python independently of the model's prose. There are no shell, arbitrary file-write or general network tools.
+
+The provider receives the goal, recent conversation and selected learning observations, or the question/reason data required by diagnosis. API credentials and team access codes are not included in model message bodies. A reply is learning assistance; educational claims require their own evidence.
+
+### 8. Evaluation plan and traceability
+
+**Current regression result:** 29 October 2026, macOS / Python 3.13.11, **43 methods passed**. Project-focused methods total 37: core 16, HTTP 6, language 2 and Agent 13. Six additional methods in `test_main.py` exercise independent examples. AI calls are simulated, and HTTP tests use temporary local services and databases. Thirty question outputs and 39 reference coding cases are exercised within those methods.
+
+```bash
+python -m unittest discover -s tests -t . -v
+```
+
+| Requirement | Automated evidence | Interface or evaluation scenario |
+|---|---|---|
+| FR-01 | `LanguageTests` | Switch after entering a reason/source; inspect text and retained input. |
+| FR-02 | `test_all_question_answers`; HTTP grading | Correct, wrong and empty choice. |
+| FR-03 | Course unlocking and hinted/free-practice tests | Read → course answers → next available lesson. |
+| FR-04 | Application source contract | Edit a reason, reanalyse and verify the attempt count is unchanged. |
+| FR-05 | Target/unknown recommendation; Agent recommendation test | Mixed unseen/due/seen history; verify ranked IDs and chapter. |
+| FR-06 | Early-repeat scheduling test | Controlled timestamps for each interval, hints and stage cap. |
+| FR-07 | `GLMDiagnosisTests`; English prompt and authorisation tests | Provider-error display and comparison with independently labelled cases. |
+| FR-08 | SQLite isolation/conflict; HTTP roundtrip | Reload and make conflicting writes from two tabs. |
+| FR-09 | Import regrading and invalid/oversize tests | Export → confirmed replacement; cancellation preserves state. |
+| FR-10 | AST restrictions and 39 reference cases | Execute all six tasks in the actual Worker; stop/timeout/error cases. |
+| FR-11 | Aggregation implementation | Known histories across local dates; compare chart and table. |
+| FR-12 | 10 `PiPoTests`; Agent HTTP integration | Natural goal → tools → next content; follow-up, stop and failure. |
+| NFR-02/03/04/06 | Input, HTTP, authorisation, payload and persistence assertions | Additional exact-boundary and browser checks as listed above. |
+
+**PiPo regression responsibilities.** The thirteen Agent methods test a complete observation loop; invalid IDs/locked lessons/single-action limits; recommendation without answer fields; rate-limit prevention of network calls; excessive tool-call rejection; recovery after a rejected action; history/privacy boundaries; fifth-round tool disablement and per-request charging; timeout after a prepared action; and incomplete/oversized responses.
+
+**Interface acceptance procedure.** Record date, code version, platform/browser, steps, actual result and evidence file for each scenario. A first-use flow should start from an empty learning space and reach a saved quiz/coding record. A returning-user flow should show a due review and a PiPo-selected activity. Model-enabled acceptance uses a tool-capable account model; compare visible tool traces with opened content.
+
+**Live-model quality evaluation.** `scripts/evaluate_ai.py` generates a rule baseline; `--live` explicitly enables paid calls for the 12 simulated diagnosis cases. Independent reviewers should label cases and assess factual correctness and relevance before interpreting agreement. Agent scenarios should separately record appropriate tool selection, action validity, recovery and useful teaching responses. Mock regression establishes control-flow behaviour; it is not a live-model accuracy or student-learning study.
+
+**Code review.** Review module contracts, failure paths, stored-state handling, model data exposure and tool permissions. Record reviewer, version, location, issue, resolution and recheck. Changes follow requirement → expected behaviour → test/change → regression → review → documentation. Completed review records and measured results remain distinct from assigned responsibilities.
+
+### 9. Course alignment and presentation evidence
+
+| Course/assessment principle | Implemented evidence |
 |---|---|
-| AC-01 | 首次访问切语言，填写理由/代码后再切换；初始英语，输入保留，代码不被翻译 / Switch after entering text/source; default EN and preserve input. |
-| AC-02 | 同题正确、错误、空选项各一次；正确判分，空选项提示 / Exercise correct/wrong/empty selection; clear outcomes. |
-| AC-03 | 未读、读后提示答对、自由练习答对、课程独立答对；仅满足完整条件解锁 / Compare progression conditions. |
-| AC-04 | 错答后修改理由并重分析；原记录更新、次数不增加 / Reanalyse without adding attempts. |
-| AC-05 | 准备目标未做/到期/其他未做/已做混合历史；对照排序，排除原题 / Check full ranking using mixed history. |
-| AC-06 | 固定时钟测试提前、刚好到期、阶段封顶与提示答对；逐项核对间隔 / Use controlled timestamps for all boundaries. |
-| AC-07 | 无配置、空理由、错误口令、模拟超时/异常输出；固定分数不变，显示原因且规则可用 / Check fallbacks; mock failures rather than paid calls. |
-| AC-08 | 保存刷新后记录保留；两个页面提交旧revision出现冲突且不覆盖 / Persistence and two-tab conflict. |
-| AC-09 | 导出、改成伪造成绩、导入确认；重新判分且替换；取消不改变状态 / Import regrading, replacement and cancellation. |
-| AC-10 | 浏览器运行6任务参考案例、非法语法、停止、超时与环境加载失败；不得伪造通过 / Real Worker checks across 39 fixtures and failures. |
-| AC-11 | 用空历史、重复/提示作答及跨日期样例核对表格和图表 / Verify aggregation against known histories. |
-| AC-12 | PiPo快捷按钮及中英关键词；跳转正确，无模型网络请求 / Verify navigation and absence of model calls. |
+| Originality and practicality, 10% | One application links an incorrect answer to explanation, further practice and a concrete PiPo-selected activity. |
+| Usability, 10% | Local single-command launch, bilingual UI, contextual feedback, explicit errors and preserved records. |
+| Technical depth, 55% | Python computation, functions/classes/modules, JSON data, sorting, SQLite transactions, model APIs and Agent tools. |
+| Good: specification and testing | FR/NFR contracts, API/data definitions and requirement-to-verification mapping. |
+| Excellent: documentation and code review | Operating README, this specification and a defined review record for findings and rechecks. |
+| Generative AI engineering bonus | AI-assisted implementation, test development, specification, documentation and inspection, with actual adopted outputs verified by the group. |
+| Lecture04 | Prompt elements, SRS and decomposition; human-facing README separated from detailed contracts. |
+| Lecture05 | Role messages, token limits, model + harness, allowlisted tools and repeated observations. |
+| Lecture06 | Pass/fail functional criteria, quantified operating constraints, unit/integration testing and matching requirements with verification. |
 
-## 8. 需求—测试可追踪性 / Requirement-to-test traceability
+Two presentation formats are separate. The English/Chinese classroom decks each contain five selected technical slides with a 4:45 route, within five minutes. The English/Chinese video support decks each contain nine slides following introduction, problem, methodology, representative live demonstration and conclusion, with a 14:30 route and 8:15 of live application use. The required deliverable is the actual video within 15 minutes. Q&A preparation and the mandatory individual peer assessment are included in the recording/classroom guide.
 
-2026-10-28重新运行 `python -m unittest discover -s tests -t . -v`：macOS/Python3.12，21个测试方法通过。初次受限环境无法绑定本机端口；允许本机HTTP后完整重跑通过。使用临时数据库和模拟模型，无付费调用。
+### 10. References
 
-On 2026-10-28, all 21 methods passed on macOS/Python3.12. The initial restricted run could not bind a local socket; the authorised local-HTTP rerun passed. Temporary databases and mocked models were used, with no paid calls.
+Supplied sources: INT6181 *Group Project Requirements v2*, §§3–5; Lecture03 *Review of Programming II*; Lecture04 *Generative AI in Programming*, slides 12–17, 24 and 44–47; Lecture05 *Foundation of Coding Agents*, slides 17–19 and 22–28; Lecture06 *Testing and Debugging I*, slides 6, 13–16 and 22–28; *CaseStudy5 Software Requirements Specification*. Slide numbering refers to original PPTX files. Component attribution and licence locations are in README.
 
-| 需求 / Requirement | 现有证据 / Existing evidence | 剩余范围 / Remaining scope |
+---
+
+## 中文
+
+**第 8 组**
+
+基线：2026 年 10 月 29 日的已实现应用。入口：`main.py`。配套文档：[README.md](README.md)。
+
+### 1. 目的与产品范围
+
+PySteps 帮助 Python 初学者在答错后找到具体学习行动，把概念阅读、固定答案判分、解释反馈、针对性练习和章节编程连接起来。PiPo 理解自然语言学习目标，通过工具检查进度并准备下一项活动。
+
+已实现内容为 3 章、15 个概念、30 道选择题、6 个编程任务及 39 个案例。使用场景是本地 Python 服务与浏览器支持的个人学习或小组教学，界面支持中英文。本规格描述现有行为及其评估标准。
+
+**用户角色。** 学习者阅读、答题、解释思路、练习、编程并管理备份；本地操作者配置服务、模型和团队口令；贡献者维护内容、实现、测试与文档。
+
+**系统边界。** Python 负责判分、课程进度、推荐、复习、模型接入、HTTP 和 SQLite；浏览器负责交互及受限代码执行；GLM-4.7 提供可选诊断与 Agent 决策。Cookie 标识学习空间，通过显式 JSON 备份迁移记录。本版本不包含教师管理、账号自动同步及服务端任意学生代码执行。
+
+### 2. 架构与主要用例
+
+```text
+浏览器：React 界面 + PiPo 面板 + Pyodide Worker
+                         |
+                    HTTP JSON 接口
+                         |
+Python 服务：来源/主机校验、会话标识、AI 授权
+       |                    |                    |
+   学习规则引擎          诊断适配器           PiPo Agent 循环
+       |                    |                    |
+   JSON 课程数据       GLM-4.7 与字段校验     模型 -> 工具 -> 观察
+       |                                         |
+ SQLite 学习状态                           学习工具白名单
+```
+
+| 用例 | 触发与结果 |
+|---|---|
+| UC-01 继续课程 | 阅读入门和可用概念，独立完成对应问题，进入下一可用步骤。 |
+| UC-02 从错题学习 | 提交答案，查看固定反馈，修订理由，可选诊断，再练习相关问题。 |
+| UC-03 请 PiPo 选择下一步 | 描述目标，PiPo 检查工具、选择内容，返回说明和最多一次已验证的打开动作。 |
+| UC-04 应用 Python | 打开章节任务，编辑草稿，运行示例，检查全部案例，查看历史提交。 |
+| UC-05 恢复或迁移记录 | 重新加载学习空间、协调旧版本冲突，或确认用备份替换当前记录。 |
+
+### 3. 功能需求
+
+以下需求均对应现有实现，自动证据与界面验收分别列于第 8 节。
+
+#### FR-01 语言与展示
+
+首次访问默认英语，显式中英文选择保存在浏览器。导航、导学正文、反馈翻译和任务说明随语言切换；学生输入、代码及要求精确匹配的输出保留原值。
+
+#### FR-02 固定规则判分
+
+服务接受已知 `question_id` 和属于该题的选项。`grade()` 对照存储答案返回 `correct` 与规则反馈；答对的概念为 `none`，错项使用映射概念或 `unknown`。未知题目和无效选项被拒绝，启用 AI 后仍以固定答案判分。
+
+#### FR-03 课程进度
+
+`courses()` 根据入门阅读、显式前置概念及此前章节概念的完成情况计算访问资格。有效课程作答须具有匹配的 `course_concept`，已阅读概念、满足前置条件、答案正确且未用提示。当前题库中，同概念两道不同题均需满足条件；自由练习和提示作答不用于过关。实现按存储顺序处理作答，并保留本次计算中已加入通过集合的概念。
+
+#### FR-04 理由修订
+
+错答后可编辑理由，并对原作答请求进一步分析。更新保留作答标识，不新增作答；空理由提示补充，诊断不可得时保留可用的规则反馈。
+
+#### FR-05 针对性推荐
+
+`recommend()` 排除原题，并限定当前章节。明确诊断时依次优先：①目标概念未做题，②到期题，③其他未做题，④其他已做题。实现使用到期时间、目标匹配、难度和 ID 进行确定性排序。诊断为 `unknown` 时先到期题，再未做题，最后其他已做题，不强行指定概念。服务返回现有题库题目，不生成新题。
+
+#### FR-06 复习安排
+
+按带时区时间戳排序后计算。错答重置阶段为 0，10 分钟后到期；提示后答对重置阶段为 0，安排一天后，已有更早的未来到期时间则保留。无提示答对时，若尚无安排或已到期则推进阶段；间隔为 1、3、7、14、30 天，阶段上限为 5。提前无提示重复答对不改变原安排。
+
+#### FR-07 GLM-4.7 概念误区诊断
+
+配置模型并通过团队口令授权后，可对有非空理由的错答进行诊断。提示包含指令、题目上下文、所选答案/理由及 JSON 输出约定。
+
+| 模型字段 | 校验约定 |
+|---|---|
+| `concept` | 错项对应候选概念，或 `unknown`。 |
+| `quote` | 非空白，最多 200 字符，逐字出现在学生理由中。 |
+| `answer_key` | 与题库答案字母一致。 |
+| `knowledge_quote` | 标准解析的逐字子串，去除首尾空白后至少 4 字符。 |
+| `explanation` | 非空白，去除首尾空白后的长度为 1–600 字符。 |
+| `hint` | 非空白，去除首尾空白后的长度为 1–240 字符。 |
+
+概念或学生引文不合格时回退规则。前两项通过而答案/依据/讲解检查未通过时，保留 `source: "ai"` 和合格诊断字段，置 `personalized: false`，讲解及提示采用题库内容；全部通过则置 `personalized: true`。服务错误、超时、超长/未完成输出及格式异常返回规则反馈。诊断最多读取 65,537 字节，超过 65,536 字节即拒绝。正确答案及空白理由不调用模型。
+
+#### FR-08 持久化与空间隔离
+
+服务对随机会话 Cookie 求哈希，作为学习空间标识。SQLite 为每个空间保存版本化 JSON 状态。`Store.save()` 使用 `BEGIN IMMEDIATE`，比较提交版本后原子递增保存；旧版本返回 HTTP 409。不同 Cookie 对应独立空间。
+
+#### FR-09 备份与导入
+
+界面导出版本 1 的学习 JSON，替换空间前请求确认。服务校验结构、ID、时间、长度及重复作答标识，重新判定选择题并在导入时恢复规则反馈；额外未知字段不进入规范状态。编程通过标记作为本地学习记录保留，导入服务不重新运行代码。导入接口返回规范状态，浏览器经确认后调用保存接口持久化替换结果。
+
+#### FR-10 浏览器编程
+
+提供 6 个章节任务，独立于测验完成状态。运行示例执行前两例，检查答案执行本任务全部案例。代码先通过 AST 白名单，再在可销毁的 Pyodide Worker 中执行；禁止导入、类定义、任意属性、间接调用和文件访问等。结果显示各案例值、输出和可定位的错误行；布尔值不能替代数值，数值型 `int`/`float` 可按值相等。草稿及完整检查提交写入学习历史，停止操作终止 Worker。
+
+#### FR-11 学习统计
+
+展示选择题数量、正确率、概念状态、编程完成情况及错题详情。正确率曲线与对应表格按设备本地日期归组，取最近 14 个有作答的日期；提示和重复作答仍计入。编程完成统计与选择题正确率分别展示。
+
+#### FR-12 PiPo 学习 Agent
+
+接收非空目标，最多 1,000 字符；历史最多 8 条用户/助手消息，每条最多 10,000 字符。运行前由 Python 校验学习状态。模型从以下工具中选择，每次执行结果作为工具观察返回，供后续决策。
+
+| 工具 | 观察或允许的动作 |
+|---|---|
+| `progress` | 选择题总数、课程状态、到期题、最近最多 5 条错题及每条最多 500 字符的理由、已通过编程 ID。 |
+| `lesson` | 入门说明或有效概念的定义、导学及课程状态。 |
+| `recommend` | 最多 3 个当前章推荐项；默认使用存储顺序中最近的错题，无错题时使用第一题；发给模型的结果省略答案和误区映射。 |
+| `coding` | 任务 ID、标题、主题及是否存在通过提交，可按准确主题筛选。 |
+| `open_content` | 为本轮已被其他工具检查的 ID 准备课程、题目或编程打开动作；锁定课程和第二个打开动作被拒绝。 |
+
+工具名称和参数键受白名单约束，参数值须为最多 100 字符的字符串。每轮最多 5 次模型请求、8 次工具执行，学校 JSON 模式第五次请求只允许最终回复，继续工具计划则拒绝；原生模式末轮禁用工具；每次模型请求均消耗共享小时额度。JSON 模式请求使用 `max_tokens: 650`（原生模式为 1400），响应超过 131,072 字节则拒绝。最终回复须非空白，JSON 模式最多 4,000 字符（原生模式最多 10,000 字符），且 `finish_reason: "stop"`。
+
+成功结果包含 `reply`、`trace`、`actions` 及 `source: "agent"`。浏览器按当前可用内容再次验证动作，完成本轮后再应用；失败返回错误，不返回部分动作。工具记录显示通过或拒绝。停止取消浏览器等待并阻止后续动作应用，但不保证取消已发出的服务端请求。工具不改写分数、阅读状态、学习记录或文件，对话保存在页面内存中。
+
+### 4. 非功能需求与运行限制
+
+| ID | 已实现的质量约束 | 验证方式 |
 |---|---|---|
-| FR-01 | 2 LanguageTests | UI切换和译文质量 / UI switching and translation quality |
-| FR-02 | all_question_answers; HTTP grading | 更多非法输入 / more invalid inputs |
-| FR-03 | entire_course_unlocks; hint_and_free_practice | 界面及异常记录顺序 / UI and unusual ordering |
-| FR-04 | 源码检查 / source inspection | AC-04 |
-| FR-05 | recommendation_target_and_unknown | 混合历史完整排序 / mixed-history ordering |
-| FR-06 | schedule_early_repeat_not_advance | 全阶段、提示与精确边界 / all stages and boundaries |
-| FR-07 | 5 AITests; language prompt; authorisation/rate limit | 真实质量、其他服务错误 / live quality and other failures |
-| FR-08 | SQLite + HTTP roundtrip/conflict | 浏览器提示与数据库失败 / UI and database failures |
-| FR-09 | import regrading; invalid/oversize | 替换确认与其余边界 / confirmation and remaining bounds |
-| FR-10 | restricted_syntax; 39 Python reference cases | 实际浏览器Worker / actual browser execution |
-| FR-11 / FR-12 | 源码检查 / source inspection | AC-11 / AC-12 |
-| NFR-01/04/05 | 规则回退、HTTP、限流等部分断言 / partial assertions | 更多边界和失败路径 / additional paths |
-| NFR-02/03/06/07/08/09 | 阈值、结构、CI配置检查 / inspected config/structure | 测量、人工、跨平台和独立审查 / measurements, human/platform review |
+| NFR-01 本地运行 | Python 后端使用标准库，网页、图标及 Pyodide 随包提供；核心学习不依赖模型。 | 完整解压启动，阻断外部请求后完成核心流程。 |
+| NFR-02 输入上限 | 请求体 ≤10,000,000 字节；阅读项 ≤16；选择题记录 ≤10,000；编程记录 ≤2,000；理由/目标 ≤1,000 字符；代码 ≤20,000 字符。 | 边界输入、状态校验及限制检查。 |
+| NFR-03 请求访问 | Host 校验、同源 JSON POST、静态范围外私有路径保护、HttpOnly/SameSite Cookie 与安全响应头。 | HTTP 测试及补充 Host/路径检查。 |
+| NFR-04 模型访问 | 团队口令至少 12 字符，以恒定时间比较摘要；密钥保留服务端；共享每进程每小时 60 次额度。 | 授权、限流及发出模型正文检查。 |
+| NFR-05 受控等待 | 诊断请求 60 秒/网页 75 秒；PiPo JSON 模式单请求最多 60 秒/轮次预算约 100 秒/网页 115 秒；Worker 加载 60 秒/执行 4 秒。 | 模拟超时与浏览器停止/超时检查；阈值不等于总响应时间保证。 |
+| NFR-06 数据保存 | 原子版本检查和 Cookie 隔离，冲突不静默覆盖较新记录。 | SQLite 与 HTTP 保存/冲突测试。 |
+| NFR-07 可维护性 | 规则、存储、HTTP、诊断和 Agent 分模块，内容为 JSON，使用标准 `unittest`。 | 模块检查、回归及代码审查记录。 |
+| NFR-08 可移植性 | 目标 Python 3.10+；CI 配置 Ubuntu/Windows/macOS × Python 3.10/3.13，以及 Node.js 22 网页构建。 | 本次本地结果与远端 CI 记录分别验证。 |
 
-测试方法明细如下；列出目标不等于验证目标的所有分支。未测量行覆盖率或分支覆盖率，不能用“21通过”声称100%覆盖。课件介绍doctest，本项目采用标准库unittest；课程文档没有要求必须改成doctest。
+浏览器运行时提供语法、输出与执行控制，不设置硬性内存配额。应用用于本地教学及小组演示。响应速度指标须注明机器、负载和测量方法，不把超时配置当作性能测试结果。
 
-The inventory below lists assertions, not exhaustive branch coverage. No line/branch coverage was measured. Lecture06 introduces doctest; using unittest is an implementation choice, not a claim that doctest was used.
+### 5. 数据约定
 
-| Test method | Direct or indirect target | Actual assertions | Why it was selected |
-|---|---|---|---|
-| `test_all_question_answers` | `LearningEngine.grade(); question data` | Execute all 30 snippets against expected output; check grading for each option and presence of wrong-option mappings. | Wrong answer keys undermine all feedback; this does not validate educational labels. |
-| `test_entire_course_unlocks_in_order` | `LearningEngine.courses(); requirements() [indirect]` | Start locked, read and complete lessons in order, and verify all 15 concepts pass. | Check that the normal learning path can be completed. |
-| `test_hint_and_free_practice_do_not_pass_course` | `LearningEngine.courses()` | Hinted or free-practice successes do not pass the boundary lesson. | Avoid treating assisted or off-course attempts as independent mastery. |
-| `test_schedule_early_repeat_not_advance` | `LearningEngine.schedule()` | An early repeat preserves the schedule; due success reaches stage 2; an error is due in 600000 ms. | Check review timing boundaries and error scheduling. |
-| `test_recommendation_target_and_unknown` | `LearningEngine.recommend()` | With empty history, first item matches concept; exclude current item; remain in chapter; unknown returns nine candidates. | Check basic selection constraints; mixed-history ranking is not established. |
-| `test_import_regrades_and_removes_untrusted_feedback` | `LearningEngine.validate_state(importing=True); grade()` | Import falsified correctness and AI feedback; recompute the wrong result and restore rule feedback. | Do not trust grades or generated explanations supplied by a backup. |
-| `test_import_rejects_invalid_and_oversize` | `LearningEngine.validate_state()` | Reject an unknown concept/task, empty attempt, unsupported version and a 20001-character draft. | Prevent malformed stored data; not an exhaustive boundary test. |
-| `test_sqlite_persistence_isolation_and_conflict` | `Store.save(); Store.get(); connect() [indirect]` | Read data through a new Store instance, isolate users and reject stale revisions with ConflictError. | Prevent lost data, cross-user leakage and stale overwrites. |
-| `test_valid_and_unknown_diagnoses` | `validate_output()` | Valid output is personalised; unknown is allowed. | Allow supported feedback and abstention. |
-| `test_bad_quote_and_label_rejected` | `validate_output()` | Reject invented quotes and unknown concept labels. | Constrain fabricated evidence and labels. |
-| `test_wrong_answer_or_anchor_uses_reviewed_explanation` | `validate_output()` | A wrong answer key or unsupported knowledge quote causes standard-explanation fallback. | Keep answer keys fixed and retain standard explanations on invalid evidence. |
-| `test_mock_success_and_timeout_fallback` | `analyze(); validate_output() [indirect]` | Accept mocked valid output, assert a 30-second timeout and fall back on simulated TimeoutError. | Exercise success and timeout paths without a paid call. |
-| `test_no_key_does_not_call_network` | `analyze()` | Without a key, return rules; fail the test if the network stub is called. | Ensure missing configuration never triggers a model request. |
-| `test_restricted_syntax` | `validate_source(); gate_status(); ticket_price(); collect_coins(); countdown(); checkout(); route_parcel() [reference solutions]` | Allow a basic function; compare type/value for 39 cases across six solutions; reject imports/open/eval/attribute access/getattr/classes. | Check reference solutions and selected restrictions, not the entire browser sandbox. |
-| `test_static_and_private_files` | `create_server(); Handler.do_GET() [via HTTP]` | Root contains the app node; source, private config, traversal and directory listing return 404. | Prevent private-file exposure through static serving. |
-| `test_state_roundtrip_cookie_and_conflict` | `Handler.do_GET()/do_POST()/identity(); Store [via HTTP]` | HttpOnly cookie, save/read consistency, stale-version 409 and empty state for a different cookie jar. | Verify real integration of API, session identity and persistence. |
-| `test_bad_origin_and_input` | `Handler.do_POST(); LearningEngine.question()/grade() [indirect]` | A cross-origin POST returns 403; an unknown question returns 400. | Check two invalid requests, not every Host or malformed-JSON case. |
-| `test_grading_and_ai_rule_fallback` | `Handler.do_POST(); LearningEngine.grade(); AI route [via HTTP]` | The grading endpoint recognises the correct answer; unconfigured diagnosis returns rule feedback. | Verify the endpoints used by the frontend reach the domain logic. |
-| `test_team_authorization_and_rate_limit` | `Application.ai_enabled(); authorize_ai(); allow_call()` | Configured availability, correct/incorrect passwords, first 60 calls allowed and the 61st rejected. | Protect access and request volume; hourly reset is not tested. |
-| `test_all_learning_prose_has_english_translation` | `data/*.json; web/src/en.json [data check]` | Check translation entries for selected learning prose, excluding code/options/tests and other skipped fields. | Detect missing entries, not translation quality or UI switching. |
-| `test_english_prompt_preserves_original_evidence` | `analyze(language="en")` | Mocked request asks for English while preserving the reason and standard explanation; English output is accepted. | Avoid altering evidence during language selection; live English quality is not established. |
+内容文件为 `concepts.json`（15 项）、`lessons.json`（15 项）、`questions.json`（30 项）和 `coding_tasks.json`（6 任务/39 案例）。
 
+```json
+{
+  "version": 1,
+  "reads": [],
+  "attempts": [],
+  "drafts": {},
+  "codeAttempts": []
+}
+```
 
-## 9. 变更、审查与验收责任 / Change, review and acceptance
+选择题记录含 `id`、`question_id`、`choice`、`reason`、`correct`、`diagnosis`、`created_at`、`hints_used`、`course_concept`、`feedback`；编程记录含 `id`、`task_id`、`source`、`passed`、`created_at`、`details`。时间戳必须带时区，选择题 `correct` 由状态校验重新计算。
 
-组长维护基线和整合；计算机B维护测试；计算机C牵头独立审查与运行验证；教育成员审查内容；设计成员检查交互和PiPo；管理成员维护需求、验收与提交清单。此处是职责安排，不证明工作已经完成。
+```sql
+CREATE TABLE learners (
+  id TEXT PRIMARY KEY,
+  revision INTEGER NOT NULL,
+  state TEXT NOT NULL
+);
+```
 
-The leader integrates; computing B maintains tests; computing C leads independent review and execution checks; education reviews content; design checks interaction; management maintains requirements and acceptance records. Assigned responsibility is not completion evidence.
+状态用于本地学习记录，不作为账号身份或监考考试凭据。
 
-修改流程 / Change process: 标注FR/NFR → 明确预期 → 尽可能先补复现测试 → 修改 → 回归 → 另一成员审查 → 更新README/SPEC及验收记录。 / Identify requirement, define behaviour, preferably reproduce with a test, change, regress, independently review and update documents.
+### 6. HTTP 接口
 
-审查记录至少包含 / Minimum review fields: 日期/date、审查人/reviewer、代码版本/version、位置/location、问题/finding、处理/resolution、复核/recheck。不编造签名或补写不存在的测试先行历史。
+全部 POST 要求允许的 Host/Origin、`Content-Type: application/json` 及限定大小的请求体。配置模型且适用时，模型接口还要求 `X-Team-Code`。
 
-当前待完成 / Outstanding: 浏览器验收、目标平台运行证据、独立内容与代码审查、NFR响应测量。可选真实AI评估须区分规则基线、模拟样例标签和独立人工判断；API可调用不等于诊断有效。项目无需为满足课件而增加所有代理、模型或企业系统功能。
-
-Pending evidence includes browser/platform checks, human review and response measurements. Optional live evaluation must distinguish rule baselines, synthetic labels and independent judgments. API availability is not diagnostic validity.
-
-## 10. 课程依据与评分对应 / Course basis and assessment mapping
-
-页码采用原始PPTX的幻灯片顺序。Lecture04 PDF为相同48页版本；Lecture05译文PDF为27页，不能直接套用30页PPTX页码。以下是所提供材料中的原则，不是对外部标准完整条文的复述。
-
-Slide numbers refer to the original PPTX order. Lecture04 has a matching 48-page PDF; the 27-page Lecture05 translation does not share the 30-slide numbering. References describe supplied course principles, not a complete external standard.
-
-| 依据 / Source | 原则 / Principle | 本文落实 / Application |
+| 方法与路径 | 输入 | 成功输出 |
 |---|---|---|
-| Lecture03, functions/data structures/classes/files | 参数、返回、容器、排序、模块职责 / parameters, returns, collections, sorting, responsibilities | §5–6 契约与分层 / contracts and modules |
-| Lecture04, slides 12–17 | 提示四要素；SRS；引用29148及不完整示例 / prompt elements, SRS, cited standard/example | §1–5、提示合同；不声称认证 / scope and contracts, no certification claim |
-| Lecture04, slides 24, 44 | 分解、规格、审查、测试反馈、同步文档 / decomposition, specification, review, feedback | §6、8–9；不伪造TDD历史 / traceable change process |
-| Lecture04, slides 45–47 | README面向人，AGENTS用于代理附加指令 / human README vs agent instructions | README保留运行、项目和贡献说明；详细契约归SPEC / separate purposes |
-| Lecture05, slides 17–19, 22–28 | 消息、JSON、额度及调用建议；模型与代理循环的区别 / messages, JSON, bounds, agents | §2、5.2；明确未实现重试/缓存 / explicit limitations |
-| Lecture06, slides 6, 8, 10 | V模型需求与验证匹配 / requirement–verification matching | §7–8 AC与测试映射 / acceptance and traceability |
-| Lecture06, slides 13–16, 22–28 | 功能/非功能、可量化质量、单元测试与边界 / FR/NFR, measurable quality, unit/boundary tests | §3–4、8；目标与结果分开 / separate targets and evidence |
-| Project Requirements v2, §3.1–3.3 | 实用10%、易用10%、技术55%；Excellent含文档与代码审查 / usefulness, usability, technical depth | 范围、NFR、测试、README、独立审查记录 / scope, tests, docs, review |
-| Project Requirements v2, §4–5 | main.py、README、代码及测试ZIP、引用 / entry point, instructions, packaging, attribution | README运行/提交/来源 / run, package, attribute |
+| GET `/api/state` | 会话 Cookie | `revision`、`state`、包含课程与复习的 `summary`。 |
+| POST `/api/state` | `revision`、`state` | 新 `revision` 与计算的 `summary`。 |
+| POST `/api/import` | `state` | 校验并重新判分的 `state`。 |
+| POST `/api/grade` | `question_id`、`choice` | `correct`、`feedback`。 |
+| POST `/api/recommend` | `question_id`、`diagnosis`、`state` | 排序后的 `questions`。 |
+| GET `/api/diagnose` | 无 | 本地设置的 `configured` 标志。 |
+| POST `/api/diagnose` | 题目、选项、理由、`language` | 诊断或规则 `feedback`。 |
+| POST `/api/agent` | `goal`、`history`、`language`、`state` | `reply`、工具 `trace`、`actions`、`source`。 |
 
-本次重写提供规格和文档证据，并不替代真实独立代码审查，也不保证最终Excellent成绩。展示20%、个人报告5%、互评及Moodle提交要求由小组另行完成。
+错误状态：400 字段无效；401 团队口令错误；403 Host/Origin 不符；404 未知/私有路径；409 版本冲突；413 请求大小；415 内容类型；503 Agent 未配置；502 Agent 本轮未完成；500 未预期的 POST 处理错误。配置标志表示本地设置，不代表服务商可达。
 
-This rewrite supplies specification/documentation evidence, not independent human review or a guaranteed grade. Presentation (20%), individual report (5%), peer assessment and Moodle obligations remain separate.
+Agent 请求示例（团队口令放入请求头）：
 
-参考材料 / Supplied references:
+```json
+{
+  "goal": "根据我的进度打开下一课",
+  "history": [],
+  "language": "zh",
+  "state": {"version": 1, "reads": [], "attempts": [], "drafts": {}, "codeAttempts": []}
+}
+```
 
-1. INT6181 Group Project Requirements_v2.pdf, pp.1–3.
-2. Lecture03 Review of Programming II.pptx.
-3. Lecture04 Generative AI in Programming.pptx / matching PDF.
-4. Lecture05 Foundation of Coding Agents.pptx; translated PDF used as a secondary reading aid.
-5. Lecture06 Testing and Debugging I.pptx.
+### 7. 模型与工具信任边界
 
-软件依赖和外部资源的来源见README及licenses。对课件引用的ISO标准只采用课件已介绍的概念，没有声称核查完整标准。文档由AI协助整理并对照代码；最终团队验收应依据真实记录。
+诊断使用受限字段与依据约定，PiPo 使用工具白名单作为执行边界。两者将学生理由和模型文本视为数据。Agent 系统提示要求个性化规划前检查进度、使用导学讲解并提供适当提示；Python 独立执行操作限制，不依赖模型的文字承诺。工具不包含 shell、任意文件写入或通用网络操作。
 
-Dependency attribution is in README/licenses. The full ISO standard was not audited. AI assisted this code-grounded documentation; final team acceptance requires actual records.
+服务商接收目标、近期对话及选定学习观察，或诊断必需的题目/理由数据；模型消息正文不包含 API 凭据和团队口令。回复用于学习辅助，教育效果主张由相应证据支持。
+
+### 8. 评估方案与需求追踪
+
+**本次回归结果：** 2026 年 10 月 29 日，macOS / Python 3.13.11，**43 个测试方法通过**。项目方法 37 个：核心 16、HTTP 6、语言 2、Agent 13；`test_main.py` 另有 6 个独立示例方法。AI 为模拟响应，HTTP 使用临时本机服务和数据库；部分方法遍历 30 道题输出及 39 个编程参考案例。
+
+```bash
+python -m unittest discover -s tests -t . -v
+```
+
+| 需求 | 自动证据 | 界面或效果评估场景 |
+|---|---|---|
+| FR-01 | `LanguageTests` | 输入理由/代码后切换语言，检查显示及输入保留。 |
+| FR-02 | `test_all_question_answers`、HTTP 判分 | 正确、错误和空选择。 |
+| FR-03 | 课程解锁、提示/自由练习测试 | 阅读、课程作答、进入下一课。 |
+| FR-04 | 应用源码合同 | 修改理由再分析，检查次数不增加。 |
+| FR-05 | 目标/未知推荐、Agent 推荐测试 | 混合未做/到期/已做历史，核对顺序与章节。 |
+| FR-06 | 提前重复复习测试 | 控制时间验证各阶段、提示和封顶。 |
+| FR-07 | `GLMDiagnosisTests`、英文提示及授权测试 | 服务错误显示，与独立人工标签比较。 |
+| FR-08 | SQLite 隔离/冲突、HTTP 保存 | 刷新及两个页面冲突写入。 |
+| FR-09 | 导入重判、无效/超长测试 | 导出后确认替换，取消则保留状态。 |
+| FR-10 | AST 限制及 39 个参考案例 | 真实 Worker 执行六任务，检查停止/超时/错误。 |
+| FR-11 | 汇总实现 | 跨本地日期的已知历史，核对曲线与表格。 |
+| FR-12 | 10 个 `PiPoTests`、Agent HTTP 集成 | 自然语言目标、工具、打开内容、追问、停止及失败。 |
+| NFR-02/03/04/06 | 输入、HTTP、授权、正文与持久化断言 | 按上表补充精确边界和浏览器检查。 |
+
+**PiPo 回归职责。** 十三个方法分别验证完整观察循环；非法 ID/锁课/单动作；推荐省略答案；额度不足不联网；工具超限拒绝；拒绝动作后恢复；上下文与凭据边界；第五轮关闭工具及逐请求计数；准备动作后超时；未完成/超长输出。
+
+**界面验收。** 每项记录日期、代码版本、操作系统/浏览器、步骤、实际结果和证据文件。首次流程从空空间开始，完成可保存的选择题/编程记录；回访流程展示到期复习及 PiPo 选定的活动。启用模型时使用支持工具的账户模型，对照可见工具记录和实际打开内容。
+
+**真实模型评估。** `scripts/evaluate_ai.py` 生成规则基线，`--live` 显式开启对 12 个模拟诊断案例的付费请求。独立人员标注案例并评估事实正确性、相关性后再解释一致率。Agent 场景另记录工具选择、动作有效性、恢复能力及教学回复。模拟回归验证控制流程，不作为真实模型准确率或学生学习效果研究。
+
+**代码审查。** 检查模块合同、失败路径、状态保存、模型数据发送和工具权限；记录审查人、版本、位置、问题、处理及复核。变更遵循“需求—预期—测试/修改—回归—审查—文档”。实际完成记录、测量结果和职责分工分别保存。
+
+### 9. 课程对应与展示证据
+
+| 课程/评分原则 | 已实现证据 |
+|---|---|
+| 原创性与实用性 10% | 同一应用把错答连接到解释、后续练习和 PiPo 选择的具体学习活动。 |
+| 易用性 10% | 单命令本地启动、中英文、情境反馈、明确错误及记录保留。 |
+| 技术深度 55% | Python 计算、函数/类/模块、JSON、排序、SQLite 事务、模型接口和 Agent 工具。 |
+| Good：规格与测试 | 功能/非功能合同、接口/数据约定和需求验证映射。 |
+| Excellent：文档与代码审查 | 运行 README、软件规格及用于记录问题和复核的审查流程。 |
+| 生成式 AI 工程加分 | AI 辅助实现、测试、规格、文档和检查，小组核实实际采用的输出。 |
+| Lecture04 | 提示要素、SRS、任务分解，运行说明与详细合同分别组织。 |
+| Lecture05 | 角色消息、token 限制、模型与执行环境、工具白名单及连续观察。 |
+| Lecture06 | 可判定功能条件、量化运行约束、单元/集成测试及需求验证匹配。 |
+
+两类展示分别制作：中英文课堂稿各五页精选技术内容，讲解安排 4:45，控制在五分钟内；中英文视频配套稿各九页，依次包含引言、问题描述、方法论、代表性现场演示和结论，安排 14:30，其中 8:15 为真实应用操作。最终提交十五分钟内的实际视频。录制与课堂指南包含师生答问准备及每位成员必须完成的同伴互评要求。
+
+### 10. 参考材料
+
+所提供的 INT6181 项目要求 v2 第 3–5 节；Lecture03 编程复习；Lecture04 编程中的生成式 AI 第 12–17、24、44–47 页；Lecture05 编程 Agent 基础第 17–19、22–28 页；Lecture06 测试与调试第 6、13–16、22–28 页；CaseStudy5 软件需求规格。页码采用原始 PPTX 顺序。组件来源及许可位置见 README。
+
+## GLM-4.7 configuration and regression scope
+
+The named target is Z.ai GLM-4.7 via the school gateway using the OpenAI-compatible protocol. OPENAI_* configuration names are retained for compatibility. The gateway does not reliably report model identity; configured identity is not proof of actual provider routing. GLMDiagnosisTests verifies valid/unknown diagnoses, rejected fabricated evidence, standard-explanation fallback, mocked request success and timeout, App Key errors without credential disclosure, Markdown JSON compatibility and no-network fallback when a key is missing. LanguageTests verifies the outgoing glm-4.7 model ID, disabled-thinking request and preserved source evidence. PiPoTests covers native and school JSON tool loops, plain-text summaries only after real content reads, and rejection of textual tool markup. All these regression calls are simulated, not live quality or latency measurements.
+
+## GLM-4.7 配置与回归范围
+
+目标模型为通过学校 OpenAI 兼容网关调用的智谱 GLM-4.7，保留 OPENAI_* 配置名以兼容已有设置。学校响应未可靠报告模型身份，配置名称不等于实际路由证明。GLMDiagnosisTests 验证有效/unknown 诊断、伪造引用拒绝、标准解析回退、模拟成功与超时、App Key 错误与凭据隐藏、Markdown JSON 兼容和无密钥不联网。LanguageTests 检查请求中的 glm-4.7、关闭思考参数及原始依据保留。PiPoTests 验证原生与学校 JSON 工具循环、实际读取内容后的普通文字总结，以及伪工具标记拒绝。上述回归使用模拟响应，不代表已测得真实诊断质量或延迟。

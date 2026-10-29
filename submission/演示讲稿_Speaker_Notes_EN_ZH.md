@@ -1,196 +1,180 @@
-# PySteps 双语展示讲稿 / Bilingual presentation script
+# Group 8 — Video presentation · 14:30
 
-课堂5分钟，最多5页。两种语言便于核对，现场选择一种语言讲述。
+## 1. PySteps: Python learning with PiPo
 
-Classroom presentation: five minutes and five slides. The two languages support review. Speak in one language during delivery.
+**0:00–0:45**
 
-## Slide 1 / 第1页
+Introduce Group 8 and the learner problem. Say: “PySteps connects a wrong answer with an explanation, a related exercise and a coding activity. PiPo can inspect our learning records and select a next step.” State that the video includes live use of the application.
 
-### On-slide content / 页面内容
+## 2. The learner problem
 
-PySteps
-Python concept diagnosis
-and practice recommendation
-Python 概念诊断与练习推荐
-For beginners who need help understanding a wrong answer.
-帮助初学者理解错因，再练习相应概念。
-Conditions, loops, functions
-条件判断、循环、函数与返回值
-Group N / 组号待填写
+**0:45–1:45**
 
-### Speaker notes / 讲者备注
+Use one learner throughout the demonstration: a beginner confuses > with >=, practises a comparison, then applies it in gate_status. Explain practical settings: an individual studying independently, a tutor working with a small group, and classroom practice. Each needs concrete feedback, a next task and saved records. These are use scenarios, not reported study outcomes.
 
-ENGLISH SPEAKER NOTES
-0:00–0:40 (40 seconds). Introduce the learner: a Python beginner can select a wrong output without knowing which concept caused it. PySteps combines short concept lessons, answer checking and another exercise. Scope is limited to conditions, loops and functions. A wrong answer is evidence of a possible misconception, not proof of a stable learning deficit. State the real group number and introduce the team using the final member list.
+## 3. Method: one continuous learning workflow
 
-中文讲稿
-0:00–0:40（40秒）。介绍用户：Python初学者选错输出后，常常不知道错在哪个概念。PySteps通过简短概念导学、判分与后续练习帮助理解。范围限定为条件判断、循环、函数。一次错误只能提示可能的误区，不能证明学生稳定地不理解。填写真实组号后，按最终成员名单介绍团队。
+**1:45–3:15**
 
-EVIDENCE / 证据
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/data/concepts.json
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/data/questions.json
-Mascot supplied by project / 形象来源：/Users/crayon11/Downloads/EDU/Python/final-homework-3/web/public/ai-character.png. Its visible watermark identifies AI generation.
-/Users/crayon11/Downloads/EDU/Python/final_homework/INT6181 Group Project Requirements_v2.pdf
+Explain the method before switching to live use. Python compares answers to the question bank; course completion requires reading and two independent unhinted answers. Recommendation stays in the current chapter and excludes the question just answered. Optional GLM-4.7 diagnosis analyses reasons; PiPo uses a separate repeated model/tool/observation loop. SQLite connects the activities through a learning state. Explain simple usability: a local launch command, a visible language switch, saved drafts and meaningful errors.
 
-Submission reminders / 提交提醒
-Group N and member names must be replaced by the real group details before submission. Use one spoken language for the 5-minute classroom presentation. The separate 15-minute video has not been created by this deck.
-提交前填写实际组号与成员信息。课堂5分钟展示选择一种语言讲述。本PPT不代表已完成另需提交的15分钟视频。
+## 4. Live demonstration: mistake feedback
 
-## Slide 2 / 第2页
+**3:15–5:30**
 
-### On-slide content / 页面内容
+SWITCH TO THE RUNNING APPLICATION for this full segment; do not remain on this slide. Open Free practice and select boundary_1 (the first conditionals question). Enter “I thought greater than includes equality”, choose B: True, submit and show the fixed incorrect result. Point to the standard explanation and available hints. With the prechecked configured model, request analysis and show the quoted reason; explain that it does not change the answer key. Revise the reason to “I now distinguish > from >=; equality makes this expression false”, reanalyse and show that the attempt count has not increased. Briefly show the language switch and clear labels. Narrate the expected result only after it is visible.
 
-Learning flow and features
-学习流程与功能
-02
-01  Read a concept and follow the learning map
-阅读概念导学，按知识地图学习
-02  Answer a question and explain the reasoning
-完成选择题，答错后仍可补充想法
-03  Review feedback and try a targeted exercise
-查看反馈，练习对应概念或到期复习题
-04  Write Python in a chapter task and track progress
-进入章节编程任务，查看错题与学习进度
-3 chapters   15 concepts   30 questions   6 coding tasks
-3章   15个概念   30道选择题   6个编程任务
+## 5. Live demonstration: PiPo chooses practice
 
-### Speaker notes / 讲者备注
+**5:30–8:00**
 
-ENGLISH SPEAKER NOTES
-0:40–1:35 (55 seconds). Explain the complete learner journey. The course map unlocks concepts through prerequisite progress. Independent correct answers to two different course questions are needed after reading. Free practice remains available and coding tasks do not require finishing the multiple-choice questions first. Show where a learner can edit the explanation after a wrong answer. Progress includes a chart and an equivalent data table. The interface supports English and Chinese. PiPo currently gives rule-based navigation, not an autonomous coding-agent service.
+STAY IN THE APPLICATION. Open PiPo, enter the team access code without showing the provider key, and send the displayed goal. Wait for the real completed response. Expand the visible tool trace and explain the actual calls rather than reading a predetermined sequence. Confirm that the opened question is a valid inspected item in the relevant chapter and not boundary_1. Ask a short follow-up: “Explain why equality matters here without giving me the answer.” Point out tool decisions and the distinction between model-selected tools and Python-executed actions. If the account model cannot complete the turn, show the actual error and explain the observed state; arrange a functioning account before the final recording. Do not substitute simulated test output for this live segment.
 
-中文讲稿
-0:40–1:35（55秒）。说明完整学习流程。知识地图按前置关系解锁，阅读后需在课程模式无提示独立答对两道不同题。自由练习随时可用，进入编程任务不要求先做完选择题。指出答错后仍可补充理由的位置。学习进度包含曲线及对应数据表。界面支持中英文。PiPo目前提供规则式学习导航，不是自主执行任务的编程智能体。
+## 6. Live demonstration: Python coding
 
-EVIDENCE / 证据
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/backend/domain.py (courses, summary)
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/web/src/App.tsx
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/web/src/AssistantWidget.tsx
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/data
+**8:00–10:30**
 
-Submission reminders / 提交提醒
-Group N and member names must be replaced by the real group details before submission. Use one spoken language for the 5-minute classroom presentation. The separate 15-minute video has not been created by this deck.
-提交前填写实际组号与成员信息。课堂5分钟展示选择一种语言讲述。本PPT不代表已完成另需提交的15分钟视频。
+STAY IN THE APPLICATION. Open Coding challenges → Spaceport Entry Pass. Explain the rule: energy below 20 returns the required recharge string; otherwise a badge permits entry. First run the starter pass body to show useful failing case results, then paste the prepared reference function from the recording guide. Run examples (first two cases), then Check answer (all seven cases for this task). Highlight the 19/20 boundary, all visible passing results and the saved submission. Briefly introduce a syntax error and show its location, then restore the correct source. Explain that the Worker executes browser Python, while the backend stores progress.
 
-## Slide 3 / 第3页
+## 7. Live demonstration: returning to saved learning
 
-### On-slide content / 页面内容
+**10:30–11:30**
 
-Python architecture and AI assistance
-Python 架构与 AI 辅助
-03
-Python server / Python 服务端
-Deterministic grading and SQLite records
-标准答案判分，SQLite保存学习记录
-Rules rank the question bank
-规则对人工题库排序，排除当前原题
-Browser Worker runs Python tasks
-浏览器Worker运行受限制的Python任务
-Kimi / Kimi 模型
-Reasoning supplies extra evidence
-分析文字理由，引用学生原话
-Validated explanation or rule fallback
-校验个性化讲解，失败时回退规则反馈
-Live diagnostic quality: still pending
-真实诊断质量：仍待独立人工评估
-Priority: unseen target concept, due review, other unseen, remaining questions
-推荐顺序：同概念未做题、到期题、其他未做题、剩余已做题
+STAY IN THE APPLICATION. Open Review mistakes and identify the comparison attempt and revised reason. Open Learning progress and show the coding completion/attempt counts. Refresh and confirm records remain in the same browser space. Export a JSON backup and explain that import is a confirmed replacement. These actions establish practical continuity for self-study and tutor-led sessions. Do not clear cookies or import a backup into a real learner space during the recording.
 
-### Speaker notes / 讲者备注
+## 8. Engineering method and verification
 
-ENGLISH SPEAKER NOTES
-1:35–2:50 (75 seconds). Python implements grading, concept progression, scheduling, recommendation and server-side Kimi validation. JavaScript provides the browser UI, while Pyodide runs learner Python inside a Worker. The recommender filters to the current chapter and removes the current question. It prefers unseen questions matching the suspected concept, then due review, other unseen questions and remaining questions. Review intervals progress through 1, 3, 7, 14 and 30 days after qualifying independent answers. A wrong answer becomes due after 10 minutes. Kimi analyses the reason and returns the candidate concept or unknown. Evidence checks require a quote from the learner and preserve the approved answer and explanation. AI can affect the diagnosis used to rank questions but it does not generate the question bank. A successful HTTP request or billing entry does not demonstrate good diagnostic quality. Live quality evaluation remains outstanding.
+**11:30–13:30**
 
-中文讲稿
-1:35–2:50（75秒）。Python实现判分、概念解锁、复习安排、推荐及服务端Kimi结果校验。JavaScript负责网页界面，Pyodide在Worker中运行学习者代码。推荐先限定当前章节，排除当前题，再优先同概念未做题、到期复习题、其他未做题和剩余已做题。符合条件的独立答对使复习间隔逐步达到1、3、7、14、30天，答错10分钟后到期。Kimi分析理由，返回候选概念或unknown。程序检查引用是否来自学生原话，并保留审核答案与解析。AI诊断可以影响推荐排序，但不会生成题库。HTTP成功或账单扣费都不能证明诊断质量，真实质量评估仍待完成。
+Return to the slides. Show domain.py, agent.py and storage.py briefly using prepared windows. Explain functions/classes/collections (Lecture03), prompt contracts and SRS (Lecture04), model plus harness (Lecture05), and requirement/test matching (Lecture06). Show the current saved regression result dated 29 October 2026: 38 passed, including 10 PiPo methods. Explain that model responses in the automated tests are simulated; the live application segment is a separate demonstration. Show one requirement in SPEC and the named test. Describe the review record fields—reviewer, code location, finding, resolution and recheck—and show actual completed records if available. Identify CI as a configured multi-platform pipeline, not an invented successful run. State that AI assisted implementation, tests and documentation.
 
-EVIDENCE / 证据
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/main.py
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/backend/domain.py (schedule, recommend)
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/backend/ai.py (analyze, validate)
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/backend/storage.py
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/web/public/python-worker.mjs
+## 9. Conclusion: feedback connected to a next step
 
-Submission reminders / 提交提醒
-Group N and member names must be replaced by the real group details before submission. Use one spoken language for the 5-minute classroom presentation. The separate 15-minute video has not been created by this deck.
-提交前填写实际组号与成员信息。课堂5分钟展示选择一种语言讲述。本PPT不代表已完成另需提交的15分钟视频。
+**13:30–14:30**
 
-## Slide 4 / 第4页
+Summarise only what the audience has just seen: incorrect answer and explanation, revised reason, PiPo-selected practice, task cases and persistent records. State the practical contribution without asserting measured learning gains. Thank the audience. Finish by 14:30, leaving 30 seconds before the 15-minute cap for transitions or variable model latency.
 
-### On-slide content / 页面内容
 
-Engineering evidence and open checks
-工程证据与待完成验证
-04
-Available evidence / 已有证据
-21 automated tests passed
-21项自动测试通过（2026-10-27）
-Specification, modular code and README
-功能规格、模块化代码与运行说明
-39 coding cases in reference fixtures
-参考解包含39个编程测试案例
-Team work still needed / 团队仍需完成
-Independent review with recorded findings
-独立代码审查，记录问题与修复复核
-Human labels and live AI comparison
-人工复核标签，比较规则与真实AI结果
-Windows and Linux execution evidence
-Windows与Linux实际运行证据
-Mock AI tests verify behavior. They do not establish diagnostic accuracy.
-模拟AI测试验证程序行为，不能证明模型诊断准确率。
+# Group 8 — Classroom technical presentation · 4:45
 
-### Speaker notes / 讲者备注
+## 1. Python architecture for learning decisions
 
-ENGLISH SPEAKER NOTES
-2:50–3:55 (65 seconds). State the current evidence precisely: all 21 unittest tests passed on 27 October 2026 without paid API calls. Tests cover grading, course flow, scheduling, persistence, HTTP behavior, AI validation and fallback, language handling, and reference coding answers. The 39 coding cases are reference fixtures, not a new cross-browser execution claim. The project includes a specification and documentation. The CI configuration contains a platform matrix, but configuration alone is not proof of successful runs. An independent teammate must review code they did not write, log findings, receive fixes and verify them. For AI evaluation, compare the rule baseline with actual model output on held-out examples with separately reviewed human labels. Keep failures and unknown cases in the report. The mock tests cannot prove better student learning.
+**0:00–0:35**
 
-中文讲稿
-2:50–3:55（65秒）。准确说明证据：2026年10月27日，21项unittest测试全部通过，没有付费API调用。覆盖判分、课程流程、复习安排、保存、HTTP行为、AI校验与回退、语言处理及编程参考解。39个编程案例是参考解测试证据，不代表今天重新完成了跨浏览器执行验证。项目已有功能规格和文档。CI虽然配置了系统矩阵，但配置存在不等于已运行通过。独立组员应审查非本人编写的代码，记录发现，修复后再复核。AI评估需使用与调试样例分开的案例，并独立复核人工标签，比较规则与真实模型输出，保留失败与不确定案例。模拟测试不能证明真实学习效果提高。
+Introduce the purpose in one sentence, then focus on architecture. Python owns learning decisions and persistence; React handles interaction; Pyodide runs student code in a browser Worker. Name the module boundaries. Lecture03: functions, classes and modularity.
 
-EVIDENCE / 证据
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/tests
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/SPEC.md
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/README.md
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/.github/workflows
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/scripts/evaluate_ai.py
-Current test execution confirmed by the project audit on 2026-10-27.
-Lecture06 Testing and Debugging I.pptx: testing and debugging evidence.
+## 2. Learning rules as testable Python functions
 
-Submission reminders / 提交提醒
-Group N and member names must be replaced by the real group details before submission. Use one spoken language for the 5-minute classroom presentation. The separate 15-minute video has not been created by this deck.
-提交前填写实际组号与成员信息。课堂5分钟展示选择一种语言讲述。本PPT不代表已完成另需提交的15分钟视频。
+**0:35–1:35**
 
-## Slide 5 / 第5页
+Use boundary_1 to illustrate deterministic grading: 5 > 5 is False. Explain how dictionaries store questions, sets express prerequisites and passed concepts, and a tuple key ranks candidates. A wrong answer schedules ten minutes; independent due-time success advances stage. Connect each rule to a named LearningTests test. This is technical explanation, not a long product tour.
 
-### On-slide content / 页面内容
+## 3. PiPo model/tool/observation loop
 
-Demonstration and limitations
-演示路径与能力边界
-05
-Demo 1  Read a concept, answer incorrectly, add a reason
-演示1：阅读概念，答错后补充想法
-Demo 2  Compare rule feedback and an AI analysis result
-演示2：对照规则反馈与一次AI分析结果
-Demo 3  Open a chapter coding task and inspect progress
-演示3：进入章节编程任务，查看进度与保存记录
-Current limits / 当前限制
-Small question bank repeats. No account-based sync. Learning gains remain unproven.
-小题库仍会重复，没有账号跨设备同步，尚未证明真实学习成绩提高。
+**1:35–2:40**
 
-### Speaker notes / 讲者备注
+Explain one concrete goal: “Review my mistake and open related practice.” The model receives tools, selects one, sees Python’s observation and chooses its next step. Highlight that this differs from keyword routing. Python rejects unknown tools, uninspected IDs and locked lessons. State the per-turn limits: up to five model requests, eight tool executions and one opening. Refer to the multi-round and rejected-action-recovery tests. A brief prepared tool trace may be shown within this timing, but do not spend the slot waiting for a network request.
 
-ENGLISH SPEAKER NOTES
-3:55–5:00 (65 seconds). Use one rehearsed short path. Start with python3 main.py --port 8001 --open on macOS or py main.py --port 8001 --open on Windows, using the actual available port. Open the learning map, read a concept and submit a wrong answer. Add a reason after submission, then show the analysis control and feedback source. For a live API request, confirm the service configuration and team access code ahead of time and expect a charge. If a prepared mock is used, label it clearly as simulated. Do not present rule fallback as successful AI. Open one chapter coding task, run a known sample and show the progress view. Explain limitations: question repetition, manual backup for moving between devices, incomplete real-user evidence, and no proven learning gain. Finish by inviting questions about the evaluation design. This deck is limited to five slides for classroom delivery. The separate fifteen-minute video should cover the full system, source code and testing evidence without extending this five-minute classroom slot.
+## 4. Reliable records and controlled code execution
 
-中文讲稿
-3:55–5:00（65秒）。提前排练一条简短路径。macOS用python3 main.py --port 8001 --open，Windows用py main.py --port 8001 --open，并选择实际可用端口。进入知识地图，阅读概念，提交错误答案。提交后补充理由，展示分析入口和反馈来源。若现场调用API，提前确认服务端配置与团队口令，调用会收费；若使用预录或模拟结果，必须明确标注。不要把规则回退说成AI成功。进入一个章节编程任务，运行已准备的示例，再展示进度。说明题库会重复、换设备依赖手动备份、真实用户证据不足、学习收益未被证明。最后请老师对评估方案提出意见。课堂展示限5页、5分钟，另外15分钟的视频应完整展示功能、源码与测试，不应延长课堂时长。
+**2:40–3:40**
 
-EVIDENCE / 证据
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/main.py
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/web/src/App.tsx
-/Users/crayon11/Downloads/EDU/Python/final-homework-3/README.md
-/Users/crayon11/Downloads/EDU/Python/final_homework/INT6181 Group Project Requirements_v2.pdf
+Explain the two-tab stale-revision example and why atomic writes avoid silent replacement. Distinguish backend learning Python from browser learner Python. A Worker can be terminated without executing student source in the web server. Explain diagnosis evidence checks and shared 60/hour allowance. Match the claims to SQLite/HTTP/AST/AI tests. These are implemented engineering choices, not claims of production security certification.
 
-Submission reminders / 提交提醒
-Group N and member names must be replaced by the real group details before submission. Use one spoken language for the 5-minute classroom presentation. The separate 15-minute video has not been created by this deck.
-提交前填写实际组号与成员信息。课堂5分钟展示选择一种语言讲述。本PPT不代表已完成另需提交的15分钟视频。
+## 5. Requirements, tests and review evidence
+
+**3:40–4:45**
+
+Show the source of the test count and one SPEC-to-test mapping. Explain that automated model tests are simulated and live teaching quality is a separate evaluation. State how AI assisted implementation, tests and documentation. Describe code review evidence using reviewer, code location, finding, resolution and recheck; show actual records if completed. Conclude that the technical contribution is an inspectable Python learning engine plus a bounded tool-using Agent. Finish at 4:45, preserving 15 seconds within the five-minute slot for transitions. Answer instructor/classmate questions afterwards as directed.
+
+
+---
+
+# 第 8 组 — 视频汇报 · 14:30
+
+## 1. PySteps：Python 学习与 PiPo
+
+**0:00–0:45**
+
+介绍第 8 组与学习者问题。开场：“PySteps 把错答连接到解释、相关练习和编程活动。PiPo 能读取学习记录并选择下一步。”说明本视频会现场操作应用。
+
+## 2. 学习者面对的问题
+
+**0:45–1:45**
+
+贯穿同一名学习者：把 > 与 >= 混淆，完成比较运算练习，再应用到 gate_status。说明现实场景：个人自学、教师带小组、课堂练习。三者都需要具体解释、下一项任务与保存记录。这是应用场景，不是虚构用户实验结果。
+
+## 3. 方法论：连续的学习流程
+
+**1:45–3:15**
+
+先解释方法，再切到实际操作。Python 对照题库判分；课程通过需要阅读和两道无提示独立正确作答。推荐保持同章并排除刚做的原题。GLM-4.7 诊断用于理由分析，PiPo 则使用独立的多轮模型—工具—观察循环。SQLite 用同一状态连接各项活动。指出易用设计：本地单命令启动、清晰语言切换、草稿保存和明确错误。
+
+## 4. 现场演示：理解一次错答
+
+**3:15–5:30**
+
+本段切换到正在运行的应用，不停留在幻灯片。打开自由练习并选择 boundary_1（条件判断第一题）。写“我以为大于包含等于”，选择 B：True 后提交，展示固定错误判分、标准解析与提示。使用录制前已检查的真实模型请求分析，展示引用的学生理由，说明模型不更改答案。改成“我现在能区分 > 和 >=，相等时这条表达式为假”，重新分析，检查作答次数不增加。简短展示语言切换与明确标签。看到实际结果后再说明结果。
+
+## 5. 现场演示：PiPo 选择练习
+
+**5:30–8:00**
+
+继续在应用内操作。打开 PiPo，输入团队口令，避免露出模型密钥，发送本页目标。等待真实完成响应，展开工具记录，按实际调用说明，不背诵预设工具顺序。检查打开的是已检查、相关章节的有效题目，且不是 boundary_1。追问“先不告诉我答案，解释这里为什么要检查等于”。说明模型选择工具、Python 执行动作的分工。若账户模型无法完成，应显示实际错误，并在最终录制前准备可正常工作的账户；不把模拟测试当作现场模型输出。
+
+## 6. 现场演示：用 Python 应用概念
+
+**8:00–10:30**
+
+继续在应用内。进入趣味编程—星港通行证。讲解低于 20 需充能，否则检查通行证。先运行只有 pass 的函数，展示清楚的失败案例，再粘贴录制指南里的参考函数。运行示例检查前两例，再检查答案运行全部七例，突出 19/20 边界、通过结果及提交保存。短暂制造语法错误，展示错误行后恢复正确代码。说明浏览器 Worker 执行 Python，后端保存记录。
+
+## 7. 现场演示：恢复保存的学习
+
+**10:30–11:30**
+
+继续在应用内。进入错题回顾，找到比较运算作答和修订理由；在学习进度展示编程完成与答题次数。刷新，确认同一浏览器空间记录仍在。导出 JSON，说明导入前需确认替换。用这些操作说明自学和教师带组的连续使用价值。录制时不清除真实用户 Cookie，也不向真实学习空间导入备份。
+
+## 8. 工程方法与验证证据
+
+**11:30–13:30**
+
+回到幻灯片，短暂展示预先打开的 domain.py、agent.py、storage.py。对应 Lecture03 的函数、类与容器，Lecture04 的提示合同与 SRS，Lecture05 的模型与执行环境，Lecture06 的需求验证匹配。展示 2026 年 10 月 29 日回归记录：38 项通过，其中 10 项 PiPo。说明自动测试使用模拟模型，与刚才真实应用演示是不同证据。展示 SPEC 中一条需求及其测试名称。介绍审查人、位置、问题、处理、复核字段，有真实完成记录时展示。CI 说明为已配置的多平台流程，不虚构绿色运行。说明 AI 辅助实现、测试和文档。
+
+## 9. 结论：把反馈连接到下一步
+
+**13:30–14:30**
+
+只总结观众已经看到的链条：错答解释、理由修订、PiPo 推荐、编程案例与保存记录。说明应用价值，不声称已测得成绩提升。感谢观众，14:30 前结束，距 15 分钟上限留 30 秒用于转场或模型等待。
+
+
+# 第 8 组 — 课堂技术展示 · 4:45
+
+## 1. 支持学习决策的 Python 架构
+
+**0:00–0:35**
+
+用一句话介绍用途，立即进入架构。Python 负责学习决策与保存；React 负责交互；Pyodide 在浏览器 Worker 运行学生代码。说明模块边界，对应 Lecture03 的函数、类与模块化。
+
+## 2. 把学习规则写成可测试的 Python 函数
+
+**0:35–1:35**
+
+以 boundary_1 说明固定判分：5 > 5 为 False。字典保存题目，集合表达前置和通过状态，排序元组决定推荐。错答十分钟后复习，到期独立成功推进阶段。对应 LearningTests 的具体测试。此处讲技术，不展开长时间产品导览。
+
+## 3. PiPo 的模型—工具—观察循环
+
+**1:35–2:40**
+
+使用具体目标“检查我的错题并打开相关练习”。模型拿到工具、选择工具、读取 Python 观察，再决定下一步，区别于关键词导航。Python 拒绝未知工具、未检查 ID 和锁课。说明每轮最多五次模型请求、八次工具、一次打开。对应多轮和拒绝后恢复测试。可短暂展示预先准备的真实工具记录，但不占用本段等待网络。
+
+## 4. 可靠保存与受控代码执行
+
+**2:40–3:40**
+
+以两个页面旧版本保存说明原子写入如何避免静默覆盖。区分后端学习规则和浏览器学生代码，终止 Worker 不需把学生代码放到网页服务器执行。说明诊断引用检查及共享每小时六十次额度，对应 SQLite、HTTP、AST 和 AI 测试。这些是实现机制，不作生产安全认证主张。
+
+## 5. 需求、测试与审查证据
+
+**3:40–4:45**
+
+展示测试计数来源及一条 SPEC 到测试的映射。说明自动模型测试使用模拟响应，真实教学质量另评估。交代 AI 辅助实现、测试与文档。代码审查用审查人、位置、问题、处理与复核作为证据，有实际完成记录时展示。结尾强调可检查的 Python 学习引擎和受限工具 Agent。4:45 结束，五分钟内留十五秒转场；按课堂安排回答师生问题。
