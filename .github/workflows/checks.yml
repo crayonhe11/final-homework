@@ -1,22 +1,49 @@
 name: Python and web checks
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   python:
+    name: Python (${{ matrix.os }}, ${{ matrix.python }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python: ['3.10', '3.13']
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m unittest discover -s tests -t . -v
-      - run: python scripts/package_submission.py --group 8
+      - name: Run project regression and retain its exit code
+        run: python scripts/ci_checks.py unit --report ci-reports/unit.txt
+      - name: Check cross-platform submission packaging
+        run: python scripts/package_submission.py --group 8
+      - name: Keep test report even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-${{ matrix.os }}-${{ matrix.python }}
+          path: ci-reports/unit.txt
+          if-no-files-found: warn
+          retention-days: 7
+
   web:
+    name: Build browser distribution
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,5 +51,106 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: web/package-lock.json
-      - run: npm ci && npm run check && npm run build
+      - name: Install locked dependencies, check types and build
+        run: npm ci && npm run check && npm run build
         working-directory: web
+      - name: Pass the newly built site to later gates
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-distribution
+          path: web/static/
+          if-no-files-found: error
+          retention-days: 7
+
+  integration:
+    name: Built-site integration and delivery package
+    needs: [python, web]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Remove checkout distribution before testing the new build
+        run: python -c "import shutil; shutil.rmtree('web/static', ignore_errors=True)"
+      - uses: actions/download-artifact@v4
+        with:
+          name: browser-distribution
+          path: web/static
+      - name: Start main.py and run all eight independent HTTP contracts
+        run: python scripts/ci_checks.py integration --report ci-reports/integration.txt
+      - name: Create audited delivery archives and checksums
+        run: python scripts/ci_checks.py package --report ci-reports/delivery.json
+      - name: Retain integration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-reports
+          path: ci-reports/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Upload downloadable delivery
+        uses: actions/upload-artifact@v4
+        with:
+          name: group8-delivery
+          path: |
+            dist/group8_project.zip
+            dist/group8_rebuild_inputs.zip
+            dist/SHA256SUMS.txt
+            dist/release-notes.md
+          if-no-files-found: error
+          retention-days: 14
+
+  container:
+    name: Deploy and verify a temporary container
+    needs: integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Remove checkout distribution
+        run: python -c "import shutil; shutil.rmtree('web/static', ignore_errors=True)"
+      - uses: actions/download-artifact@v4
+        with:
+          name: browser-distribution
+          path: web/static
+      - name: Build image, start isolated staging, check interfaces and clean up
+        run: python scripts/ci_checks.py container --report ci-reports/container.txt
+      - name: Retain container build and staging evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-reports
+          path: ci-reports/
+          if-no-files-found: warn
+          retention-days: 7
+
+  delivery:
+    name: Publish verified main build
+    needs: container
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: group8-delivery
+          path: dist
+      - name: Publish versioned prerelease after all gates pass
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: build-${{ github.run_number }}-${{ github.run_attempt }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            --target "$GITHUB_SHA" \
+            --title "PySteps Group 8 verified build $GITHUB_RUN_NUMBER" \
+            --notes-file dist/release-notes.md \
+            --prerelease \
+            dist/group8_project.zip dist/group8_rebuild_inputs.zip dist/SHA256SUMS.txt
