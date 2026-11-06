@@ -4,3 +4,8 @@ config.local.json
 .env*
 runtime
 dist
+
+api_config.json
+ci-reports
+**/__pycache__
+**/*.pyc

@@ -1,67 +1,62 @@
-# 中文版：CI运行记录
+# CI 与交付运行记录 / CI and Delivery Record
 
-## 2026-10-28：首次核对的当前版本运行
+## 中文版
 
-运行链接：https://github.com/crayonhe11/final-homework/actions/runs/40643041857
+### 1. 已核实的历史结果
 
-提交：424f5aacb208ef1c43f982221b338a59e57d3eef。整体失败。
+2026-11-05只读核实的最近一次历史运行：[2026-10-29运行](https://github.com/crayonhe11/final-homework/actions/runs/40840307773)，提交17e1ed22465dac45b69ed0182a00e5892b943030。六个系统/Python组合及网页任务全部成功；Windows日志明确为43项测试通过。该结果只对应这个旧提交。
 
-- 网页检查/构建：成功。
-- Ubuntu + Python 3.10和3.13：成功。
-- Windows + Python 3.13：失败；21项测试中出现7个中文输出题目的子案例错误。
-- Windows + Python 3.10：任务最终标为取消，但测试步骤已有失败记录。
-- macOS两项：任务最终标为取消；步骤日志显示测试与打包成功，不能将整个任务写成成功。
+### 2. 2026-11-06完善的流水线
 
-## 本地修复与后续验证
+1. push、pull_request和workflow_dispatch触发；同分支新版本取消旧运行。
+2. Windows/macOS/Ubuntu × Python3.10/3.13运行项目测试；当前本地57项通过，并检查跨平台打包。保留每个组合的文本日志。
+3. Node22按锁定依赖重新构建网页，上传browser-distribution。
+4. 必须等六个Python任务及网页构建成功，再下载本次构建，启动真实main.py，用临时SQLite执行8个HTTP黑盒契约；本地8项通过。
+5. 生成作业ZIP、重建ZIP、SHA256SUMS并拒绝私有文件；上传group8-delivery。
+6. 用同一网页构建Docker镜像，临时启动容器并再次执行8个HTTP契约；失败保留日志，完成后清理容器。此项本机无Docker，由GitHub runner实际验证。
+7. main分支所有关卡成功才自动创建GitHub版本化预发布。PR不发布main版本。
 
-测试子进程的-I隔离模式忽略PYTHONIOENCODING环境变量。改用命令行-X utf8明确启用子进程UTF-8，并保留父进程UTF-8解码；断言附带子进程stderr，方便排查。CI设置fail-fast:false，某环境失败不再联动取消其余矩阵任务。
+新增CIPipelineTests三项：失败退出码不会被写日志操作掩盖、验收清空继承的付费密钥、ZIP审计拒绝配置/数据库/Git/路径穿越。原验收记录的54项是2026-11-03快照；本次增加后为57项，没有把同一测试重复算成新功能测试。
 
-此修复已推送，后续远端验证结果见下节。当前没有上传产物或自动部署步骤。此前文档中的“远端结果未验证”是旧检查时点；本记录提供后来取得的真实远端结果。
+### 3. 到哪里看证据
 
-## 第二次远端运行：测试通过，Windows打包日志失败
+- [GitHub Actions](https://github.com/crayonhe11/final-homework/actions)：选择准确提交SHA的运行，查看任务与日志。
+- [Pull Requests](https://github.com/crayonhe11/final-homework/pulls?q=is%3Apr)：分支、PR和自动检查记录；具体PR链接也会附在本次任务中。
+- [Releases](https://github.com/crayonhe11/final-homework/releases)：全部检查通过后的main预发布及ZIP/checksum。
+- Actions的Artifacts：tests-*、integration-reports、container-reports保留7天；group8-delivery保留14天。
 
-运行：https://github.com/crayonhe11/final-homework/actions/runs/40643879670
+本文编写时的本地证据与实际远端状态分别记录；远端结果以对应PR/提交链接为准，不把本地通过写成所有平台通过。流水线从不使用真实学校密钥；模型网络调用不属于该验收。
 
-提交：8f64abd22e9be661d32deca274cadee75b022e33。
+### 4. 持续交付与生产部署边界
 
-- 六个 Python 环境的测试步骤全部成功；上次的中文题目输出问题已修复。
-- Ubuntu、macOS 的完整任务与网页任务成功。
-- Windows 3.10、3.13 在打包步骤失败：ZIP 已生成，但最后打印中文组号提醒时，cp1252 编码触发 UnicodeEncodeError。
-- 已在打包脚本中显式将标准输出和错误输出设置为 UTF-8，兼容中文路径及中文提示。无需修改用户系统语言。
-- 本地通过 PYTHONIOENCODING=cp1252 复现原错误；修复后验证该编码、ASCII 和 UTF-8 下正常打包，以及非法组号的正常报错。压缩包完整性检查通过。
+已实现的机制是CI、临时容器验收环境自动部署及版本化交付物发布。没有配置长期可达的生产服务器，因此不宣称已完成生产网站持续部署。Docker监听8000，宿主端口可映射8011；PUBLIC_ORIGIN必须匹配宿主实际来源。README含启动命令。生产主机、域名、秘密变量、持久卷及上线后检查需要在确定服务器后接入。
 
-此轮打包修复仍需推送后取得新的 Windows 绿色运行记录；本地模拟不能替代真实远端验证。CI 成功也不等于已实现 CD 部署。
+Lecture09第5–9页对应测试目标、设计、执行与断言分析；第11/13/16页对应仓库、触发、环境、工作流；第19–20页对应真实PR与查看日志；第12页的持续生产部署仍需服务器。人工成员审查不能由一次自动检查或自己的合并替代。
 
-# English Version: CI Run Record
+---
 
-## 28 October 2026: inspected current-version run
+## English Version
 
-Run: https://github.com/crayonhe11/final-homework/actions/runs/40643041857
+### 1. Verified historical result
 
-Commit: 424f5aacb208ef1c43f982221b338a59e57d3eef. Overall result: failure.
+On 5 November 2026, read-only inspection confirmed [the 29 October run](https://github.com/crayonhe11/final-homework/actions/runs/40840307773) for commit17e1ed22465dac45b69ed0182a00e5892b943030. All six OS/Python jobs and the frontend passed; the Windows log explicitly reported43tests. This evidence applies only to that historical commit.
 
-- Frontend checking/building: success.
-- Ubuntu with Python 3.10 and 3.13: success.
-- Windows/Python3.13: failure, with seven Chinese-output question subcase errors in the21-test suite.
-- Windows/Python3.10: final job conclusion cancelled, with a failed test step recorded.
-- Both macOS jobs: final conclusions cancelled, although test and packaging steps show success; do not label the entire jobs successful.
+### 2. Pipeline completed on 6 November 2026
 
-## Local fix and remaining verification
+Push, pull_request and workflow_dispatch trigger the pipeline; newer same-branch runs supersede older ones. Windows/macOS/Ubuntu with Python3.10/3.13 run the suite and packaging compatibility checks, retaining per-environment reports. The current local suite has57passing methods. Node22 installs locked dependencies and uploads the freshly built browser distribution.
 
-The isolated child interpreter (-I) ignores PYTHONIOENCODING. Use explicit -X utf8 for child output and retain UTF-8 decoding in the parent. Failure assertions now expose child stderr. Set matrix fail-fast:false to let all environments finish independently.
+Integration depends on all Python jobs and the web build. It downloads that exact browser build, starts main.py with temporary SQLite and runs eight implementation-independent HTTP contracts; all eight passed locally. Packaging audits private entries and creates both ZIPs and SHA256 checksums. A subsequent job builds Docker with the same browser artifact, starts temporary staging, executes the eight contracts and cleans up. Docker is unavailable locally, so this gate must be executed on GitHub. Only fully passing main builds publish versioned GitHub prereleases; PRs do not publish main releases.
 
-The change was pushed; see the follow-up run below. Artifact upload and automatic deployment are not implemented. Earlier documents describing remote results as unverified reflect an earlier checkpoint; this record adds the subsequently retrieved evidence.
+Three new CIPipelineTests guard nonzero exit propagation, disabling inherited paid credentials and private/traversal ZIP rejection. The54-test validation record is a3November snapshot; the current57includes these three additional CI-focused checks.
 
-## Second remote run: tests pass, Windows packaging logging fails
+### 3. Evidence locations
 
-Run: https://github.com/crayonhe11/final-homework/actions/runs/40643879670
+Use [Actions](https://github.com/crayonhe11/final-homework/actions) for the exact SHA's jobs/logs, [PRs](https://github.com/crayonhe11/final-homework/pulls?q=is%3Apr) for branch/check evidence and [Releases](https://github.com/crayonhe11/final-homework/releases) for verified main deliveries. Artifacts retain tests-*, integration-reports and container-reports for seven days, and group8-delivery for14days. The task also attaches the concrete PR link.
 
-Commit: 8f64abd22e9be661d32deca274cadee75b022e33.
+Local results at writing time are distinct from actual remote status. Check the associated PR/commit, rather than treating local success as all-platform success. Test services disable real school credentials and do not exercise paid model access.
 
-- Test steps passed in all six Python environments, confirming the earlier Unicode question-output fix.
-- Ubuntu, macOS and frontend jobs succeeded.
-- Both Windows jobs failed during packaging: the ZIP was generated, but printing the Chinese placeholder-group reminder raised UnicodeEncodeError under cp1252.
-- The packaging script now explicitly configures stdout and stderr as UTF-8, supporting Unicode paths and messages without changing the system language.
-- Local validation reproduced the original failure with PYTHONIOENCODING=cp1252, then verified packaging under cp1252, ASCII and UTF-8, normal invalid-group errors, and ZIP integrity after the fix.
+### 4. Delivery versus production deployment
 
-This packaging fix still requires pushing and a fresh successful Windows run. Local simulation does not replace remote verification. Successful CI alone does not establish a CD deployment pipeline.
+Implemented mechanisms are CI, automatic temporary-container staging and versioned deployable delivery. No persistent public production server is configured. Docker listens on8000, usually mapped to host8011, with PUBLIC_ORIGIN matching the host origin. README provides commands. Production host/domain/secrets/persistent storage and post-deployment checks require a chosen server.
+
+Lecture09slides5–9 map to objectives/design/execution/assertion analysis;11/13/16 to repository/triggers/environments/workflow;19–20 to actual PR checks/logs. Slide12's continuous production deployment still needs a server. Automated checks or self-merging do not replace genuine independent human review.

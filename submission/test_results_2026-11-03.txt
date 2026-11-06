@@ -1,0 +1,81 @@
+验证日期 / Validation date: 2026-11-03, Asia/Hong_Kong
+环境 / Environment: macOS, Python 3.13.11
+模型请求全部模拟，不产生API费用 / Model calls are simulated; no paid API usage.
+
+PROJECT REGRESSION (54 real project tests)
+test_final_round_disables_tools_and_charges_each_model_call (tests.test_agent.PiPoTests.test_final_round_disables_tools_and_charges_each_model_call) ... ok
+test_history_is_bounded_and_credentials_stay_out_of_model_payload (tests.test_agent.PiPoTests.test_history_is_bounded_and_credentials_stay_out_of_model_payload) ... ok
+test_incomplete_or_oversized_model_output_is_rejected (tests.test_agent.PiPoTests.test_incomplete_or_oversized_model_output_is_rejected) ... ok
+test_json_gateway_accepts_plain_summary_only_after_content_read (tests.test_agent.PiPoTests.test_json_gateway_accepts_plain_summary_only_after_content_read) ... ok
+test_json_gateway_executes_tools_instead_of_showing_markup (tests.test_agent.PiPoTests.test_json_gateway_executes_tools_instead_of_showing_markup) ... ok
+test_json_gateway_rejects_textual_tool_markup (tests.test_agent.PiPoTests.test_json_gateway_rejects_textual_tool_markup) ... ok
+test_model_observes_then_selects_and_opens (tests.test_agent.PiPoTests.test_model_observes_then_selects_and_opens) ... ok
+test_rate_limit_prevents_network (tests.test_agent.PiPoTests.test_rate_limit_prevents_network) ... ok
+test_recommendation_has_no_answer_keys (tests.test_agent.PiPoTests.test_recommendation_has_no_answer_keys) ... ok
+test_rejected_action_returns_observation_and_model_recovers (tests.test_agent.PiPoTests.test_rejected_action_returns_observation_and_model_recovers)
+A model cannot open uninspected content, but can correct its next step. ... ok
+test_timeout_after_preparing_action_does_not_return_partial_success (tests.test_agent.PiPoTests.test_timeout_after_preparing_action_does_not_return_partial_success)
+Only a completed turn may deliver browser actions; progress stays intact. ... ok
+test_tool_budget_stops_unbounded_model (tests.test_agent.PiPoTests.test_tool_budget_stops_unbounded_model) ... ok
+test_tools_validate_ids_locking_and_single_action (tests.test_agent.PiPoTests.test_tools_validate_ids_locking_and_single_action) ... ok
+test_restricted_syntax (tests.test_core.CodeSyntaxTests.test_restricted_syntax) ... ok
+test_bad_quote_and_label_rejected (tests.test_core.GLMDiagnosisTests.test_bad_quote_and_label_rejected) ... ok
+test_glm_gateway_account_key_error_is_actionable_and_redacted (tests.test_core.GLMDiagnosisTests.test_glm_gateway_account_key_error_is_actionable_and_redacted) ... ok
+test_glm_gateway_markdown_json_preserves_validation (tests.test_core.GLMDiagnosisTests.test_glm_gateway_markdown_json_preserves_validation) ... ok
+test_mock_success_and_timeout_fallback (tests.test_core.GLMDiagnosisTests.test_mock_success_and_timeout_fallback) ... ok
+test_no_key_does_not_call_network (tests.test_core.GLMDiagnosisTests.test_no_key_does_not_call_network) ... ok
+test_valid_and_unknown_diagnoses (tests.test_core.GLMDiagnosisTests.test_valid_and_unknown_diagnoses) ... ok
+test_wrong_answer_or_anchor_uses_reviewed_explanation (tests.test_core.GLMDiagnosisTests.test_wrong_answer_or_anchor_uses_reviewed_explanation) ... ok
+test_all_question_answers (tests.test_core.LearningTests.test_all_question_answers) ... ok
+test_entire_course_unlocks_in_order (tests.test_core.LearningTests.test_entire_course_unlocks_in_order) ... ok
+test_hint_and_free_practice_do_not_pass_course (tests.test_core.LearningTests.test_hint_and_free_practice_do_not_pass_course) ... ok
+test_import_regrades_and_removes_untrusted_feedback (tests.test_core.LearningTests.test_import_regrades_and_removes_untrusted_feedback) ... ok
+test_import_rejects_invalid_and_oversize (tests.test_core.LearningTests.test_import_rejects_invalid_and_oversize) ... ok
+test_recommendation_target_and_unknown (tests.test_core.LearningTests.test_recommendation_target_and_unknown) ... ok
+test_schedule_early_repeat_not_advance (tests.test_core.LearningTests.test_schedule_early_repeat_not_advance) ... ok
+test_sqlite_persistence_isolation_and_conflict (tests.test_core.LearningTests.test_sqlite_persistence_isolation_and_conflict) ... ok
+test_agent_auth_validation_and_action_response (tests.test_http.HTTPTests.test_agent_auth_validation_and_action_response) ... ok
+test_agent_unconfigured_returns_503_without_model_call (tests.test_http.HTTPTests.test_agent_unconfigured_returns_503_without_model_call) ... ok
+test_bad_origin_and_input (tests.test_http.HTTPTests.test_bad_origin_and_input) ... ok
+test_diagnose_status_reports_configuration_without_secrets (tests.test_http.HTTPTests.test_diagnose_status_reports_configuration_without_secrets) ... ok
+test_diagnosis_http_authorization_and_input_do_not_call_model (tests.test_http.HTTPTests.test_diagnosis_http_authorization_and_input_do_not_call_model) ... ok
+test_diagnosis_http_routes_authorized_reason_and_language (tests.test_http.HTTPTests.test_diagnosis_http_routes_authorized_reason_and_language) ... ok
+test_diagnosis_http_shortcuts_and_rate_limit_use_rule_feedback (tests.test_http.HTTPTests.test_diagnosis_http_shortcuts_and_rate_limit_use_rule_feedback) ... ok
+test_grading_and_ai_rule_fallback (tests.test_http.HTTPTests.test_grading_and_ai_rule_fallback) ... ok
+test_import_http_regrades_then_requires_explicit_save (tests.test_http.HTTPTests.test_import_http_regrades_then_requires_explicit_save) ... ok
+test_import_http_rejects_bad_schema (tests.test_http.HTTPTests.test_import_http_rejects_bad_schema) ... ok
+test_json_boundary_errors_have_expected_status (tests.test_http.HTTPTests.test_json_boundary_errors_have_expected_status) ... ok
+test_recommend_http_rejects_invalid_contract (tests.test_http.HTTPTests.test_recommend_http_rejects_invalid_contract) ... ok
+test_recommend_http_returns_target_and_same_chapter (tests.test_http.HTTPTests.test_recommend_http_returns_target_and_same_chapter) ... ok
+test_state_roundtrip_cookie_and_conflict (tests.test_http.HTTPTests.test_state_roundtrip_cookie_and_conflict) ... ok
+test_static_and_private_files (tests.test_http.HTTPTests.test_static_and_private_files) ... ok
+test_team_authorization_and_rate_limit (tests.test_http.HTTPTests.test_team_authorization_and_rate_limit) ... ok
+test_unknown_routes_and_bad_host (tests.test_http.HTTPTests.test_unknown_routes_and_bad_host) ... ok
+test_all_learning_prose_has_english_translation (tests.test_language.LanguageTests.test_all_learning_prose_has_english_translation) ... ok
+test_english_prompt_preserves_original_evidence (tests.test_language.LanguageTests.test_english_prompt_preserves_original_evidence) ... ok
+test_bind_failure_is_reported_without_traceback (tests.test_main.EntryPointTests.test_bind_failure_is_reported_without_traceback) ... ok
+test_help_describes_real_entry_options (tests.test_main.EntryPointTests.test_help_describes_real_entry_options) ... ok
+test_host_port_and_database_are_forwarded (tests.test_main.EntryPointTests.test_host_port_and_database_are_forwarded) ... ok
+test_invalid_port_is_rejected_before_server_creation (tests.test_main.EntryPointTests.test_invalid_port_is_rejected_before_server_creation) ... ok
+test_missing_web_distribution_has_actionable_error (tests.test_main.EntryPointTests.test_missing_web_distribution_has_actionable_error) ... ok
+test_open_uses_bound_port_and_keyboard_interrupt_closes_server (tests.test_main.EntryPointTests.test_open_uses_bound_port_and_keyboard_interrupt_closes_server) ... ok
+
+----------------------------------------------------------------------
+Ran 54 tests in 0.981s
+
+OK
+
+INDEPENDENT HTTP CONTRACT (8 tests, reference instance only)
+test_get_diagnose_contract (__main__.ReconstructionContractTests.test_get_diagnose_contract) ... ok
+test_get_state_contract (__main__.ReconstructionContractTests.test_get_state_contract) ... ok
+test_post_agent_unconfigured_contract (__main__.ReconstructionContractTests.test_post_agent_unconfigured_contract) ... ok
+test_post_diagnose_safe_shortcut_contract (__main__.ReconstructionContractTests.test_post_diagnose_safe_shortcut_contract) ... ok
+test_post_grade_contract (__main__.ReconstructionContractTests.test_post_grade_contract) ... ok
+test_post_import_contract (__main__.ReconstructionContractTests.test_post_import_contract) ... ok
+test_post_recommend_contract (__main__.ReconstructionContractTests.test_post_recommend_contract) ... ok
+test_post_state_contract (__main__.ReconstructionContractTests.test_post_state_contract) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.017s
+
+OK
