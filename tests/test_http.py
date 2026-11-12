@@ -167,6 +167,7 @@ class HTTPTests(unittest.TestCase):
                     self.request('/api/diagnose',dict(good,**change),headers={'X-Team-Code':'test-access-code'})
                 self.assertEqual(err.exception.code,400)
             model.assert_not_called()
+            self.assertEqual(self.app.calls, 0, "Rejected inputs must not consume the shared model allowance")
 
     def test_diagnosis_http_shortcuts_and_rate_limit_use_rule_feedback(self):
         self.configure_ai()

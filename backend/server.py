@@ -191,11 +191,11 @@ class Handler(SimpleHTTPRequestHandler):
                     return self.send_json(dict(graded['feedback'], message='尚未配置GLM-4.7及团队口令，使用规则反馈。'))
                 if not self.app.authorize_ai(self.headers.get('X-Team-Code', '')[:1000]):
                     return self.send_json({'error': '团队AI口令不正确。'}, 401)
-                if not self.app.allow_call():
-                    return self.send_json(dict(graded['feedback'], message='服务器本小时AI请求已达60次，使用规则反馈。'))
                 language = body.get('language', 'zh')
                 if language not in ['zh', 'en']:
                     raise ValueError('Invalid language')
+                if not self.app.allow_call():
+                    return self.send_json(dict(graded['feedback'], message='服务器本小时AI请求已达60次，使用规则反馈。'))
                 return self.send_json(analyze(engine, qid, choice, reason, self.app.settings, language=language))
             return self.send_json({'error': '接口不存在'}, 404)
         except ConflictError as error:
