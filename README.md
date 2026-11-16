@@ -122,7 +122,7 @@ PySteps 是第 8 组制作的 Python 入门学习网页。你可以阅读概念�
 python -m unittest discover -s tests -t . -v
 ```
 
-Mac 可把 `python` 换为 `python3`，Windows 可换为 `py`。测试使用临时数据库和模拟模型，不会调用学校付费模型。`tests/test_http.py` 测试主要 HTTP 接口；`test_core.py` 测试规则与数据；`test_agent.py` 测试 PiPo 工具；`test_language.py` 测试语言；`test_main.py` 测试真实启动入口。最新数量、逐项用途及实际验收结果见 [验收记录](submission/验收记录_中英.md)。
+Mac 可把 `python` 换为 `python3`，Windows 可换为 `py`。测试使用临时数据库和模拟模型，不会调用学校付费模型。`tests/test_http.py` 测试主要 HTTP 接口；`test_core.py` 测试规则与数据；`test_agent.py` 测试 PiPo 工具；`test_language.py` 测试语言；`test_main.py` 测试真实启动入口。本地验证共运行 **80 项自动化测试**，终端末尾显示 `Ran 80 tests` 和 `OK` 即表示通过。覆盖进度保存与冲突、答题反馈、复习与推荐、PiPo 输入校验及诊断降级。远程运行结果请在 GitHub 的 **Actions** 中按提交核对。
 
 只有修改前端源码的开发者才需要 Node.js 22 和 npm：
 
@@ -284,7 +284,7 @@ Run:
 python -m unittest discover -s tests -t . -v
 ```
 
-Use `python3` on Mac or `py` on Windows if appropriate. Tests use temporary databases and simulated models, without paid school requests. `test_http.py` checks principal endpoints; `test_core.py` checks rules/data; `test_agent.py` checks PiPo tools; `test_language.py` checks translation/prompt handling; `test_main.py` checks the real entry point. See the [validation record](submission/验收记录_中英.md) for current counts, responsibilities and actual results.
+Use `python3` on Mac or `py` on Windows if appropriate. Tests use temporary databases and simulated models, without paid school requests. `test_http.py` checks principal endpoints; `test_core.py` checks rules/data; `test_agent.py` checks PiPo tools; `test_language.py` checks translation/prompt handling; `test_main.py` checks the real entry point. The local suite ran **80 automated tests**. Look for `Ran 80 tests` and `OK` at the end of the output. Coverage includes progress saves and conflicts, grading feedback, review scheduling and recommendations, PiPo input validation, and diagnosis fallback. Check GitHub **Actions** for the run associated with your commit.
 
 Only frontend developers need Node.js 22 and npm:
 
