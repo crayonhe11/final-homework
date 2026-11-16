@@ -45,13 +45,39 @@ class PiPoTests(unittest.TestCase):
         self.assertEqual(result['actions'], [])
         self.assertEqual(result['trace'][-1], {'tool': 'lesson', 'status': 'ok'})
 
+    def test_boundary_explanation_opens_lesson_or_matching_free_practice(self):
+        for reads, expected in [([], ('question', 'boundary_2')),
+                                (['__intro__'], ('lesson', 'boundary'))]:
+            with self.subTest(reads=reads):
+                state = dict(empty_state(), reads=reads)
+                def forbidden(*args):
+                    self.fail('The comparison explanation should not require the model')
+                result = run_agent(self.engine, state,
+                    'Please open the lesson on greater than or equal to when the score is exactly 60.',
+                    [], 'en', self.settings, forbidden, forbidden)
+                self.assertIn('score >= 60 is True', result['reply'])
+                self.assertEqual(result['actions'], [dict(kind=expected[0], id=expected[1])])
+
+    def test_loop_practice_opens_even_when_course_is_locked(self):
+        def forbidden(*args, **kwargs):
+            self.fail('Explicit loop practice must not call the model')
+        for goal, language in [('I always have trouble with loops, can you help me practice?', 'en'),
+                               ('我不懂循环，帮我挑一道循环练习并打开', 'zh')]:
+            with self.subTest(language=language):
+                result = run_agent(self.engine, empty_state(), goal, [], language,
+                                   self.settings, forbidden, forbidden)
+                self.assertEqual(len(result['actions']), 1)
+                action = result['actions'][0]
+                self.assertEqual(action['kind'], 'question')
+                self.assertEqual(self.engine.question(action['id'])['topic'], '循环')
+
     def test_json_gateway_rejects_textual_tool_markup(self):
         def fake(request, timeout):
             content = json.dumps({'reply': '<tool_call>inspect_progress()</arg_value>'})
             return io.BytesIO(json.dumps({'choices': [{'finish_reason': 'stop',
                 'message': {'content': content}}]}).encode())
         with self.assertRaises(ValueError):
-            run_agent(self.engine, empty_state(), '练习循环', [], 'zh',
+            run_agent(self.engine, empty_state(), '解释 Python 循环', [], 'zh',
                       dict(self.settings, AI_AGENT_MODE='json'), lambda: True, fake)
 
     def test_model_observes_then_selects_and_opens(self):
