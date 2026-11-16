@@ -1,7 +1,5 @@
 # PySteps 软件需求与重建规格 / Reconstruction Specification
 
-版本：2026-11-03；第 8 组。规范词“必须 / shall”表示验收要求。本文供实现者或另一个 AI 重建同功能程序；普通使用者先读 README。本文完整中文版之后是完整英文版，最后为两种语言共用的机器可读规范附录。
-
 ## 中文版
 
 ### 1. 重建任务、交付物与等价标准
@@ -10,9 +8,6 @@
 
 功能等价指：相同数据与输入产生相同判分、解锁、排序、复习日期、保存/导入结果和合法导航动作；页面提供本文规定的状态与操作。AI 自由讲解以字段、证据和行为约束验收，不要求模型输出逐字一致，也不要求源码、变量名或浏览器像素逐一相同。固定题目、答案、导学和中英文翻译以附录数据为准；不得自行缩减或重新生成。
 
-只把本文交给另一个 AI 时，它应从附录恢复五个 JSON 文件，自行实现业务代码。Pyodide 二进制、图片和许可证作为外部资源随重建输入包提供；它们不是需要从需求文字重新创造的算法。独立重建输入包不含原 `backend/`、React 交互代码、Worker 判题实现或原测试实现。课程内容是规范数据，不是运行时模型指令。
-
-排除：教师管理、复杂登录、自动跨设备账号同步、任意学科题库、照片识别、服务端执行任意学生代码、训练模型、模型生成并直接采用新题。
 
 ### 2. 启动、资源与架构
 
@@ -328,7 +323,7 @@ An independent AI receives this specification, external resources/licences and t
 
 ### 2. Launch, resources and architecture
 
-Python ≥3.10, standard-library backend; ordinary use needs no third-party Python packages, Node.js or Docker. main.py defaults to host 127.0.0.1, port 8011, database `runtime/learning.sqlite3` and supports --open. Accept integer ports 0..65535; port 0 binds an available port and the printed/opened URL uses that actual port. Reject invalid arguments, missing web/static/index.html and bind failure with actionable CLI errors. Control+C closes the server.
+Python ≥3.10, standard-library backend; ordinary use needs no third-party Python packages, Node.js or Docker. main.py defaults to host 127.0.0.1, port 8011, database runtime/learning.sqlite 3 and supports --open. Accept integer ports 0..65535; port 0 binds an available port and the printed/opened URL uses that actual port. Reject invalid arguments, missing web/static/index.html and bind failure with actionable CLI errors. Control+C closes the server.
 
 Serve bundled frontend and Pyodide without an external CDN. HTTP JSON connects frontend to Python grading, rules, SQLite and models; learner code runs only in disposable browser Workers. Separate learning, storage, HTTP, diagnosis and agent responsibilities. Static access is restricted to web/static; no directory listing, hidden/parent/private files. All /api routes return JSON.
 
@@ -436,7 +431,7 @@ Native mode retains 8 history, max_tokens 1400,20-second model wait, reply≤100
 | AC 13 | known wrong/correct history, reason edits |chart/table counts agree, no added attempt | browser; not complete date algorithm coverage |
 | AC 14 | switch language, refresh, export/import |remembered language, preserved records/input | LanguageTests/browser |
 
-All 8 API method/path pairs have HTTP tests. The local baseline is 80 automated tests. AC05 covers prioritizing unseen questions that match the diagnosed concept and ordering due, unseen, and not-yet-due questions for an unknown diagnosis. AC06 covers the 1-, 3-, 7-, 14-, and 30-day review intervals, stage reset after a hinted correct answer while retaining an earlier future deadline, and chronological processing across time zones. AC08–AC10 cover Chinese as the default diagnosis language, rule fallback without quota use when AI is unconfigured, PiPo rejecting invalid input before calling the model, and failed or conflicting saves preserving stored progress and revision. Mocks prove routing/control flow, not real model quality, actual upstream model identity or educational improvement. Developer browser walkthrough is not a novice-user study. Python reference cases do not replace actual Worker checks. Record the commit, environment, observed results, and pending checks in the validation record.
+All 8 API method/path pairs have HTTP tests. The local baseline is 80 automated tests. AC05 covers prioritizing unseen questions for a known diagnosis and ordering due, unseen, and not-yet-due questions for an unknown diagnosis. AC06 covers the 1-, 3-, 7-, 14-, and 30-day review intervals, stage reset after a hint, and chronological processing across time zones. AC08–AC10 cover the diagnosis language default, quota-free rule fallback, PiPo rejecting invalid input before calling the model, and failed or conflicting saves preserving stored progress and revision. Mocks prove routing/control flow, not real model quality, actual upstream model identity or educational improvement. Developer browser walkthrough is not a novice-user study. Python reference cases do not replace actual Worker checks. Record the commit, environment, observed results, and pending checks in the validation record.
 
 Quantified constraints are the body/record/model/Worker limits above. Do not infer performance from configured timeouts; measure named hardware/load before claiming latency or scalability. CI runs the project suite on Ubuntu/Windows/macOS × Python3.10/3.13, rebuilds the browser, starts main.py for eight HTTP contracts, audits delivery archives, then verifies temporary Docker staging. Passing main builds publish a versioned GitHub prerelease; PRs do not publish main releases. Failures block dependent stages and reports/artifacts are retained. Production deployment is unconfigured; temporary staging and ZIP delivery do not constitute a running production service.
 

@@ -122,7 +122,13 @@ PySteps 是第 8 组制作的 Python 入门学习网页。你可以阅读概念�
 python -m unittest discover -s tests -t . -v
 ```
 
-Mac 可把 `python` 换为 `python3`，Windows 可换为 `py`。测试使用临时数据库和模拟模型，不会调用学校付费模型。`tests/test_http.py` 测试主要 HTTP 接口；`test_core.py` 测试规则与数据；`test_agent.py` 测试 PiPo 工具；`test_language.py` 测试语言；`test_main.py` 测试真实启动入口。本地验证共运行 **80 项自动化测试**，终端末尾显示 `Ran 80 tests` 和 `OK` 即表示通过。覆盖进度保存与冲突、答题反馈、复习与推荐、PiPo 输入校验及诊断降级。远程运行结果请在 GitHub 的 **Actions** 中按提交核对。
+Mac 可把 `python` 换为 `python3`，Windows 可换为 `py`。`
+tests/test_http.py` 测试主要 HTTP 接口；
+`test_core.py` 测试规则与数据；
+`test_agent.py` 测试 PiPo 工具；
+`test_language.py` 测试语言；
+`test_main.py` 测试真实启动入口。
+本地验证共运行 **80 项自动化测试**，终端末尾显示 `Ran 80 tests` 和 `OK` 即表示通过。覆盖进度保存与冲突、答题反馈、复习与推荐、PiPo 输入校验及诊断降级。
 
 只有修改前端源码的开发者才需要 Node.js 22 和 npm：
 
@@ -135,30 +141,16 @@ npm run build
 
 项目文件：`main.py` 是入口，`backend/` 是 Python 实现，`data/` 是题库和导学，`web/` 是网页源码与已构建文件，`tests/` 是测试，`SPEC.md` 是可重建的功能规格。完整数据也嵌入 SPEC 的规范附录。运行 `python scripts/package_rebuild.py` 生成不含原实现的独立 AI 重建输入包 `dist/group8_rebuild_inputs.zip`，并校验规范数据。测试验收需按规格的输入和预期结果执行。
 
-打包作业：
 
-```bash
-python scripts/package_submission.py --group 8
-```
-
-生成 `dist/group8_project.zip`；打包脚本排除本地密钥、数据库、Git 历史和开发依赖。项目旁的旧版完整备份属于私有恢复材料，包含本地配置，**不要把旧版备份当作作业提交**。课堂 PPT、实际视频、个人报告和真实代码审查记录仍需按课程要求由组员完成或确认。
-
-课程联系：Lecture03 的函数、类、集合与排序用于学习引擎；Lecture04 的提示词要素用于诊断，README 面向人；Lecture05 的模型与工具循环用于 PiPo；Lecture06 的功能/非功能需求及验收匹配用于 SPEC 和测试。具体页码、测试映射、独立重建步骤见 SPEC。引用与许可证在 `licenses/`；使用 React、Lucide、Pyodide 等外部组件，不宣称从零实现这些组件。
 
 ### 10. 自动检查与交付（CI/CD）
 
-每次推送、PR更新或手动触发Actions会运行：三系统×两Python版本测试→网页重新构建→用本次构建启动真实服务并运行8个黑盒契约→打包与隐私检查→Docker临时部署与同样8接口验收。失败保留日志并阻止后续阶段。测试服务明确清空模型密钥和口令，不消耗学校积分。
+每次推送、PR更新或手动触发Actions会运行：三系统×两Python版本测试→网页重新构建→用本次构建启动真实服务并运行8个黑盒契约→打包与隐私检查→Docker临时部署与同样8接口验收。失败保留日志并阻止后续阶段。
 
-打开仓库的Actions，选择本次运行：各系统的tests-*、integration-reports、container-reports可下载日志；group8-delivery包含作业包、重建包和SHA256SUMS。日志保留7天，交付包14天。只有main分支通过全部检查后才自动创建GitHub预发布版本，便于较长期下载。PR只测试和产生交付物，不发布main版本。
+打开仓库的Actions，选择本次运行：各系统的tests-*、integration-reports、container-reports可下载日志；日志保留7天，交付包14天。只有main分支通过全部检查后才自动创建GitHub预发布版本，便于较长期下载。PR只测试和产生交付物，不发布main版本。
 
-这里完成的是持续集成、临时验收环境部署与可部署交付物发布。生产服务器尚未配置；GitHub预发布不是运行中的学习网站。维护者部署容器时，先解压最新版作业包，在目录中运行：
+这里完成的是持续集成、临时验收环境部署与可部署交付物发布。生产服务器尚未配置；GitHub预发布不是运行中的学习网站。
 
-```bash
-docker build -t pysteps:group8 .
-docker run -d --name pysteps -p 8011:8000 -v pysteps-data:/data -e PUBLIC_ORIGIN=http://127.0.0.1:8011 pysteps:group8
-```
-
-本机打开http://127.0.0.1:8011/。团队服务器改用实际可达的域名/来源；模型凭据用服务端环境或秘密变量传入，不写入镜像。课程Lecture09的第5–9页对应目标/测试/执行/断言分析，第11/13/16页对应工作流与环境，第19–20页用真实PR检查记录展示。结果须以具体提交SHA的Actions日志为准。
 
 ---
 
@@ -286,7 +278,7 @@ python -m unittest discover -s tests -t . -v
 
 Use `python3` on Mac or `py` on Windows if appropriate. Tests use temporary databases and simulated models, without paid school requests. `test_http.py` checks principal endpoints; `test_core.py` checks rules/data; `test_agent.py` checks PiPo tools; `test_language.py` checks translation/prompt handling; `test_main.py` checks the real entry point. The local suite ran **80 automated tests**. Look for `Ran 80 tests` and `OK` at the end of the output. Coverage includes progress saves and conflicts, grading feedback, review scheduling and recommendations, PiPo input validation, and diagnosis fallback. Check GitHub **Actions** for the run associated with your commit.
 
-If you edit the frontend source, use Node.js 22 and npm:
+Only frontend developers need Node.js 22 and npm:
 
 ```bash
 cd web
@@ -303,7 +295,7 @@ Package Group 8's submission with:
 python scripts/package_submission.py --group 8
 ```
 
-This produces `dist/group8_project.zip`, excluding local credentials, databases, Git history and development dependencies. The adjacent old-version backup is a private recovery copy that includes local configuration: **do not submit it**. The classroom slides, recorded video, individual reports and genuine human review records still need completion/confirmation by members under course requirements.
+This produces `dist/group8_project.zip`, excluding local credentials, databases, Git history and development dependencies. The adjacent old-version backup is a private recovery copy that includes local configuration: **do not submit it**. The actual video, individual reports and genuine human review records still need completion/confirmation by members under course requirements.
 
 Course alignment: Lecture03 functions/classes/collections/sorting inform the engine; Lecture04 prompt elements inform diagnosis and human-facing documentation; Lecture05 model/tool loops inform PiPo; Lecture06 FR/NFR and matching verification inform SPEC/tests. SPEC records exact slides, traceability and independent reconstruction steps. Upstream licences are in `licenses/`; React, Lucide and Pyodide are external components, not original reimplementations.
 
@@ -311,7 +303,7 @@ Course alignment: Lecture03 functions/classes/collections/sorting inform the eng
 
 Pushes, PR updates and manual Actions runs trigger: three OSes × two Python versions; fresh browser build; main.py plus eight black-box HTTP contracts against that build; archive/privacy checks; then temporary Docker staging and eight HTTP contracts again. Failures retain reports and stop dependent stages. Staging explicitly disables provider credentials, avoiding school-model charges.
 
-In an Actions run, download tests-*, integration-reports and container-reports for evidence. group8-delivery contains both ZIPs and SHA256SUMS. Reports are retained for seven days and delivery artifacts for 14 days. After every gate passes on main, a versioned GitHub prerelease is published for longer-term downloads. PRs produce tests/artifacts but do not publish main releases.
+In an Actions run, download tests-*, integration-reports and container-reports for evidence. group8-delivery contains both ZIPs and SHA256SUMS. Reports remain seven days; delivery artifacts remain14days. After every gate passes on main, a versioned GitHub prerelease is published for longer-term downloads. PRs produce tests/artifacts but do not publish main releases.
 
 This provides CI, temporary staging deployment and deployable release delivery. A production server is not configured; a GitHub release is not a running learning website. To deploy an extracted verified project with Docker:
 
@@ -320,4 +312,4 @@ docker build -t pysteps:group8 .
 docker run -d --name pysteps -p 8011:8000 -v pysteps-data:/data -e PUBLIC_ORIGIN=http://127.0.0.1:8011 pysteps:group8
 ```
 
-Open **http://127.0.0.1:8011/** locally. For a team server, use its reachable domain or origin and provide model credentials through server environment variables or a secrets manager. Lecture 09 slides 5–9 cover test objectives, design, execution and assertion analysis. Slides 11, 13 and 16 cover workflows and environments. Slides 19–20 show how to inspect PR checks. Verify the exact commit SHA in Actions.
+Openhttp://127.0.0.1:8011/. On a team server, use its reachable origin and supply model secrets through server variables, never an image. Lecture09 slides5–9 map to objectives/design/execution/assertion analysis;11/13/16to workflow/environments;19–20to actualPR checks. Verify results for the exact commitSHA in Actions.
