@@ -286,7 +286,7 @@ python -m unittest discover -s tests -t . -v
 
 Use `python3` on Mac or `py` on Windows if appropriate. Tests use temporary databases and simulated models, without paid school requests. `test_http.py` checks principal endpoints; `test_core.py` checks rules/data; `test_agent.py` checks PiPo tools; `test_language.py` checks translation/prompt handling; `test_main.py` checks the real entry point. The local suite ran **80 automated tests**. Look for `Ran 80 tests` and `OK` at the end of the output. Coverage includes progress saves and conflicts, grading feedback, review scheduling and recommendations, PiPo input validation, and diagnosis fallback. Check GitHub **Actions** for the run associated with your commit.
 
-Only frontend developers need Node.js 22 and npm:
+If you edit the frontend source, use Node.js 22 and npm:
 
 ```bash
 cd web
@@ -303,7 +303,7 @@ Package Group 8's submission with:
 python scripts/package_submission.py --group 8
 ```
 
-This produces `dist/group8_project.zip`, excluding local credentials, databases, Git history and development dependencies. The adjacent old-version backup is a private recovery copy that includes local configuration: **do not submit it**. The actual video, individual reports and genuine human review records still need completion/confirmation by members under course requirements.
+This produces `dist/group8_project.zip`, excluding local credentials, databases, Git history and development dependencies. The adjacent old-version backup is a private recovery copy that includes local configuration: **do not submit it**. The classroom slides, recorded video, individual reports and genuine human review records still need completion/confirmation by members under course requirements.
 
 Course alignment: Lecture03 functions/classes/collections/sorting inform the engine; Lecture04 prompt elements inform diagnosis and human-facing documentation; Lecture05 model/tool loops inform PiPo; Lecture06 FR/NFR and matching verification inform SPEC/tests. SPEC records exact slides, traceability and independent reconstruction steps. Upstream licences are in `licenses/`; React, Lucide and Pyodide are external components, not original reimplementations.
 
@@ -311,7 +311,7 @@ Course alignment: Lecture03 functions/classes/collections/sorting inform the eng
 
 Pushes, PR updates and manual Actions runs trigger: three OSes × two Python versions; fresh browser build; main.py plus eight black-box HTTP contracts against that build; archive/privacy checks; then temporary Docker staging and eight HTTP contracts again. Failures retain reports and stop dependent stages. Staging explicitly disables provider credentials, avoiding school-model charges.
 
-In an Actions run, download tests-*, integration-reports and container-reports for evidence. group8-delivery contains both ZIPs and SHA256SUMS. Reports remain seven days; delivery artifacts remain14days. After every gate passes on main, a versioned GitHub prerelease is published for longer-term downloads. PRs produce tests/artifacts but do not publish main releases.
+In an Actions run, download tests-*, integration-reports and container-reports for evidence. group8-delivery contains both ZIPs and SHA256SUMS. Reports are retained for seven days and delivery artifacts for 14 days. After every gate passes on main, a versioned GitHub prerelease is published for longer-term downloads. PRs produce tests/artifacts but do not publish main releases.
 
 This provides CI, temporary staging deployment and deployable release delivery. A production server is not configured; a GitHub release is not a running learning website. To deploy an extracted verified project with Docker:
 
@@ -320,4 +320,4 @@ docker build -t pysteps:group8 .
 docker run -d --name pysteps -p 8011:8000 -v pysteps-data:/data -e PUBLIC_ORIGIN=http://127.0.0.1:8011 pysteps:group8
 ```
 
-Openhttp://127.0.0.1:8011/. On a team server, use its reachable origin and supply model secrets through server variables, never an image. Lecture09 slides5–9 map to objectives/design/execution/assertion analysis;11/13/16to workflow/environments;19–20to actualPR checks. Verify results for the exact commitSHA in Actions.
+Open **http://127.0.0.1:8011/** locally. For a team server, use its reachable domain or origin and provide model credentials through server environment variables or a secrets manager. Lecture 09 slides 5–9 cover test objectives, design, execution and assertion analysis. Slides 11, 13 and 16 cover workflows and environments. Slides 19–20 show how to inspect PR checks. Verify the exact commit SHA in Actions.
