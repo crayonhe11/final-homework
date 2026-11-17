@@ -57,6 +57,78 @@ class LearningTests(unittest.TestCase):
         self.assertEqual(result[0]['concept'],q['concept']);self.assertNotIn(q['id'],[r['id'] for r in result])
         self.assertTrue(all(r['topic']==q['topic'] for r in result))
         self.assertEqual(len(E.recommend(q['id'],'unknown',state)),9)
+    def test_review_intervals_stop_growing_after_thirty_days(self):
+        q = E.questions[0]
+        day_ms = 86_400_000
+        now = int(datetime(2026, 10, 1, tzinfo=timezone.utc).timestamp() * 1000)
+        history = []
+        for stage, days in [(1, 1), (2, 3), (3, 7), (4, 14), (5, 30), (5, 30)]:
+            with self.subTest(stage=stage, attempts=len(history) + 1):
+                at = datetime.fromtimestamp(now / 1000, timezone.utc).isoformat()
+                history.append(attempt(q, at=at, ident=str(len(history))))
+                due = now + days * day_ms
+                self.assertEqual(E.schedule(history)[q['id']], dict(stage=stage, due=due))
+                now = due
+
+    def test_hinted_answer_preserves_nearer_deadline_and_resets_stage(self):
+        q = E.questions[0]
+        history = [
+            attempt(q),
+            attempt(q, at='2026-10-02T00:00:00Z', ident='second'),
+        ]
+        due = E.schedule(history)[q['id']]['due']
+        history.append(attempt(q, at='2026-10-04T18:00:00Z', hints=1, ident='hinted'))
+        self.assertEqual(E.schedule(history)[q['id']], dict(stage=0, due=due))
+
+    def test_review_uses_attempt_timestamps_when_history_is_out_of_order(self):
+        q = E.questions[0]
+        wrong = next(choice for choice in q['options'] if choice != q['answer'])
+        history = [
+            attempt(q, choice=wrong, at='2026-10-02T02:00:00+02:00', ident='wrong'),
+            attempt(q),
+        ]
+        failed_at = datetime(2026, 10, 2, tzinfo=timezone.utc).timestamp() * 1000
+        self.assertEqual(E.schedule(history)[q['id']], dict(stage=0, due=failed_at + 600_000))
+
+    def test_unknown_diagnosis_prioritizes_due_then_unseen_then_future(self):
+        q = E.questions[0]
+        same_topic = [item for item in E.questions if item['topic'] == q['topic'] and item != q]
+        overdue, due_now, future, unseen = same_topic[:4]
+        state = empty_state()
+        state['attempts'] = [
+            attempt(due_now, at='2026-10-02T00:00:00Z'),
+            attempt(future, at='2026-10-03T00:00:00Z'),
+            attempt(overdue),
+        ]
+        now = datetime(2026, 10, 3, tzinfo=timezone.utc).timestamp() * 1000
+        ids = [item['id'] for item in E.recommend(q['id'], 'unknown', state, now)]
+        self.assertEqual(ids[:2], [overdue['id'], due_now['id']])
+        self.assertLess(ids.index(unseen['id']), ids.index(future['id']))
+
+    def test_known_diagnosis_prioritizes_unseen_target_over_due_other_concept(self):
+        q = E.questions[0]
+        due = next(item for item in E.questions
+                   if item['topic'] == q['topic'] and item['concept'] != q['concept'])
+        state = empty_state()
+        state['attempts'] = [attempt(due)]
+        now = datetime(2026, 10, 3, tzinfo=timezone.utc).timestamp() * 1000
+        results = E.recommend(q['id'], q['concept'], state, now)
+        self.assertEqual(results[0]['concept'], q['concept'])
+        target_count = sum(item['concept'] == q['concept'] for item in results)
+        self.assertEqual(results[target_count]['id'], due['id'])
+
+    def test_later_mistake_does_not_revoke_a_completed_concept(self):
+        state = empty_state()
+        state['reads'] = ['__intro__', 'boundary']
+        questions = [q for q in E.questions if q['concept'] == 'boundary']
+        state['attempts'] = [attempt(q) for q in questions]
+        q = questions[0]
+        wrong = next(choice for choice in q['options'] if choice != q['answer'])
+        state['attempts'].append(attempt(q, choice=wrong, at='2026-10-02T00:00:00Z', ident='retry'))
+        progress = E.courses(state)['boundary']
+        self.assertTrue(progress['passed'])
+        self.assertFalse(progress['latest'][q['id']])
+
     def test_import_regrades_and_removes_untrusted_feedback(self):
         state=empty_state();q=E.questions[0];a=attempt(q,choice=next(c for c in q['options'] if c!=q['answer']))
         a['correct']=True;a['feedback']={'source':'ai','concept':'unknown','quote':a['reason'],'explanation':'伪造','hint':'伪造'}

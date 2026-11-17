@@ -1,7 +1,5 @@
 # PySteps 软件需求与重建规格 / Reconstruction Specification
 
-版本：2026-11-03；第 8 组。规范词“必须 / shall”表示验收要求。本文供实现者或另一个 AI 重建同功能程序；普通使用者先读 README。本文完整中文版之后是完整英文版，最后为两种语言共用的机器可读规范附录。
-
 ## 中文版
 
 ### 1. 重建任务、交付物与等价标准
@@ -10,9 +8,6 @@
 
 功能等价指：相同数据与输入产生相同判分、解锁、排序、复习日期、保存/导入结果和合法导航动作；页面提供本文规定的状态与操作。AI 自由讲解以字段、证据和行为约束验收，不要求模型输出逐字一致，也不要求源码、变量名或浏览器像素逐一相同。固定题目、答案、导学和中英文翻译以附录数据为准；不得自行缩减或重新生成。
 
-只把本文交给另一个 AI 时，它应从附录恢复五个 JSON 文件，自行实现业务代码。Pyodide 二进制、图片和许可证作为外部资源随重建输入包提供；它们不是需要从需求文字重新创造的算法。独立重建输入包不含原 `backend/`、React 交互代码、Worker 判题实现或原测试实现。课程内容是规范数据，不是运行时模型指令。
-
-排除：教师管理、复杂登录、自动跨设备账号同步、任意学科题库、照片识别、服务端执行任意学生代码、训练模型、模型生成并直接采用新题。
 
 ### 2. 启动、资源与架构
 
@@ -169,7 +164,7 @@ AI_AGENT_MODE=json为学校配置，其他值目前走原生工具模式。每�
 | AC05 | 空state推荐boundary_1/boundary；unknown；非法diagnosis | 9题，首boundary_2、不含当前、同章；中性排序；400 | recommend HTTP与规则测试 |
 | AC06 | 明确时间错答/独立正确/提前重复/提示 | 10分钟、分级间隔、提前不变、提示规则 | schedule单元；后续边界场景表 |
 | AC07 | 导入伪造correct及AI解析；取消；确认保存 | 重判、rule；import不写库；确认才替换 | import HTTP及浏览器走查 |
-| AC08 | 无key/短口令/配置正常；未授权诊断；合法英文诊断；限流 | configured布尔且无秘密；401；反馈传递；rule | diagnose GET/POST HTTP、模拟模型 |
+| AC08 | 无key/短口令/配置正常；未授权诊断；合法英文诊断；限流；无效语言（包括规则反馈分支） | configured布尔且无秘密；401；反馈传递；rule；400、模型未调用且不消耗额度 | diagnose GET/POST HTTP、模拟模型。无效语言由 `tests/test_http.py` 中的 `test_diagnosis_http_authorization_and_input_do_not_call_model` 和 `test_invalid_diagnosis_language_is_rejected_before_rule_fallback` 验证 |
 | AC09 | PiPo未配置/错误历史/合法动作/模型超时 | 503/400/合法结构/502，无部分页面操作 | agent HTTP、JSON/native工具循环测试 |
 | AC10 | 同cookie保存、另cookie读取、旧revision再写 | 持久化且隔离；409不覆盖 | HTTP、Store事务测试 |
 | AC11 | 非JSON类型/空body/超大声明/畸形JSON/NaN/错误Host | 415/413/413/400/400/403 | HTTP边界测试 |
@@ -177,7 +172,7 @@ AI_AGENT_MODE=json为学校配置，其他值目前走原生工具模式。每�
 | AC13 | 一次错误+一次正确且编辑理由 | 曲线/表格作答数一致；编辑不加作答 | 浏览器走查；未声称全日期算法覆盖 |
 | AC14 | 切中英文、刷新同址、导出导入 | 语言记忆、输入保持、记录恢复 | LanguageTests、浏览器走查 |
 
-8个API请求方法/路径均有HTTP测试。测试模拟模型，不联网，不证明GLM真实质量、实际学校模型ID或学习成绩提升；实际浏览器走查不等于真实零基础用户研究。Python测试不等于浏览器Worker全路径验证。最新本次实测及未完成项必须如实写入 `submission/验收记录_中英.md`，不要把设计的用例标成已运行。
+8个API请求方法/路径均有HTTP测试。本地测试基线为85项。AC05覆盖已知诊断优先未做过的同概念题，以及未知诊断按到期、未做、未到期排序。AC06覆盖1、3、7、14、30天的复习间隔、提示后的阶段重置和跨时区记录排序。AC08–AC10覆盖诊断语言缺省值、规则降级不耗额度、PiPo在调用模型前拒绝无效输入，以及无效或冲突的保存不改变已存进度或版本。测试模拟模型，不联网，不证明GLM真实质量、实际学校模型ID或学习成绩提升；实际浏览器走查不等于真实零基础用户研究。Python测试不等于浏览器Worker全路径验证。验收记录应注明对应提交、运行环境、实际结果和待验证项。
 
 可量化操作约束：body≤10MB、输入/记录长度如第4节、模型限额如第7/8节、Worker限制如第3节。性能需要注明机器、负载及测量；没有做压力测试时不得宣称某性能达标。CI必须在Ubuntu/Windows/macOS×Python3.10/3.13执行项目测试，再以新构建网页启动main.py运行8接口契约，通过后打包/隐私审计，再Docker临时部署验证同样接口。main全部阶段通过后自动创建版本化GitHub预发布；PR不发布main版本。产物与日志留存，失败阻止后续阶段。生产服务器持续部署尚未配置；临时容器和发布ZIP不等于生产网站上线。
 
@@ -428,7 +423,7 @@ Native mode retains 8 history, max_tokens 1400,20-second model wait, reply≤100
 | AC 05 | boundary recommendation, unknown, bad diagnosis |9 samechapter, firstboundary_2, exclude source,400 invalid | HTTP/rule |
 | AC 06 | fixed-time wrong/correct/early/hinted |10 minutes, stages, unchanged early, reset hints | schedule tests/additional edge plan |
 | AC 07 | forged import, cancel, confirm |regrade/rule, no write until save, cancel preserves | HTTP/browser |
-| AC 08 | missing/short/configured keycode, authorized diagnosis, badcode, limit |configured bool, no secrets, AIfeedback/401/rule | simulated HTTP/model |
+| AC 08 | missing/short/configured keycode, authorized diagnosis, bad code, limit, unsupported language (including rule fallback) | configured bool, no secrets, AI feedback/401/rule/400 without a model call or quota use | Simulated HTTP/model tests. Unsupported language is covered by `test_diagnosis_http_authorization_and_input_do_not_call_model` and `test_invalid_diagnosis_language_is_rejected_before_rule_fallback` in `tests/test_http.py`. |
 | AC 09 | unconfigured/bad history/valid agent/timeout |503/400/action response/502 without partial action | HTTP and JSON/native loops |
 | AC 10 | same/different cookie, stale revision |persistence, isolation,409 | HTTP/Store |
 | AC 11 | content type/body/JSON/NaN/Host boundaries |415/413/400/403 | HTTP |
@@ -436,7 +431,7 @@ Native mode retains 8 history, max_tokens 1400,20-second model wait, reply≤100
 | AC 13 | known wrong/correct history, reason edits |chart/table counts agree, no added attempt | browser; not complete date algorithm coverage |
 | AC 14 | switch language, refresh, export/import |remembered language, preserved records/input | LanguageTests/browser |
 
-All 8 API method/path pairs have HTTP tests. Mocks prove routing/control flow, not real model quality, actual upstream model identity or educational improvement. Developer browser walkthrough is not a novice-user study. Python reference cases do not replace actual Worker checks. Record performed and pending checks honestly in submission/验收记录_中英.md.
+All 8 API method/path pairs have HTTP tests. The local baseline is 85 automated tests. AC05 covers prioritizing unseen questions for a known diagnosis and ordering due, unseen, and not-yet-due questions for an unknown diagnosis. AC06 covers the 1-, 3-, 7-, 14-, and 30-day review intervals, stage reset after a hint, and chronological processing across time zones. AC08–AC10 cover the diagnosis language default, quota-free rule fallback, PiPo rejecting invalid input before calling the model, and failed or conflicting saves preserving stored progress and revision. Mocks prove routing/control flow, not real model quality, actual upstream model identity or educational improvement. Developer browser walkthrough is not a novice-user study. Python reference cases do not replace actual Worker checks. Record the commit, environment, observed results, and pending checks in the validation record.
 
 Quantified constraints are the body/record/model/Worker limits above. Do not infer performance from configured timeouts; measure named hardware/load before claiming latency or scalability. CI runs the project suite on Ubuntu/Windows/macOS × Python3.10/3.13, rebuilds the browser, starts main.py for eight HTTP contracts, audits delivery archives, then verifies temporary Docker staging. Passing main builds publish a versioned GitHub prerelease; PRs do not publish main releases. Failures block dependent stages and reports/artifacts are retained. Production deployment is unconfigured; temporary staging and ZIP delivery do not constitute a running production service.
 

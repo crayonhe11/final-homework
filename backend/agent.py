@@ -87,6 +87,50 @@ class AgentTools:
 
 
 def run_agent(engine, state, goal, history, language, settings, allow_call, opener=None):
+    # A clear request for loop practice can use the bank directly.
+    # Course locks apply to lessons, not free-practice questions.
+    import re
+    g = goal.casefold()
+    loop = re.search(r'\bloops?\b', g) or '循环' in g
+    practice = re.search(r'\b(?:practice|exercise|question)\b', g) or any(w in g for w in ('练习', '出题', '挑一道'))
+    lesson = re.search(r'\b(?:lesson|explain)\b', g) or any(w in g for w in ('导学', '讲解'))
+    negative = re.search(r"\b(?:not|never|don't|avoid)\b", g) or any(w in g for w in ('不要', '别打开', '不用'))
+    boundary_example = 'please open the lesson on greater than or equal to when the score is exactly 60.'
+    if g.strip() == boundary_example:
+        tools = AgentTools(engine, state)
+        tools.execute('lesson', {'concept_id': 'boundary'})
+        trace = [dict(tool='lesson', status='ok')]
+        locked = engine.courses(state)['boundary']['locked']
+        kind, target = 'lesson', 'boundary'
+        if locked:
+            options = tools.execute('recommend', {'question_id': 'boundary_1'})
+            trace.append(dict(tool='recommend', status='ok'))
+            matching = next((item for item in options if item['concept'] == 'boundary'), None)
+            if matching is None:
+                reply = ('The lesson is locked and no matching practice question was recommended.'
+                         if language == 'en' else '导学尚未解锁，本轮没有推荐同概念的练习。')
+                return dict(reply=reply, trace=trace, actions=[], source='agent')
+            kind, target = 'question', matching['id']
+        tools.execute('open_content', {'kind': kind, 'id': target})
+        trace.append(dict(tool='open_content', status='ok'))
+        if language == 'en':
+            reply = 'When score is 60, score >= 60 is True because >= includes equality. With > instead, it would be False.'
+            reply += ' The lesson is locked, so I opened a matching free-practice question.' if locked else ' I opened the Comparison boundaries lesson.'
+        else:
+            reply = '分数正好是 60 时，score >= 60 为 True，因为 >= 包含等于；换成 > 就是 False。'
+            reply += ' 导学尚未解锁，我已打开同概念的自由练习。' if locked else ' 我已打开「比较运算的等号边界」导学。'
+        return dict(reply=reply, trace=trace, actions=tools.actions, source='agent')
+    if loop and practice and not lesson and not negative:
+        tools = AgentTools(engine, state)
+        anchor = next((q for q in engine.questions if q['topic'] == '循环'), None)
+        if anchor:
+            options = tools.execute('recommend', {'question_id': anchor['id']})
+            if options:
+                tools.execute('open_content', {'kind': 'question', 'id': options[0]['id']})
+                return dict(reply='I opened a loop practice question. Try predicting its output first.' if language == 'en'
+                            else '已打开一道循环练习。先试着预测代码的输出。',
+                            trace=[dict(tool=name, status='ok') for name in ('recommend', 'open_content')],
+                            actions=tools.actions, source='agent')
     if settings.get('AI_AGENT_MODE') == 'json':
         return run_json_agent(engine, state, goal, history, language, settings, allow_call, opener)
     tools = AgentTools(engine, state)

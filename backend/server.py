@@ -5,6 +5,7 @@ from hmac import compare_digest
 from http.cookies import SimpleCookie
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
+import logging
 import mimetypes
 from pathlib import Path
 import re
@@ -178,10 +179,17 @@ class Handler(SimpleHTTPRequestHandler):
                 state = engine.validate_state(body.get('state'))
                 try:
                     result = run_agent(engine, state, goal, history, language, self.app.settings, self.app.allow_call)
-                except Exception:
+                except Exception as error:
+                    status = getattr(error, 'code', None)
+                    logging.getLogger(__name__).warning(
+                        'PiPo turn failed: %s; upstream HTTP status=%s',
+                        type(error).__name__, status if type(status) is int else '-')
                     return self.send_json({'error': 'PiPo 本轮未完成，未执行页面操作。请检查模型、网络或额度后重试。 / PiPo could not finish; no page action was applied. Check model, network or quota and retry.'}, 502)
                 return self.send_json(result)
             if path == '/api/diagnose':
+                language = body.get('language', 'zh')
+                if language not in ['zh', 'en']:
+                    raise ValueError('Invalid language')
                 qid, choice = body.get('question_id'), body.get('choice')
                 graded = engine.grade(qid, choice)
                 reason = text(body.get('reason', ''), 1000, '理由')
@@ -193,9 +201,6 @@ class Handler(SimpleHTTPRequestHandler):
                     return self.send_json({'error': '团队AI口令不正确。'}, 401)
                 if not self.app.allow_call():
                     return self.send_json(dict(graded['feedback'], message='服务器本小时AI请求已达60次，使用规则反馈。'))
-                language = body.get('language', 'zh')
-                if language not in ['zh', 'en']:
-                    raise ValueError('Invalid language')
                 return self.send_json(analyze(engine, qid, choice, reason, self.app.settings, language=language))
             return self.send_json({'error': '接口不存在'}, 404)
         except ConflictError as error:

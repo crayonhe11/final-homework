@@ -167,6 +167,7 @@ class HTTPTests(unittest.TestCase):
                     self.request('/api/diagnose',dict(good,**change),headers={'X-Team-Code':'test-access-code'})
                 self.assertEqual(err.exception.code,400)
             model.assert_not_called()
+            self.assertEqual(self.app.calls, 0, "Rejected inputs must not consume the shared model allowance")
 
     def test_diagnosis_http_shortcuts_and_rate_limit_use_rule_feedback(self):
         self.configure_ai()
@@ -207,5 +208,134 @@ class HTTPTests(unittest.TestCase):
             with self.subTest(path=path,status=status),self.assertRaises(HTTPError) as err:
                 self.request(path,body,headers=headers)
             self.assertEqual(err.exception.code,status)
+
+
+    def assert_http_error(self, path, body, status, headers=None):
+        with self.assertRaises(HTTPError) as caught:
+            self.request(path, body, headers=headers)
+        with caught.exception as response:
+            self.assertEqual(response.code, status)
+            self.assertIn('error', json.load(response))
+
+    def assert_agent_input_rejected(self, **changes):
+        self.configure_ai()
+        body = dict(goal='Help with loops', language='en', history=[], state=empty_state())
+        body.update(changes)
+        with patch('backend.server.run_agent') as model:
+            self.assert_http_error('/api/agent', body, 400,
+                                   headers={'X-Team-Code': 'test-access-code'})
+            model.assert_not_called()
+        self.assertEqual(self.app.calls, 0)
+
+    def test_state_rejects_boolean_revision(self):
+        self.assert_http_error('/api/state', dict(revision=True, state=empty_state()), 400)
+
+    def test_state_rejects_negative_revision(self):
+        self.assert_http_error('/api/state', dict(revision=-1, state=empty_state()), 400)
+
+    def test_state_rejects_missing_revision(self):
+        self.assert_http_error('/api/state', dict(state=empty_state()), 400)
+
+    def test_state_conflict_preserves_winning_update(self):
+        with self.request('/api/state') as response:
+            revision = json.load(response)['revision']
+        winner = dict(empty_state(), reads=['__intro__'])
+        with self.request('/api/state', dict(revision=revision, state=winner)) as response:
+            self.assertEqual(json.load(response)['revision'], revision + 1)
+        self.assert_http_error('/api/state', dict(revision=revision, state=empty_state()), 409)
+        with self.request('/api/state') as response:
+            saved = json.load(response)
+        self.assertEqual(saved['revision'], revision + 1)
+        self.assertEqual(saved['state'], winner)
+
+    def test_state_save_returns_updated_course_summary(self):
+        with self.request('/api/state') as response:
+            before = json.load(response)
+        self.assertTrue(before['summary']['courses']['boundary']['locked'])
+        state = dict(empty_state(), reads=['__intro__', 'boundary'])
+        with self.request('/api/state', dict(revision=before['revision'], state=state)) as response:
+            course = json.load(response)['summary']['courses']['boundary']
+        self.assertTrue(course['read'])
+        self.assertFalse(course['locked'])
+        self.assertFalse(course['passed'])
+
+    def test_state_invalid_save_does_not_advance_revision(self):
+        with self.request('/api/state') as response:
+            before = json.load(response)
+        invalid = dict(empty_state(), reads=['unknown-concept'])
+        self.assert_http_error('/api/state', dict(revision=before['revision'], state=invalid), 400)
+        with self.request('/api/state') as response:
+            self.assertEqual(json.load(response), before)
+
+    def test_grade_wrong_option_returns_concept_feedback(self):
+        with self.request('/api/grade', dict(question_id='boundary_1', choice='B')) as response:
+            grade = json.load(response)
+        self.assertFalse(grade['correct'])
+        self.assertEqual(grade['feedback']['concept'], 'boundary')
+        self.assertEqual(grade['feedback']['source'], 'rule')
+
+    def test_grade_rejects_missing_choice(self):
+        self.assert_http_error('/api/grade', dict(question_id='boundary_1'), 400)
+
+    def test_state_response_is_not_cacheable(self):
+        with self.request('/api/state') as response:
+            self.assertEqual(response.headers['Cache-Control'], 'no-store')
+
+    def test_agent_passes_trimmed_goal_and_conversation_context(self):
+        self.configure_ai()
+        history = [dict(role='user', text='I tried loops.'), dict(role='assistant', text='Try range.')]
+        state = dict(empty_state(), reads=['__intro__'])
+        body = dict(goal='  Help with loops  ', language='en', history=history, state=state)
+        with patch('backend.server.run_agent', return_value=dict(reply='Try a loop.', actions=[])) as model:
+            with self.request('/api/agent', body, headers={'X-Team-Code': 'test-access-code'}) as response:
+                self.assertEqual(json.load(response)['reply'], 'Try a loop.')
+            model.assert_called_once()
+            self.assertEqual(model.call_args.args[1:5], (state, 'Help with loops', history, 'en'))
+
+    def test_agent_invalid_goal_is_rejected_before_model(self):
+        self.assert_agent_input_rejected(goal='   ')
+
+    def test_agent_unsupported_language_is_rejected_before_model(self):
+        self.assert_agent_input_rejected(language='fr')
+
+    def test_agent_oversized_history_is_rejected_before_model(self):
+        self.assert_agent_input_rejected(history=[dict(role='user', text='help')] * 9)
+
+    def test_agent_invalid_history_text_is_rejected_before_model(self):
+        self.assert_agent_input_rejected(history=[dict(role='user', text=42)])
+
+    def test_agent_invalid_progress_is_rejected_before_model(self):
+        self.assert_agent_input_rejected(state=dict(empty_state(), reads=['unknown-concept']))
+
+    def test_diagnosis_defaults_to_chinese(self):
+        self.configure_ai()
+        body = dict(question_id='boundary_1', choice='B', reason='我以为大于包括相等')
+        with patch('backend.server.analyze', return_value=dict(source='ai')) as model:
+            with self.request('/api/diagnose', body, headers={'X-Team-Code': 'test-access-code'}) as response:
+                self.assertEqual(json.load(response)['source'], 'ai')
+            model.assert_called_once()
+            self.assertEqual(model.call_args.kwargs['language'], 'zh')
+
+    def test_diagnosis_disabled_does_not_consume_quota(self):
+        with patch('backend.server.analyze') as model:
+            body = dict(question_id='boundary_1', choice='B', reason='I thought equality counted.')
+            with self.request('/api/diagnose', body) as response:
+                feedback = json.load(response)
+            self.assertEqual(feedback['source'], 'rule')
+            self.assertEqual(feedback['concept'], 'boundary')
+            model.assert_not_called()
+            self.assertEqual(self.app.calls, 0)
+
+    def test_invalid_diagnosis_language_is_rejected_before_rule_fallback(self):
+        body = dict(question_id='boundary_1', choice='B', language='fr', reason='My reasoning')
+        with patch('backend.server.analyze') as model:
+            self.assert_http_error('/api/diagnose', body, 400)
+            self.configure_ai()
+            for change in (dict(choice='A'), dict(reason='')):
+                with self.subTest(change=change):
+                    self.assert_http_error('/api/diagnose', dict(body, **change), 400)
+            model.assert_not_called()
+            self.assertEqual(self.app.calls, 0)
+
 
 if __name__=='__main__':unittest.main()
