@@ -326,4 +326,16 @@ class HTTPTests(unittest.TestCase):
             model.assert_not_called()
             self.assertEqual(self.app.calls, 0)
 
+    def test_invalid_diagnosis_language_is_rejected_before_rule_fallback(self):
+        body = dict(question_id='boundary_1', choice='B', language='fr', reason='My reasoning')
+        with patch('backend.server.analyze') as model:
+            self.assert_http_error('/api/diagnose', body, 400)
+            self.configure_ai()
+            for change in (dict(choice='A'), dict(reason='')):
+                with self.subTest(change=change):
+                    self.assert_http_error('/api/diagnose', dict(body, **change), 400)
+            model.assert_not_called()
+            self.assertEqual(self.app.calls, 0)
+
+
 if __name__=='__main__':unittest.main()

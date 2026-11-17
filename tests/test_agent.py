@@ -2,6 +2,7 @@
 import io
 import json
 import unittest
+from unittest.mock import patch
 from backend.agent import AgentTools, run_agent
 from backend.domain import LearningEngine, empty_state
 
@@ -57,6 +58,25 @@ class PiPoTests(unittest.TestCase):
                     [], 'en', self.settings, forbidden, forbidden)
                 self.assertIn('score >= 60 is True', result['reply'])
                 self.assertEqual(result['actions'], [dict(kind=expected[0], id=expected[1])])
+
+    def test_locked_boundary_without_matching_recommendation(self):
+        other_questions = [q for q in self.engine.questions if q['concept'] != 'boundary'][:3]
+        with patch.object(self.engine, 'recommend', return_value=other_questions):
+            result = run_agent(self.engine, empty_state(),
+                'Please open the lesson on greater than or equal to when the score is exactly 60.',
+                [], 'en', self.settings, lambda: False)
+        self.assertIn('locked', result['reply'])
+        self.assertEqual(result['actions'], [])
+        self.assertEqual(result['trace'][-1], dict(tool='recommend', status='ok'))
+
+    def test_boundary_request_with_different_score_uses_model_flow(self):
+        goal = 'Open the comparison boundaries lesson and tell me if score >= 60 when score = 59.'
+        with patch('backend.agent.run_json_agent', return_value={'reply': 'False'}) as model:
+            result = run_agent(self.engine, empty_state(), goal, [], 'en',
+                              dict(self.settings, AI_AGENT_MODE='json'), lambda: True)
+        model.assert_called_once()
+        self.assertEqual(model.call_args.args[2], goal)
+        self.assertEqual(result['reply'], 'False')
 
     def test_loop_practice_opens_even_when_course_is_locked(self):
         def forbidden(*args, **kwargs):

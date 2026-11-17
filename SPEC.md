@@ -164,7 +164,7 @@ AI_AGENT_MODE=json为学校配置，其他值目前走原生工具模式。每�
 | AC05 | 空state推荐boundary_1/boundary；unknown；非法diagnosis | 9题，首boundary_2、不含当前、同章；中性排序；400 | recommend HTTP与规则测试 |
 | AC06 | 明确时间错答/独立正确/提前重复/提示 | 10分钟、分级间隔、提前不变、提示规则 | schedule单元；后续边界场景表 |
 | AC07 | 导入伪造correct及AI解析；取消；确认保存 | 重判、rule；import不写库；确认才替换 | import HTTP及浏览器走查 |
-| AC08 | 无key/短口令/配置正常；未授权诊断；合法英文诊断；限流 | configured布尔且无秘密；401；反馈传递；rule | diagnose GET/POST HTTP、模拟模型 |
+| AC08 | 无key/短口令/配置正常；未授权诊断；合法英文诊断；限流；无效语言（包括规则反馈分支） | configured布尔且无秘密；401；反馈传递；rule；400且不消耗额度 | diagnose GET/POST HTTP、模拟模型 |
 | AC09 | PiPo未配置/错误历史/合法动作/模型超时 | 503/400/合法结构/502，无部分页面操作 | agent HTTP、JSON/native工具循环测试 |
 | AC10 | 同cookie保存、另cookie读取、旧revision再写 | 持久化且隔离；409不覆盖 | HTTP、Store事务测试 |
 | AC11 | 非JSON类型/空body/超大声明/畸形JSON/NaN/错误Host | 415/413/413/400/400/403 | HTTP边界测试 |
@@ -423,7 +423,7 @@ Native mode retains 8 history, max_tokens 1400,20-second model wait, reply≤100
 | AC 05 | boundary recommendation, unknown, bad diagnosis |9 samechapter, firstboundary_2, exclude source,400 invalid | HTTP/rule |
 | AC 06 | fixed-time wrong/correct/early/hinted |10 minutes, stages, unchanged early, reset hints | schedule tests/additional edge plan |
 | AC 07 | forged import, cancel, confirm |regrade/rule, no write until save, cancel preserves | HTTP/browser |
-| AC 08 | missing/short/configured keycode, authorized diagnosis, badcode, limit |configured bool, no secrets, AIfeedback/401/rule | simulated HTTP/model |
+| AC 08 | missing/short/configured keycode, authorized diagnosis, bad code, limit, unsupported language (including rule fallback) | configured bool, no secrets, AI feedback/401/rule/400 without quota use | simulated HTTP/model |
 | AC 09 | unconfigured/bad history/valid agent/timeout |503/400/action response/502 without partial action | HTTP and JSON/native loops |
 | AC 10 | same/different cookie, stale revision |persistence, isolation,409 | HTTP/Store |
 | AC 11 | content type/body/JSON/NaN/Host boundaries |415/413/400/403 | HTTP |

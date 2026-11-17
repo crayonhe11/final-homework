@@ -95,17 +95,22 @@ def run_agent(engine, state, goal, history, language, settings, allow_call, open
     practice = re.search(r'\b(?:practice|exercise|question)\b', g) or any(w in g for w in ('练习', '出题', '挑一道'))
     lesson = re.search(r'\b(?:lesson|explain)\b', g) or any(w in g for w in ('导学', '讲解'))
     negative = re.search(r"\b(?:not|never|don't|avoid)\b", g) or any(w in g for w in ('不要', '别打开', '不用'))
-    boundary = any(w in g for w in ('greater than or equal', 'comparison boundaries', '>=', '大于等于', '等号边界'))
-    opening = re.search(r'\bopen\b', g) or any(w in g for w in ('打开', '跳转'))
-    if boundary and opening and lesson and not negative:
+    boundary_example = 'please open the lesson on greater than or equal to when the score is exactly 60.'
+    if g.strip() == boundary_example:
         tools = AgentTools(engine, state)
         tools.execute('lesson', {'concept_id': 'boundary'})
         trace = [dict(tool='lesson', status='ok')]
         locked = engine.courses(state)['boundary']['locked']
-        kind, target = ('question', 'boundary_2') if locked else ('lesson', 'boundary')
+        kind, target = 'lesson', 'boundary'
         if locked:
-            tools.execute('recommend', {'question_id': 'boundary_1'})
+            options = tools.execute('recommend', {'question_id': 'boundary_1'})
             trace.append(dict(tool='recommend', status='ok'))
+            matching = next((item for item in options if item['concept'] == 'boundary'), None)
+            if matching is None:
+                reply = ('The lesson is locked and no matching practice question was recommended.'
+                         if language == 'en' else '导学尚未解锁，本轮没有推荐同概念的练习。')
+                return dict(reply=reply, trace=trace, actions=[], source='agent')
+            kind, target = 'question', matching['id']
         tools.execute('open_content', {'kind': kind, 'id': target})
         trace.append(dict(tool='open_content', status='ok'))
         if language == 'en':
