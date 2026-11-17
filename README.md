@@ -128,7 +128,7 @@ tests/test_http.py` 测试主要 HTTP 接口；
 `test_agent.py` 测试 PiPo 工具；
 `test_language.py` 测试语言；
 `test_main.py` 测试真实启动入口。
-本地验证共运行 **80 项自动化测试**，终端末尾显示 `Ran 80 tests` 和 `OK` 即表示通过。覆盖进度保存与冲突、答题反馈、复习与推荐、PiPo 输入校验及诊断降级。
+本地验证共运行 **85 项自动化测试**，终端末尾显示 `Ran 85 tests` 和 `OK` 即表示通过。覆盖进度保存与冲突、答题反馈、复习与推荐、PiPo 输入校验及诊断降级。
 
 只有修改前端源码的开发者才需要 Node.js 22 和 npm：
 
@@ -276,7 +276,7 @@ Run:
 python -m unittest discover -s tests -t . -v
 ```
 
-Use `python3` on Mac or `py` on Windows if appropriate. Tests use temporary databases and simulated models, without paid school requests. `test_http.py` checks principal endpoints; `test_core.py` checks rules/data; `test_agent.py` checks PiPo tools; `test_language.py` checks translation/prompt handling; `test_main.py` checks the real entry point. The local suite ran **80 automated tests**. Look for `Ran 80 tests` and `OK` at the end of the output. Coverage includes progress saves and conflicts, grading feedback, review scheduling and recommendations, PiPo input validation, and diagnosis fallback. Check GitHub **Actions** for the run associated with your commit.
+Use `python3` on Mac or `py` on Windows if appropriate. Tests use temporary databases and simulated models, without paid school requests. `test_http.py` checks principal endpoints; `test_core.py` checks rules/data; `test_agent.py` checks PiPo tools; `test_language.py` checks translation/prompt handling; `test_main.py` checks the real entry point. The local suite ran **85 automated tests**. Look for `Ran 85 tests` and `OK` at the end of the output. Coverage includes progress saves and conflicts, grading feedback, review scheduling and recommendations, PiPo input validation, and diagnosis fallback. Check GitHub **Actions** for the run associated with your commit.
 
 Only frontend developers need Node.js 22 and npm:
 
