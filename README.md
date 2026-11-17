@@ -31,7 +31,7 @@ PySteps 是第 8 组制作的 Python 入门学习网页。你可以阅读概念�
 
 `main.py` 默认端口就是 **8011**。如果显示 `Address already in use`，先检查是否已经开着旧服务；也可以把命令中的 `8011` 换为 `8012`，再访问对应网址。不要重复启动多个窗口解决同一个端口占用。
 
-如果终端说找不到 `py`、`python3` 或 `python`，说明 Python 尚未安装或命令未配置。若提示找不到 `main.py`，说明终端尚未进入正确的项目文件夹。双击 `打开网页版.html` 只会显示启动说明，不会启动 Python 服务。
+如果终端说找不到 `py`、`python3` 或 `python`，说明 Python 尚未安装或命令未配置。若提示找不到 `main.py`，说明终端尚未进入正确的项目文件夹。
 
 ### 4. 第一次学习：跟着完成一次完整流程
 
@@ -185,7 +185,7 @@ Normal use requires no Node.js, npm, Docker or third-party Python packages. Keep
 
 The default port is **8011**. For `Address already in use`, check whether your existing server is already running. Alternatively change `8011` to `8012` in the command and use the new address. Repeatedly opening terminals does not resolve a port conflict.
 
-If `py`, `python3` or `python` is unavailable, install/configure Python first. If `main.py` cannot be found, enter the correct project directory. Double-clicking `打开网页版.html` displays instructions; it does not start Python.
+If `py`, `python3` or `python` is unavailable, install/configure Python first. If `main.py` cannot be found, enter the correct project directory.
 
 ### 4. Complete your first learning session
 
