@@ -14,7 +14,7 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--group',default='8');args=parser.parse_args()
     if not re.fullmatch(r'(N|[0-9]{1,3})',args.group):parser.error('组号须为1至3位数字；暂未确定可用N')
     allowed_files=['main.py','打开网页版.html','README.md','SPEC.md','config.example.json','Dockerfile','.dockerignore','.gitignore']
-    allowed_dirs=['backend','data','tests','scripts','submission','licenses','.github']
+    allowed_dirs=['code_review','backend','data','tests','scripts','submission','licenses','.github']
     paths=[ROOT/f for f in allowed_files]+[f for d in allowed_dirs for f in (ROOT/d).rglob('*')]
     for d in ['src','public','static']:
         paths.extend((ROOT/'web'/d).rglob('*'))
